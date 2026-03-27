@@ -24,7 +24,7 @@ export default function WelcomeScreen({ navigation }) {
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={styles.loginButton}
-              onPress={() => navigation?.navigate('Login')}
+              onPress={() => navigation.navigate('Login')}
               activeOpacity={0.85}
             >
               <Text style={styles.loginButtonText}>Нэвтрэх</Text>
@@ -32,7 +32,7 @@ export default function WelcomeScreen({ navigation }) {
 
             <TouchableOpacity
               style={styles.registerButton}
-              onPress={() => navigation?.navigate('Register')}
+              onPress={() => navigation.navigate('Register')}
               activeOpacity={0.85}
             >
               <Text style={styles.registerButtonText}>Бүртгүүлэх</Text>
@@ -80,11 +80,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    elevation: 6,
   },
   iconText: {
     fontSize: 72,
