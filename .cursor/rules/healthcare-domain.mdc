@@ -1,0 +1,36 @@
+---
+description: Healthcare consultations product, roles, pricing, data strategy
+alwaysApply: true
+---
+
+# Product domain (tusul2)
+
+**Domain**: Healthcare and consultations (clinics/hospitals on platform; patients book and consult).
+
+## Roles (two in one app)
+
+1. **Үйлчлүүлэгч / Өвчтөн** — patient: browse providers, chat or lightweight consult, book slots.
+2. **Үйлчилгээ үзүүлэгч / Эмнэлэг** — provider org: register clinic, add doctors, manage schedules, receive bookings.
+
+Implement **role-aware navigation and screens** (e.g. `(patient)/`, `(provider)/` or equivalent) with shared types and mock services.
+
+## Provider capabilities (target)
+
+- Join platform, **register clinic**
+- **Add doctors**
+- **Manage schedules**
+- **Receive bookings**
+
+## Patient / pricing rules
+
+- **Free**: online consultation (informal / initial consult — mock as chat or video placeholder).
+- **Paid**: booking a **formal appointment** with a defined time (show price and payment as mock first).
+
+## Data
+
+- **Phase 1**: **Mock data** (fixtures, in-memory or local JSON) behind a small API layer (`frontend/services/` or `frontend/lib/api`) so swapping to a real backend is a **single place** change.
+- **Phase 2**: Connect to backend; keep UI free of raw fetch scattered across components.
+
+## Naming
+
+- Use Mongolian in UI; use **English identifiers** in code (variables, files, routes) for maintainability unless the team standard says otherwise.

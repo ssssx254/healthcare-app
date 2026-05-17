@@ -1,0 +1,19 @@
+---
+description: Expo RN stack, NativeWind, TypeScript, Expo Go constraints
+alwaysApply: true
+---
+
+# Stack (tusul2)
+
+- **Framework**: React Native inside **Expo managed workflow** (target **Expo SDK 54** so **Expo Go** on iOS matches; Apple only ships the latest Expo Go).
+- **Navigation**: **Expo Router** (file-based routes, typed where practical).
+- **Language**: **TypeScript** everywhere (strict, no implicit `any` unless unavoidable).
+- **Styling**: **NativeWind** (Tailwind on RN). Prefer utility classes; extract small presentational components instead of giant style objects.
+- **Runtime**: The app **must run in Expo Go**. Do not add native modules or config that require **custom dev builds** (prebuild-only libs, incompatible native code, etc.). When choosing a library, verify Expo Go compatibility in Expo docs or the package readme.
+- **UI copy**: All **user-facing strings** (labels, buttons, errors, empty states, onboarding) must be **Mongolian**. Keep developer comments and commit messages in whatever language is clearest for the team (English is fine).
+- **Code quality**: Small modules, clear folders under **`frontend/`** (`frontend/app/`, `frontend/components/`, `frontend/hooks/`, `frontend/lib/`, `frontend/constants/`, `frontend/types/`, `frontend/data/` mocks). Prefer composition and typed props over large monolith screens.
+
+## Anti-patterns
+
+- ❌ Dependencies that **require a custom development build** or **do not support Expo Go** (check each package before adding).
+- ❌ Hardcoding English in UI components.

@@ -1,0 +1,43 @@
+const express = require("express");
+const healthRoutes = require("./health.routes");
+const authRoutes = require("./auth.routes");
+const clinicsRoutes = require("./clinics.routes");
+const doctorsRoutes = require("./doctors.routes");
+const servicesRoutes = require("./services.routes");
+const scheduleSlotsRoutes = require("./scheduleSlots.routes");
+const bookingsRoutes = require("./bookings.routes");
+const consultationsRoutes = require("./consultations.routes");
+const questionnairesRoutes = require("./questionnaires.routes");
+const notificationsRoutes = require("./notifications.routes");
+const providerOnboardingRoutes = require("./providerOnboarding.routes");
+const medicalRecordsRoutes = require("./medicalRecords.routes");
+const chatRoutes = require("./chat.routes");
+const walletRoutes = require("./wallet.routes");
+const paymentsRoutes = require("./payments.routes");
+const adminRoutes = require("./admin.routes");
+const reportsRoutes = require("./reports.routes");
+const statsRoutes = require("./stats.routes");
+
+const router = express.Router();
+
+router.use("/health", healthRoutes);
+router.use("/auth", authRoutes);
+router.use("/clinics", clinicsRoutes);
+router.use("/doctors", doctorsRoutes);
+router.use("/services", servicesRoutes);
+router.use("/schedule-slots", scheduleSlotsRoutes);
+router.use("/bookings", bookingsRoutes);
+router.use("/consultations", consultationsRoutes);
+router.use("/consultation-requests", consultationsRoutes);
+router.use("/questionnaires", questionnairesRoutes);
+router.use("/notifications", notificationsRoutes);
+router.use("/provider-onboarding", providerOnboardingRoutes);
+router.use("/medical-records", medicalRecordsRoutes);
+router.use("/chat", chatRoutes);
+router.use("/wallet", walletRoutes);
+router.use("/payments", paymentsRoutes);
+router.use("/admin", adminRoutes);
+router.use("/reports", reportsRoutes);
+router.use("/stats", statsRoutes);
+
+module.exports = router;

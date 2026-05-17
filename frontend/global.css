@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Web: MaterialCommunityIcons — stable path (not node_modules). See scripts/copy-web-icon-font.js */
+@font-face {
+  font-family: "material-community";
+  src: url("/assets/fonts/material-community.ttf") format("truetype");
+  font-display: block;
+}
+
+/* Expo web: full-height shell + subtle desktop backdrop (native unchanged). */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: #e8eef4;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #0f172a;
+  }
+}
