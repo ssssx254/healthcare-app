@@ -10,21 +10,42 @@ function assertRole(user, role, message) {
 
 async function getCustomerStats(user) {
   assertRole(user, ROLES.CUSTOMER, "Зөвхөн хэрэглэгч өөрийн статистикийг харна.");
-  const [[row]] = await pool.execute(
+  const [[bookingRow]] = await pool.execute(
     `SELECT
        COUNT(*) AS total_bookings,
+       SUM(CASE WHEN b.status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed_bookings,
        SUM(CASE WHEN b.status = 'completed' THEN 1 ELSE 0 END) AS completed_bookings,
        SUM(CASE WHEN b.status = 'cancelled' OR b.status LIKE 'cancelled_%' THEN 1 ELSE 0 END) AS cancelled_bookings,
+       SUM(CASE WHEN b.status = 'pending' THEN 1 ELSE 0 END) AS pending_bookings,
        COALESCE(SUM(CASE WHEN b.payment_status = 'paid' THEN b.total_amount ELSE 0 END), 0) AS paid_amount_total
      FROM bookings b
      WHERE b.patient_user_id = ?`,
     [user.id],
   );
+
+  const [[walletRow]] = await pool.execute(
+    `SELECT COALESCE(w.balance, 0) AS wallet_balance
+     FROM wallets w
+     WHERE w.user_id = ?`,
+    [user.id],
+  );
+
+  const [[chatRow]] = await pool.execute(
+    `SELECT COUNT(*) AS online_consultations_count
+     FROM chat_conversations c
+     WHERE c.customer_user_id = ?`,
+    [user.id],
+  );
+
   return {
-    total_bookings: Number(row?.total_bookings || 0),
-    completed: Number(row?.completed_bookings || 0),
-    cancelled: Number(row?.cancelled_bookings || 0),
-    paid_amount_total: Number(row?.paid_amount_total || 0),
+    total_bookings: Number(bookingRow?.total_bookings || 0),
+    confirmed_bookings: Number(bookingRow?.confirmed_bookings || 0),
+    completed_bookings: Number(bookingRow?.completed_bookings || 0),
+    cancelled_bookings: Number(bookingRow?.cancelled_bookings || 0),
+    pending_bookings: Number(bookingRow?.pending_bookings || 0),
+    wallet_balance: Number(walletRow?.wallet_balance || 0),
+    paid_amount_total: Number(bookingRow?.paid_amount_total || 0),
+    online_consultations_count: Number(chatRow?.online_consultations_count || 0),
   };
 }
 

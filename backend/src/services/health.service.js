@@ -1,15 +1,25 @@
-const { pingDatabase } = require("../config/database");
+const { pingDatabase, logDatabaseConnectionError } = require("../config/database");
+const { env } = require("../config/env");
 
 /**
- * Health check: app + optional DB ping.
+ * Health check: app + DB (SELECT 1 амжилттай л "connected").
  */
 async function getHealthStatus() {
-  let database = "unknown";
+  let database = "disconnected";
+
   try {
-    await pingDatabase();
-    database = "connected";
-  } catch {
+    const ok = await pingDatabase();
+    database = ok ? "connected" : "disconnected";
+    if (!ok && env.nodeEnv === "production") {
+      console.error("[health] MySQL SELECT 1 did not return expected row");
+    }
+  } catch (err) {
     database = "disconnected";
+    if (env.nodeEnv === "production") {
+      logDatabaseConnectionError(err, "health");
+    } else {
+      console.warn("[health] database ping failed:", sanitizeDevMessage(err));
+    }
   }
 
   return {
@@ -17,6 +27,11 @@ async function getHealthStatus() {
     timestamp: new Date().toISOString(),
     database,
   };
+}
+
+function sanitizeDevMessage(err) {
+  const message = err?.message ? String(err.message) : String(err);
+  return message.replace(/:\/\/([^:@/]+):([^@/]+)@/g, "://$1:***@");
 }
 
 module.exports = { getHealthStatus };
