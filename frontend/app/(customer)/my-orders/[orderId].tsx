@@ -4,8 +4,9 @@ import { useCustomerBooking } from "@/contexts/CustomerBookingContext";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { ApiError } from "@/lib/api/client";
 import { bookingApi } from "@/services/api/bookingApi";
+import { doctorReviewApi } from "@/services/api/doctorReviewApi";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 
 function statusTone(s: OrderUiStatus): "brand" | "neutral" | "success" | "warning" {
@@ -22,7 +23,36 @@ export default function OrderDetailScreen() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [rescheduleInfo, setRescheduleInfo] = useState<string | null>(null);
+  const [reviewBookingId, setReviewBookingId] = useState<number | null>(null);
+  const [reviewHint, setReviewHint] = useState<string | null>(null);
   const order = useMemo(() => orders.find((o) => o.id === orderId), [orders, orderId]);
+
+  useEffect(() => {
+    if (!order || order.customerStatus !== "completed" || order.kind !== "formal") {
+      setReviewBookingId(null);
+      setReviewHint(null);
+      return;
+    }
+    let alive = true;
+    void doctorReviewApi.list(order.doctorId, { page_size: 1 }).then((res) => {
+      if (!alive) return;
+      if (res.viewer.can_submit && res.viewer.booking_id) {
+        setReviewBookingId(res.viewer.booking_id);
+        setReviewHint(null);
+      } else {
+        setReviewBookingId(null);
+        setReviewHint(res.viewer.message);
+      }
+    }).catch(() => {
+      if (alive) {
+        setReviewBookingId(null);
+        setReviewHint("Зөвхөн үзлэгт хамрагдсан хэрэглэгч үнэлгээ өгөх боломжтой.");
+      }
+    });
+    return () => {
+      alive = false;
+    };
+  }, [order?.id, order?.doctorId, order?.customerStatus, order?.kind]);
   const canCustomerCancel =
     order &&
     order.customerStatus !== "cancelled" &&
@@ -35,12 +65,12 @@ export default function OrderDetailScreen() {
     <>
       <Stack.Screen options={{ title: "Захиалгын дэлгэрэнгүй" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         {!order ? (
           <Card>
-            <Text className="text-center text-sm text-slate-600 dark:text-slate-300">Захиалга олдсонгүй.</Text>
+            <Text className="text-center text-sm text-app-text-secondary">Захиалга олдсонгүй.</Text>
             <Button label="Жагсаалт руу" className="mt-4" onPress={() => router.replace("/(customer)/my-orders")} />
           </Card>
         ) : (
@@ -53,46 +83,63 @@ export default function OrderDetailScreen() {
             {actionError ? <Text className="mb-3 text-sm text-red-600 dark:text-red-400">{actionError}</Text> : null}
             {!isOnline ? (
               <Card className="mb-3">
-                <Text className="text-xs text-slate-600 dark:text-slate-300">
+                <Text className="text-xs text-app-text-secondary">
                   Офлайн горим: захиалгын мэдээлэл харах боломжтой, өөрчлөлт онлайн үед идэвхжинэ.
                 </Text>
               </Card>
             ) : null}
             <Card className="mb-4">
-              <Text className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <Text className="text-xs font-medium uppercase tracking-wide text-app-text-muted">
                 Эмнэлэг
               </Text>
-              <Text className="mt-1 text-base text-slate-900 dark:text-slate-50">{order.clinicName}</Text>
-              <Text className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <Text className="mt-1 text-base text-app-text">{order.clinicName}</Text>
+              <Text className="mt-4 text-xs font-medium uppercase tracking-wide text-app-text-muted">
                 Эмч
               </Text>
-              <Text className="mt-1 text-base text-slate-900 dark:text-slate-50">{order.doctorName}</Text>
+              <Text className="mt-1 text-base text-app-text">{order.doctorName}</Text>
               {order.slotLabel ? (
                 <>
-                  <Text className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <Text className="mt-4 text-xs font-medium uppercase tracking-wide text-app-text-muted">
                     Цаг
                   </Text>
-                  <Text className="mt-1 text-base text-slate-900 dark:text-slate-50">{order.slotLabel}</Text>
+                  <Text className="mt-1 text-base text-app-text">{order.slotLabel}</Text>
                 </>
               ) : null}
-              <Text className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <Text className="mt-4 text-xs font-medium uppercase tracking-wide text-app-text-muted">
                 Төлбөр
               </Text>
-              <Text className="mt-1 text-base text-slate-900 dark:text-slate-50">
+              <Text className="mt-1 text-base text-app-text">
                 {order.kind === "free_online" ? "Төлбөргүй" : `${order.priceMnt.toString()} ₮`}
               </Text>
-              <Text className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <Text className="mt-4 text-xs font-medium uppercase tracking-wide text-app-text-muted">
                 Огноо
               </Text>
-              <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              <Text className="mt-1 text-sm text-app-text-secondary">
                 {new Date(order.createdAtIso).toLocaleString("mn-MN")}
               </Text>
             </Card>
 
             {order.healthSummary ? (
               <Card className="mb-4">
-                <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Анкетын товч</Text>
-                <Text className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{order.healthSummary}</Text>
+                <Text className="text-sm font-semibold text-app-text">Анкетын товч</Text>
+                <Text className="mt-2 text-sm leading-6 text-app-text-secondary">{order.healthSummary}</Text>
+              </Card>
+            ) : null}
+
+            {reviewBookingId != null ? (
+              <Button
+                label="Үнэлгээ өгөх"
+                className="mb-3"
+                onPress={() =>
+                  router.push({
+                    pathname: `/clinic/${order.clinicId}/doctor/${order.doctorId}` as never,
+                    params: { reviewBookingId: String(reviewBookingId) },
+                  })
+                }
+              />
+            ) : reviewHint && order.customerStatus === "completed" && order.kind === "formal" ? (
+              <Card className="mb-3 border-app-border bg-app-muted">
+                <Text className="text-center text-xs text-app-text-secondary">{reviewHint}</Text>
               </Card>
             ) : null}
 
@@ -163,7 +210,7 @@ export default function OrderDetailScreen() {
                 }}
               />
             ) : null}
-            {rescheduleInfo ? <Text className="mt-2 text-xs text-slate-600 dark:text-slate-300">{rescheduleInfo}</Text> : null}
+            {rescheduleInfo ? <Text className="mt-2 text-xs text-app-text-secondary">{rescheduleInfo}</Text> : null}
           </>
         )}
       </ScreenScrollView>

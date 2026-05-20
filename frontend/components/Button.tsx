@@ -15,15 +15,15 @@ const variantClasses: Record<Variant, { base: string; text: string }> = {
     text: "text-white font-semibold",
   },
   secondary: {
-    base: "bg-slate-200 active:bg-slate-300 dark:bg-slate-700 dark:active:bg-slate-600",
-    text: "text-slate-900 dark:text-slate-50 font-semibold",
+    base: "bg-app-muted active:opacity-90",
+    text: "text-app-text font-semibold",
   },
   outline: {
-    base: "border-2 border-brand-600 bg-transparent active:bg-brand-50 dark:active:bg-brand-900",
+    base: "border-2 border-brand-600 bg-transparent active:bg-app-brand-muted",
     text: "text-brand-700 dark:text-brand-300 font-semibold",
   },
   ghost: {
-    base: "bg-transparent active:bg-slate-100 dark:active:bg-slate-800/80",
+    base: "bg-transparent active:bg-app-muted",
     text: "text-brand-700 dark:text-brand-300 font-medium",
   },
 };

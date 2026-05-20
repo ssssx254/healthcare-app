@@ -45,7 +45,7 @@ export default function SearchScreen() {
     <>
       <Stack.Screen options={{ title: "Хайлт" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Хайлт" subtitle="Эмнэлэг, эмчээр хайна уу." />
@@ -64,15 +64,15 @@ export default function SearchScreen() {
         )}
         {categories.length > 0 ? (
           <Card className="mb-3">
-            <Text className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-50">Үйлчилгээний ангилал</Text>
+            <Text className="mb-2 text-sm font-semibold text-app-text">Үйлчилгээний ангилал</Text>
             <View className="flex-row flex-wrap gap-2">
               {categories.slice(0, 12).map((cat) => (
                 <Pressable
                   key={cat}
                   onPress={() => setQuery(cat)}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+                  className="rounded-full px-3 py-2 border-app-border bg-app-card"
                 >
-                  <Text className="text-xs text-slate-700 dark:text-slate-300">{cat}</Text>
+                  <Text className="text-xs text-app-text-secondary">{cat}</Text>
                 </Pressable>
               ))}
             </View>
@@ -96,7 +96,7 @@ export default function SearchScreen() {
 
         {!loading && !error ? (
           <>
-            <Text className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Эмнэлгүүд</Text>
+            <Text className="mb-2 text-sm font-semibold text-app-text">Эмнэлгүүд</Text>
             {clinics.length === 0 ? (
               <Card className="mb-4">
                 <Text className="text-center text-sm text-slate-500">Илэрц олдсонгүй.</Text>
@@ -106,15 +106,15 @@ export default function SearchScreen() {
                 {clinics.map((c) => (
                   <Pressable key={c.id} onPress={() => router.push(`/clinic/${c.id}`)}>
                     <Card className="active:opacity-90">
-                      <Text className="font-semibold text-slate-900 dark:text-slate-50">{c.name}</Text>
-                      <Text className="text-xs text-slate-500 dark:text-slate-400">{c.city}</Text>
+                      <Text className="font-semibold text-app-text">{c.name}</Text>
+                      <Text className="text-xs text-app-text-muted">{c.city}</Text>
                     </Card>
                   </Pressable>
                 ))}
               </View>
             )}
 
-            <Text className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Эмч нар</Text>
+            <Text className="mb-2 text-sm font-semibold text-app-text">Эмч нар</Text>
             {doctors.length === 0 ? (
               <Card>
                 <Text className="text-center text-sm text-slate-500">Эмч олдсонгүй.</Text>
@@ -127,8 +127,8 @@ export default function SearchScreen() {
                     onPress={() => router.push(`/clinic/${d.clinicId}/doctor/${d.id}`)}
                   >
                     <Card className="active:opacity-90">
-                      <Text className="font-semibold text-slate-900 dark:text-slate-50">{d.name}</Text>
-                      <Text className="text-xs text-slate-500 dark:text-slate-400">{d.specialty}</Text>
+                      <Text className="font-semibold text-app-text">{d.name}</Text>
+                      <Text className="text-xs text-app-text-muted">{d.specialty}</Text>
                     </Card>
                   </Pressable>
                 ))}

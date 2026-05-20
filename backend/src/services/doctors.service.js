@@ -4,6 +4,10 @@ const { sqlLimitOffset } = require("../utils/paginationSql");
 const { assertPositiveIntId, optionalTrimmedString } = require("../utils/validation");
 const { assertClinicOwner } = require("./clinics.service");
 
+const RATING_STATS_SQL = `
+  (SELECT ROUND(AVG(dr.rating), 2) FROM doctor_reviews dr WHERE dr.doctor_id = d.id) AS average_rating,
+  (SELECT COUNT(*) FROM doctor_reviews dr WHERE dr.doctor_id = d.id) AS review_count`;
+
 async function assertDoctorInOwnedClinic(doctorId, ownerUserId) {
   const [rows] = await pool.execute(
     `SELECT d.id FROM doctors d
@@ -114,26 +118,62 @@ async function listDoctors(listQuery, opts = {}) {
   const [rows] = await pool.execute(
     `SELECT d.id, d.clinic_id, d.full_name, d.specialization, d.title, d.bio, d.education, d.work_history,
             d.experience_years, d.profile_image, d.created_at,
-            c.clinic_name, c.approval_status AS clinic_approval_status${extraCols}
+            c.clinic_name, c.approval_status AS clinic_approval_status,
+            ${RATING_STATS_SQL}${extraCols}
      FROM ${join}
      WHERE ${whereSql}
      ORDER BY ${sortCol} ${dir}
      ${sqlLimitOffset(listQuery, { max: 200 })}`,
     params,
   );
-  return { items: rows, total };
+  return { items: normalizeDoctorRatingFields(rows), total };
+}
+
+function normalizeDoctorRatingFields(rows) {
+  return rows.map((r) => ({
+    ...r,
+    average_rating: r.average_rating != null ? Number(r.average_rating) : null,
+    review_count: Number(r.review_count || 0),
+  }));
+}
+
+/**
+ * Онцлох эмч — дундаж үнэлгээ >= minRating, баталгаажсан эмнэлэг.
+ */
+async function listFeaturedDoctors({ minRating = 4.5, limit = 6 }) {
+  const min = Number(minRating);
+  const lim = Math.min(50, Math.max(1, Math.floor(Number(limit)) || 6));
+  const [rows] = await pool.execute(
+    `SELECT d.id, d.clinic_id, d.full_name, d.specialization, d.title, d.bio, d.education, d.work_history,
+            d.experience_years, d.profile_image, d.created_at,
+            c.clinic_name, c.approval_status AS clinic_approval_status,
+            ${RATING_STATS_SQL}
+     FROM doctors d
+     INNER JOIN clinics c ON c.id = d.clinic_id
+     WHERE c.approval_status = 'approved'
+       AND (SELECT COALESCE(AVG(dr2.rating), 0) FROM doctor_reviews dr2 WHERE dr2.doctor_id = d.id) >= ?
+     ORDER BY average_rating DESC, review_count DESC, d.created_at DESC
+     LIMIT ${lim}`,
+    [min],
+  );
+  return normalizeDoctorRatingFields(rows);
 }
 
 async function getDoctorById(id) {
   const [rows] = await pool.execute(
-    `SELECT id, clinic_id, full_name, specialization, title, bio, education, work_history, experience_years, profile_image, created_at
-     FROM doctors WHERE id = ? LIMIT 1`,
+    `SELECT d.id, d.clinic_id, d.full_name, d.specialization, d.title, d.bio, d.education, d.work_history,
+            d.experience_years, d.profile_image, d.created_at,
+            c.clinic_name,
+            ${RATING_STATS_SQL}
+     FROM doctors d
+     INNER JOIN clinics c ON c.id = d.clinic_id
+     WHERE d.id = ? LIMIT 1`,
     [id],
   );
   if (!rows[0]) {
     throw new AppError(404, "Эмч олдсонгүй.");
   }
-  return rows[0];
+  return normalizeDoctorRatingFields([rows[0]])[0];
 }
 
 async function updateDoctor(doctorId, ownerUserId, body) {
@@ -172,4 +212,4 @@ async function updateDoctor(doctorId, ownerUserId, body) {
   return getDoctorById(doctorId);
 }
 
-module.exports = { createDoctor, listDoctors, getDoctorById, updateDoctor };
+module.exports = { createDoctor, listDoctors, listFeaturedDoctors, getDoctorById, updateDoctor };

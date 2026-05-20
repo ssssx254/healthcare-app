@@ -1,5 +1,16 @@
 import { apiRequest } from "@/lib/api/client";
 
+export type CustomerStatsResponse = {
+  total_bookings: number;
+  confirmed_bookings: number;
+  completed_bookings: number;
+  cancelled_bookings: number;
+  pending_bookings: number;
+  wallet_balance: number;
+  paid_amount_total: number;
+  online_consultations_count: number;
+};
+
 export type AdminStatsResponse = {
   total_users: number;
   total_providers: number;
@@ -16,8 +27,11 @@ export type AdminStatsResponse = {
 };
 
 export const statsApi = {
+  customer(): Promise<CustomerStatsResponse> {
+    return apiRequest<CustomerStatsResponse>("/stats/customer", { method: "GET" });
+  },
+
   admin(): Promise<AdminStatsResponse> {
     return apiRequest<AdminStatsResponse>("/stats/admin", { method: "GET" });
   },
 };
-

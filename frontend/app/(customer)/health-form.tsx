@@ -21,7 +21,7 @@ export default function HealthFormScreen() {
     <>
       <Stack.Screen options={{ title: "Эрүүл мэндийн анкет" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader
@@ -68,7 +68,7 @@ export default function HealthFormScreen() {
           />
         </Card>
 
-        <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">Анкет бөглөх нь сонголттой.</Text>
+        <Text className="mt-3 text-xs text-app-text-muted">Анкет бөглөх нь сонголттой.</Text>
 
         <Button label="Үргэлжлүүлэх" className="mt-4" onPress={onContinue} />
         <Button label="Буцах" variant="ghost" className="mt-2" onPress={() => router.back()} />

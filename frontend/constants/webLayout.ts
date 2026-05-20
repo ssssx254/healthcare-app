@@ -23,3 +23,13 @@ export function getWebBreakpoint(viewportWidth: number): WebBreakpoint {
   if (viewportWidth >= WEB_BREAKPOINT_TABLET) return "tablet";
   return "mobile";
 }
+
+/** Phone browser / narrow web: full viewport width (no centered 480px column). */
+export function isWebMobileFullscreen(viewportWidth: number): boolean {
+  return viewportWidth <= WEB_BREAKPOINT_TABLET;
+}
+
+/** Tablet+ desktop: centered app column with backdrop gutters. */
+export function isWebDesktopPreview(viewportWidth: number): boolean {
+  return viewportWidth > WEB_BREAKPOINT_TABLET;
+}

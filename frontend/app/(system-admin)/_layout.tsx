@@ -1,13 +1,18 @@
 import { routes } from "@/constants/appRoutes";
-import { tabScreenOptions } from "@/constants/navigationTheme";
+import { WebBottomTabBar } from "@/components/WebBottomTabBar";
+import { WebScreenFrame } from "@/components/WebScreenFrame";
 import { useAuth } from "@/hooks/useAuth";
+import { useTabScreenOptions } from "@/hooks/useTabScreenOptions";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, Tabs, router } from "expo-router";
-import { Pressable, useColorScheme } from "react-native";
+import { HeaderThemeToggleButton } from "@/components";
+import { useAppTheme } from "@/components/ThemeProvider";
+import { Pressable, View } from "react-native";
 
 export default function SystemAdminLayout() {
   const { isAuthenticated, user, authLoading } = useAuth();
-  const colorScheme = useColorScheme();
+  const { palette } = useAppTheme();
+  const tabOptions = useTabScreenOptions();
 
   if (authLoading) return null;
   if (!isAuthenticated || user?.role !== "system_admin") {
@@ -15,20 +20,25 @@ export default function SystemAdminLayout() {
   }
 
   return (
+    <WebScreenFrame>
     <Tabs
+      tabBar={(props) => <WebBottomTabBar {...props} />}
       screenOptions={() => ({
-        ...tabScreenOptions(colorScheme),
+        ...tabOptions,
         headerTitle: "",
         headerShown: true,
         headerLeft: () => (
           <Pressable onPress={() => router.push(routes.adminNotifications)} hitSlop={10} className="px-2 py-1">
-            <MaterialCommunityIcons name="bell-outline" size={22} color={colorScheme === "dark" ? "#e2e8f0" : "#0f172a"} />
+            <MaterialCommunityIcons name="bell-outline" size={22} color={palette.icon} />
           </Pressable>
         ),
         headerRight: () => (
-          <Pressable onPress={() => router.push(routes.adminProfile)} hitSlop={10} className="px-2 py-1">
-            <MaterialCommunityIcons name="cog-outline" size={22} color={colorScheme === "dark" ? "#e2e8f0" : "#0f172a"} />
-          </Pressable>
+          <View className="mr-1 flex-row items-center">
+            <HeaderThemeToggleButton />
+            <Pressable onPress={() => router.push(routes.adminProfile)} hitSlop={10} className="min-h-[44px] min-w-[44px] items-center justify-center rounded-xl active:opacity-70">
+              <MaterialCommunityIcons name="cog-outline" size={22} color={palette.icon} />
+            </Pressable>
+          </View>
         ),
       })}
     >
@@ -83,6 +93,7 @@ export default function SystemAdminLayout() {
         }}
       />
     </Tabs>
+    </WebScreenFrame>
   );
 }
 

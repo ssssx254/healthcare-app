@@ -1,4 +1,14 @@
-import { AppContainer, AuthMessageBanner, Button, Card, ClinicLogoPickerField, FormScrollView, Input, SectionHeader } from "@/components";
+import {
+  AppContainer,
+  AuthMessageBanner,
+  Button,
+  Card,
+  ClinicLogoPickerField,
+  EmergencyCallButton,
+  FormScrollView,
+  Input,
+  SectionHeader,
+} from "@/components";
 import { webAuthScrollContent } from "@/utils/webScrollContent";
 import { routes } from "@/constants/appRoutes";
 import { submitProviderOnboarding } from "@/data/healthcare/providerOnboardingStore";
@@ -214,10 +224,12 @@ export default function RegisterScreen() {
   return (
     <AppContainer centerContent className="flex-1">
       <FormScrollView
-        className="flex-1 bg-slate-50 px-5 pt-6 dark:bg-slate-950"
+        className="flex-1 px-5 pt-6 bg-app-bg"
         contentContainerStyle={webAuthScrollContent({ paddingBottom: 40 })}
       >
       <SectionHeader variant="hero" title="Бүртгүүлэх" subtitle={subtitle} className="mb-2" />
+
+      <EmergencyCallButton className="mb-4" />
 
       {formError ? <AuthMessageBanner variant="error" message={formError} className="mb-4" /> : null}
 
@@ -228,7 +240,7 @@ export default function RegisterScreen() {
               key={s}
               className={cn(
                 "h-1.5 flex-1 rounded-full",
-                s <= providerStep ? "bg-brand-600 dark:bg-brand-500" : "bg-slate-200 dark:bg-slate-700",
+                s <= providerStep ? "bg-brand-600 dark:bg-brand-500" : "dark:bg-slate-700",
               )}
               accessibilityLabel={`Алхам ${s}`}
             />
@@ -236,16 +248,16 @@ export default function RegisterScreen() {
         </View>
       ) : null}
 
-      <Card className="mb-4 border border-slate-200 dark:border-slate-700">
-        <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Хэрэглэгчийн төрөл</Text>
-        <Text className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">Нэгийг сонгоно уу. Сонголтоо дараа нь өөрчилж болно.</Text>
+      <Card className="mb-4 border border-app-border">
+        <Text className="text-sm font-semibold text-app-text">Хэрэглэгчийн төрөл</Text>
+        <Text className="mt-1 text-xs leading-5 text-app-text-muted">Нэгийг сонгоно уу. Сонголтоо дараа нь өөрчилж болно.</Text>
         <View className="mt-4 flex-row gap-3">
           <Pressable
             className={cn(
               "min-h-[88px] flex-1 items-center justify-center rounded-2xl border-2 px-3 py-3",
               signupRole === "customer"
                 ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                : "border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900",
+                : "border-slate-200 bg-white border-app-border-strong bg-app-card",
             )}
             onPress={() => {
               setSignupRole("customer");
@@ -257,7 +269,7 @@ export default function RegisterScreen() {
             <Text
               className={cn(
                 "text-center text-base font-bold",
-                signupRole === "customer" ? "text-slate-900 dark:text-white" : "text-slate-900 dark:text-slate-50",
+                signupRole === "customer" ? "text-slate-900 dark:text-white" : "text-app-text",
               )}
               numberOfLines={2}
             >
@@ -266,7 +278,7 @@ export default function RegisterScreen() {
             <Text
               className={cn(
                 "mt-1 text-center text-xs leading-4",
-                signupRole === "customer" ? "text-slate-600 dark:text-brand-100" : "text-slate-500 dark:text-slate-400",
+                signupRole === "customer" ? "text-slate-600 dark:text-brand-100" : "text-app-text-muted",
               )}
               numberOfLines={3}
             >
@@ -278,7 +290,7 @@ export default function RegisterScreen() {
               "min-h-[88px] flex-1 items-center justify-center rounded-2xl border-2 px-3 py-3",
               signupRole === "provider"
                 ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                : "border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900",
+                : "border-slate-200 bg-white border-app-border-strong bg-app-card",
             )}
             onPress={() => {
               setSignupRole("provider");
@@ -290,7 +302,7 @@ export default function RegisterScreen() {
             <Text
               className={cn(
                 "text-center text-base font-bold",
-                signupRole === "provider" ? "text-slate-900 dark:text-white" : "text-slate-900 dark:text-slate-50",
+                signupRole === "provider" ? "text-slate-900 dark:text-white" : "text-app-text",
               )}
               numberOfLines={2}
             >
@@ -299,7 +311,7 @@ export default function RegisterScreen() {
             <Text
               className={cn(
                 "mt-1 text-center text-xs leading-4",
-                signupRole === "provider" ? "text-slate-600 dark:text-brand-100" : "text-slate-500 dark:text-slate-400",
+                signupRole === "provider" ? "text-slate-600 dark:text-brand-100" : "text-app-text-muted",
               )}
               numberOfLines={3}
             >
@@ -309,16 +321,16 @@ export default function RegisterScreen() {
         </View>
       </Card>
 
-      <Card className="border-2 border-slate-200 shadow-md dark:border-slate-600">
+      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
         {isProviderFlow ? (
-          <View className="mb-5 border-b border-slate-200 pb-4 dark:border-slate-700">
+          <View className="mb-5 border-b border-slate-200 pb-4 border-app-border">
             <Text className="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
               Алхам {providerStep} / 5
             </Text>
-            <Text className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-50">{providerStepTitles[providerStep - 1]}</Text>
+            <Text className="mt-1 text-base font-semibold text-app-text">{providerStepTitles[providerStep - 1]}</Text>
           </View>
         ) : (
-          <Text className="mb-5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <Text className="mb-5 text-xs font-bold uppercase tracking-wider text-app-text-muted">
             Хувийн мэдээлэл
           </Text>
         )}
@@ -401,7 +413,7 @@ export default function RegisterScreen() {
               error={errors.clinicRegistrationNumber}
               className="min-h-[52px] py-4"
             />
-            <Text className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Төрөл</Text>
+            <Text className="mb-2 text-sm font-semibold text-app-text">Төрөл</Text>
             <View className="mb-4 flex-row flex-wrap gap-2">
               {(["эмнэлэг", "төв", "кабинет", "зөвлөгөөний төв"] as const).map((type) => (
                 <Pressable
@@ -410,11 +422,11 @@ export default function RegisterScreen() {
                     "rounded-2xl border-2 px-3 py-2.5",
                     clinicType === type
                       ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                      : "border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900",
+                      : "border-slate-200 bg-white border-app-border-strong bg-app-card",
                   )}
                   onPress={() => setClinicType(type)}
                 >
-                  <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">{type}</Text>
+                  <Text className="text-sm font-medium text-app-text">{type}</Text>
                 </Pressable>
               ))}
             </View>
@@ -488,29 +500,29 @@ export default function RegisterScreen() {
               multiline
               error={errors.serviceDirections}
             />
-            <Text className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Үйлчилгээний хэлбэр</Text>
+            <Text className="mb-2 text-sm font-semibold text-app-text">Үйлчилгээний хэлбэр</Text>
             <View className="mb-2 gap-2">
               <Pressable
                 className={cn(
                   "rounded-2xl border-2 px-4 py-3",
                   hasOnlineConsult
                     ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                    : "border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900",
+                    : "border-slate-200 bg-white border-app-border-strong bg-app-card",
                 )}
                 onPress={() => setHasOnlineConsult((prev) => !prev)}
               >
-                <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Онлайн зөвлөгөө өгдөг</Text>
+                <Text className="text-sm font-medium text-app-text">Онлайн зөвлөгөө өгдөг</Text>
               </Pressable>
               <Pressable
                 className={cn(
                   "rounded-2xl border-2 px-4 py-3",
                   hasAmbulatoryCare
                     ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                    : "border-slate-200 bg-white dark:border-slate-600 dark:bg-slate-900",
+                    : "border-slate-200 bg-white border-app-border-strong bg-app-card",
                 )}
                 onPress={() => setHasAmbulatoryCare((prev) => !prev)}
               >
-                <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Амбулаторийн үзлэг хийдэг</Text>
+                <Text className="text-sm font-medium text-app-text">Амбулаторийн үзлэг хийдэг</Text>
               </Pressable>
             </View>
             {errors.serviceModes ? <Text className="mb-3 text-sm text-red-600 dark:text-red-400">{errors.serviceModes}</Text> : null}
@@ -519,16 +531,16 @@ export default function RegisterScreen() {
 
         {isProviderFlow && providerStep === 5 && (
           <View className="gap-3">
-            <View className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-600 dark:bg-slate-800/60">
-              <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Илгээх мэдээллийн тойм</Text>
-              <Text className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">Хариуцсан хүн: {fullName || "—"}</Text>
-              <Text className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">
+            <View className="rounded-2xl border p-4 border-app-border-strong bg-app-muted/60">
+              <Text className="text-sm font-semibold text-app-text">Илгээх мэдээллийн тойм</Text>
+              <Text className="mt-2 text-xs leading-5 text-app-text-secondary">Хариуцсан хүн: {fullName || "—"}</Text>
+              <Text className="mt-1 text-xs leading-5 text-app-text-secondary">
                 Эмнэлэг: {clinicName || "—"} ({clinicType})
               </Text>
-              <Text className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">Регистр/ТЗ: {clinicRegistrationNumber || "—"}</Text>
-              <Text className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">Байршил: {cityDistrict || "—"}</Text>
-              <Text className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">Чиглэл: {serviceDirections || "—"}</Text>
-              <Text className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">
+              <Text className="mt-1 text-xs leading-5 text-app-text-secondary">Регистр/ТЗ: {clinicRegistrationNumber || "—"}</Text>
+              <Text className="mt-1 text-xs leading-5 text-app-text-secondary">Байршил: {cityDistrict || "—"}</Text>
+              <Text className="mt-1 text-xs leading-5 text-app-text-secondary">Чиглэл: {serviceDirections || "—"}</Text>
+              <Text className="mt-1 text-xs leading-5 text-app-text-secondary">
                 Лого: {clinicLogoDataUrl ? "Сонгогдсон" : "—"}
               </Text>
             </View>
@@ -539,7 +551,7 @@ export default function RegisterScreen() {
           </View>
         )}
 
-        <View className="mt-2 gap-2 border-t border-slate-200 pt-5 dark:border-slate-700">
+        <View className="mt-2 gap-2 border-t border-slate-200 pt-5 border-app-border">
           {isProviderFlow && providerStep > 1 ? (
             <Button
               label="Өмнөх алхам"
@@ -561,7 +573,7 @@ export default function RegisterScreen() {
 
         <Link href={routes.login} asChild>
           <Pressable className="mt-5 items-center py-2 active:opacity-80">
-            <Text className="text-center text-sm font-medium text-slate-600 dark:text-slate-400">Бүртгэлтэй юу? Нэвтрэх</Text>
+            <Text className="text-center text-sm font-medium text-app-text-muted">Бүртгэлтэй юу? Нэвтрэх</Text>
           </Pressable>
         </Link>
       </Card>

@@ -23,15 +23,15 @@ export default function ScheduleScreen() {
     <>
       <Stack.Screen options={{ title: "Хуваарь" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Цагийн хуваарь" subtitle="7 хоногийн хуваарь, боломжит цаг, хаалттай өдрүүд." />
         <Card className="mb-4">
-          <Text className="text-sm text-slate-600 dark:text-slate-300">
+          <Text className="text-sm text-app-text-secondary">
             Слот нь эмчийн 7 хоногийн хуваарь + үйлчилгээний үргэлжлэх хугацаанд тулгуурлан үүснэ.
           </Text>
-          <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          <Text className="mt-2 text-xs text-app-text-muted">
             Эмч: {doctors.length} · Үйлчилгээ: {services.length} · Нийт слот: {slots.length}
           </Text>
         </Card>
@@ -43,7 +43,7 @@ export default function ScheduleScreen() {
         </Link>
         {!isOnline ? (
           <Card className="mb-4">
-            <Text className="text-xs text-slate-600 dark:text-slate-300">
+            <Text className="text-xs text-app-text-secondary">
               Офлайн үед хуваарь өөрчлөх боломжгүй. Интернеттэй болоход дахин оролдоно уу.
             </Text>
           </Card>
@@ -67,7 +67,7 @@ export default function ScheduleScreen() {
 
         {allDates.length > 0 ? (
           <Card className="mb-4">
-            <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Өдөр шүүх</Text>
+            <Text className="text-sm font-semibold text-app-text">Өдөр шүүх</Text>
             <View className="mt-3 flex-row flex-wrap gap-2">
               {allDates.map((d) => {
                 const active = selectedDate === d;
@@ -82,7 +82,7 @@ export default function ScheduleScreen() {
                 );
               })}
             </View>
-            <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            <Text className="mt-2 text-xs text-app-text-muted">
               Слотуудыг серверт хадгалсан тул үйлчлүүлэгч талын апп дээр автоматаар харагдана.
             </Text>
           </Card>
@@ -103,11 +103,11 @@ export default function ScheduleScreen() {
           <View className="gap-2">
             {visibleSlots.map((s) => (
               <Card key={s.id}>
-                <Text className="font-semibold text-slate-900 dark:text-slate-50">{s.label}</Text>
-                <Text className="text-xs text-slate-500 dark:text-slate-400">
+                <Text className="font-semibold text-app-text">{s.label}</Text>
+                <Text className="text-xs text-app-text-muted">
                   {s.dateIso} · {doctorName(s.doctorId)}
                 </Text>
-                <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <Text className="mt-1 text-xs text-app-text-muted">
                   Үйлчилгээ: {serviceName(s.serviceId)} · Хугацаа: {s.durationMinutes ?? 0} мин · Төлөв: {s.status ?? "available"}
                 </Text>
                 <View className="mt-2 flex-row gap-2">

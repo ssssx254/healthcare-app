@@ -1,0 +1,138 @@
+/* Web-only layout — Expo Go (native) энэ файлыг уншихгүй (_layout.web.tsx). */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: var(--app-shell-backdrop);
+}
+
+/* Desktop web (>768px): centered phone preview + side gutters */
+@media (min-width: 769px) {
+  .web-app-shell--preview {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    background-color: var(--app-shell-backdrop) !important;
+  }
+
+  .web-app-shell--preview .web-app-column--preview {
+    width: 480px !important;
+    max-width: 480px !important;
+    min-width: 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: auto !important;
+    align-self: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    overflow: visible !important;
+    padding-bottom: 4px !important;
+  }
+
+  .web-app-shell--preview .web-app-column--desktop {
+    border-radius: 20px !important;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14) !important;
+  }
+
+  .dark .web-app-shell--preview .web-app-column--desktop {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .web-app-inner--preview {
+    width: 480px !important;
+    max-width: 480px !important;
+    align-self: center !important;
+  }
+
+  .web-screen-frame--preview {
+    width: 480px !important;
+    max-width: 480px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    align-self: center !important;
+    overflow: visible !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
+    flex-basis: auto !important;
+    min-height: 0 !important;
+  }
+
+  .web-app-column--preview .web-screen-frame--preview {
+    height: 100% !important;
+  }
+}
+
+/* Phone browser: full width */
+@media (max-width: 768px) {
+  .web-app-shell--mobile {
+    align-items: stretch !important;
+    background-color: transparent !important;
+  }
+
+  .web-app-shell--mobile .web-app-column--mobile {
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+
+  .web-app-inner--mobile {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .web-screen-frame--mobile {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  body {
+    background-color: var(--app-bg);
+  }
+}
+
+/* Web bottom tab bar */
+.web-tab-bar-root {
+  flex-shrink: 0 !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+.web-tab-bar-root > div {
+  min-height: 88px !important;
+  height: auto !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  padding-top: 8px !important;
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (max-width: 768px) {
+  .web-tab-bar-root > div {
+    min-height: 92px !important;
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .web-tab-bar-root > div {
+    min-height: 88px !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}

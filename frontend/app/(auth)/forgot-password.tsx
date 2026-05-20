@@ -1,4 +1,12 @@
-import { AuthMessageBanner, Button, Card, FormScrollView, Input, SectionHeader } from "@/components";
+import {
+  AuthMessageBanner,
+  Button,
+  Card,
+  EmergencyCallButton,
+  FormScrollView,
+  Input,
+  SectionHeader,
+} from "@/components";
 import { routes } from "@/constants/appRoutes";
 import { forgotPasswordRequest } from "@/services/api/authApi";
 import { router } from "expo-router";
@@ -43,7 +51,7 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <FormScrollView className="flex-1 bg-slate-50 px-5 pt-6 dark:bg-slate-950" contentContainerStyle={{ paddingBottom: 40 }}>
+    <FormScrollView className="flex-1 px-5 pt-6 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
       <SectionHeader
         variant="hero"
         title="Нууц үг мартсан"
@@ -51,10 +59,12 @@ export default function ForgotPasswordScreen() {
         className="mb-2"
       />
 
+      <EmergencyCallButton className="mb-4" />
+
       {formError ? <AuthMessageBanner variant="error" message={formError} className="mb-4" /> : null}
 
-      <Card className="border-2 border-slate-200 shadow-md dark:border-slate-600">
-        <View className="mb-5 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/40">
+      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+        <View className="mb-5 rounded-2xl p-4 bg-app-muted/40">
           <Input
             label="Имэйл эсвэл утас"
             appearance="prominent"
@@ -70,13 +80,13 @@ export default function ForgotPasswordScreen() {
             placeholder="жишээ@имэйл.mn эсвэл 99112233"
             error={fieldError}
             hint="Бүртгэлд бүртгэсэн хаяг эсвэл утасны дугаараа оруулна уу."
-            className="min-h-[52px] border-slate-200 bg-white py-4 dark:border-slate-600 dark:bg-slate-900"
+            className="min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
           />
         </View>
 
-        <View className="mb-6 rounded-2xl bg-slate-100 px-4 py-3.5 dark:bg-slate-800/90">
-          <Text className="text-xs font-bold uppercase tracking-wide text-slate-600 dark:text-slate-300">Санамж</Text>
-          <Text className="mt-2 text-sm leading-5 text-slate-600 dark:text-slate-400">
+        <View className="mb-6 rounded-2xl px-4 py-3.5 bg-app-muted/90">
+          <Text className="text-xs font-bold uppercase tracking-wide text-app-text-secondary">Санамж</Text>
+          <Text className="mt-2 text-sm leading-5 text-app-text-muted">
             Заавар имэйл эсвэл мессежээр ирнэ. Хэдэн минут хүлээгээд «Спам» хавтсаа шалгана уу.
           </Text>
         </View>
@@ -88,7 +98,7 @@ export default function ForgotPasswordScreen() {
           onPress={() => router.replace(routes.login)}
           className="mt-4 items-center py-3 active:opacity-80"
         >
-          <Text className="text-center text-sm font-medium text-slate-600 dark:text-slate-400">Нэвтрэх хуудас руу буцах</Text>
+          <Text className="text-center text-sm font-medium text-app-text-muted">Нэвтрэх хуудас руу буцах</Text>
         </Pressable>
       </Card>
     </FormScrollView>

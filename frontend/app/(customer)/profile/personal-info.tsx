@@ -62,14 +62,14 @@ export default function PersonalInfoScreen() {
   const sectionTitle = (icon: ComponentProps<typeof MaterialCommunityIcons>["name"], title: string) => (
     <View className="mb-2 mt-1 flex-row items-center gap-2">
       <MaterialCommunityIcons name={icon} size={18} color="#2563eb" />
-      <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">{title}</Text>
+      <Text className="text-sm font-semibold text-app-text">{title}</Text>
     </View>
   );
 
   return (
     <>
       <Stack.Screen options={{ title: "Хувийн мэдээлэл" }} />
-      <FormScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <FormScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Хувийн мэдээлэл" subtitle="Өөрийн мэдээллээ шинэчилж хадгална уу." />
 
         <Card className="mb-4">

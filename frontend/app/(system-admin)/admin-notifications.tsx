@@ -61,7 +61,7 @@ export default function AdminNotificationsScreen() {
   return (
     <>
       <Tabs.Screen options={{ title: "Мэдэгдэл" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         <SectionHeader title="Админы мэдэгдэл" subtitle="Системийн анхааруулга, шинэчлэлт, мэдэгдлүүд." />
         <Button
           label={markingAll ? "Түр хүлээнэ үү…" : "Бүгдийг уншсан болгох"}
@@ -90,11 +90,11 @@ export default function AdminNotificationsScreen() {
               <Pressable key={item.id} onPress={() => void markRead(item.id)}>
                 <Card className={read ? "" : "border-brand-300 dark:border-brand-700"}>
                   <View className="flex-row items-start justify-between gap-2">
-                    <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50">{item.title}</Text>
+                    <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text">{item.title}</Text>
                     <Badge label={read ? "Уншсан" : "Шинэ"} tone={read ? "neutral" : "warning"} />
                   </View>
-                  <Text className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.body}</Text>
-                  <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">{formatTimeLabel(item.created_at)}</Text>
+                  <Text className="mt-2 text-sm leading-6 text-app-text-secondary">{item.body}</Text>
+                  <Text className="mt-2 text-xs text-app-text-muted">{formatTimeLabel(item.created_at)}</Text>
                 </Card>
               </Pressable>
             );

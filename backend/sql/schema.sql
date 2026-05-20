@@ -9,6 +9,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ---------------------------------------------------------------------------
 -- users
 -- ---------------------------------------------------------------------------
+DROP TABLE IF EXISTS `doctor_reviews`;
 DROP TABLE IF EXISTS `reviews`;
 DROP TABLE IF EXISTS `chat_messages`;
 DROP TABLE IF EXISTS `chat_participant_reads`;
@@ -16,6 +17,7 @@ DROP TABLE IF EXISTS `chat_conversations`;
 DROP TABLE IF EXISTS `notifications`;
 DROP TABLE IF EXISTS `questionnaires`;
 DROP TABLE IF EXISTS `consultation_requests`;
+DROP TABLE IF EXISTS `lab_tests`;
 DROP TABLE IF EXISTS `lab_test_results`;
 DROP TABLE IF EXISTS `prescriptions`;
 DROP TABLE IF EXISTS `medical_notes`;
@@ -451,6 +453,51 @@ CREATE TABLE `lab_test_results` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
+-- lab_tests (шинжилгээ — үйлчлүүлэгч / эмнэлэг)
+-- ---------------------------------------------------------------------------
+CREATE TABLE `lab_tests` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `patient_user_id` BIGINT UNSIGNED NOT NULL,
+  `clinic_id` BIGINT UNSIGNED NULL DEFAULT NULL,
+  `doctor_id` BIGINT UNSIGNED NULL DEFAULT NULL,
+  `booking_id` BIGINT UNSIGNED NULL DEFAULT NULL,
+  `title` VARCHAR(255) NOT NULL,
+  `test_type` VARCHAR(128) NOT NULL,
+  `test_date` DATE NOT NULL,
+  `description` TEXT NULL,
+  `attachment_url` MEDIUMTEXT NULL,
+  `attachment_type` VARCHAR(32) NULL DEFAULT NULL,
+  `result_text` TEXT NULL,
+  `result_file_url` MEDIUMTEXT NULL,
+  `result_file_type` VARCHAR(32) NULL DEFAULT NULL,
+  `doctor_notes` TEXT NULL,
+  `status` ENUM('submitted','completed','reviewed') NOT NULL DEFAULT 'submitted',
+  `uploaded_by` ENUM('customer','clinic') NOT NULL DEFAULT 'customer',
+  `created_by_user_id` BIGINT UNSIGNED NOT NULL,
+  `reviewed_by_user_id` BIGINT UNSIGNED NULL DEFAULT NULL,
+  `reviewed_at` TIMESTAMP NULL DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_lab_tests_patient` (`patient_user_id`),
+  KEY `idx_lab_tests_clinic` (`clinic_id`),
+  KEY `idx_lab_tests_status` (`status`),
+  KEY `idx_lab_tests_uploaded_by` (`uploaded_by`),
+  CONSTRAINT `fk_lab_tests_patient` FOREIGN KEY (`patient_user_id`) REFERENCES `users` (`id`)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_lab_tests_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_lab_tests_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_lab_tests_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_lab_tests_created_by` FOREIGN KEY (`created_by_user_id`) REFERENCES `users` (`id`)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_lab_tests_reviewed_by` FOREIGN KEY (`reviewed_by_user_id`) REFERENCES `users` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
 -- consultation_requests
 -- ---------------------------------------------------------------------------
 CREATE TABLE `consultation_requests` (
@@ -599,7 +646,31 @@ CREATE TABLE `notifications` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
--- reviews
+-- doctor_reviews (үзлэг дууссан захиалгатай үйлчлүүлэгч)
+-- ---------------------------------------------------------------------------
+CREATE TABLE `doctor_reviews` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `doctor_id` BIGINT UNSIGNED NOT NULL,
+  `customer_user_id` BIGINT UNSIGNED NOT NULL,
+  `booking_id` BIGINT UNSIGNED NOT NULL,
+  `rating` TINYINT UNSIGNED NOT NULL,
+  `comment` TEXT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_doctor_reviews_booking` (`booking_id`),
+  KEY `idx_doctor_reviews_doctor` (`doctor_id`),
+  KEY `idx_doctor_reviews_customer` (`customer_user_id`),
+  CONSTRAINT `chk_doctor_reviews_rating` CHECK (`rating` >= 1 AND `rating` <= 5),
+  CONSTRAINT `fk_doctor_reviews_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_doctor_reviews_customer` FOREIGN KEY (`customer_user_id`) REFERENCES `users` (`id`)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_doctor_reviews_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- reviews (legacy / clinic-level)
 -- ---------------------------------------------------------------------------
 CREATE TABLE `reviews` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

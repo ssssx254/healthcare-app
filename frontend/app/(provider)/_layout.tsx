@@ -1,15 +1,17 @@
 import { routes } from "@/constants/appRoutes";
-import { HeaderChatLink, HeaderNotificationLink } from "@/components";
+import { HeaderChatLink, HeaderNotificationLink, HeaderThemeAndLogout } from "@/components";
 import { ProviderWorkspaceProvider } from "@/contexts/ProviderWorkspaceContext";
-import { tabScreenOptions } from "@/constants/navigationTheme";
+import { WebBottomTabBar } from "@/components/WebBottomTabBar";
+import { WebScreenFrame } from "@/components/WebScreenFrame";
 import { useAuth } from "@/hooks/useAuth";
+import { useTabScreenOptions } from "@/hooks/useTabScreenOptions";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
-import { useColorScheme, View } from "react-native";
+import { View } from "react-native";
 
 export default function ProviderGroupLayout() {
-  const { isAuthenticated, user, authLoading } = useAuth();
-  const colorScheme = useColorScheme();
+  const { isAuthenticated, user, authLoading, signOut } = useAuth();
+  const tabOptions = useTabScreenOptions();
 
   if (authLoading) return null;
   if (!isAuthenticated || user?.role !== "provider") {
@@ -18,9 +20,11 @@ export default function ProviderGroupLayout() {
 
   return (
     <ProviderWorkspaceProvider>
+      <WebScreenFrame>
       <Tabs
+        tabBar={(props) => <WebBottomTabBar {...props} />}
         screenOptions={() => ({
-          ...tabScreenOptions(colorScheme),
+          ...tabOptions,
           headerTitle: "",
           headerLeft: () => (
             <View className="ml-1 flex-row items-center">
@@ -28,6 +32,7 @@ export default function ProviderGroupLayout() {
               <HeaderChatLink href={routes.providerChat} />
             </View>
           ),
+          headerRight: () => <HeaderThemeAndLogout onPress={signOut} />,
         })}
       >
         <Tabs.Screen
@@ -71,6 +76,7 @@ export default function ProviderGroupLayout() {
         <Tabs.Screen name="orders" options={{ href: null }} />
         <Tabs.Screen name="schedule" options={{ href: null }} />
         <Tabs.Screen name="patients" options={{ href: null }} />
+        <Tabs.Screen name="lab-tests" options={{ href: null }} />
         <Tabs.Screen name="clinic-register" options={{ href: null }} />
         <Tabs.Screen name="clinic-profile" options={{ href: null }} />
         <Tabs.Screen name="clinic-edit" options={{ href: null }} />
@@ -83,6 +89,7 @@ export default function ProviderGroupLayout() {
         <Tabs.Screen name="notification-settings" options={{ href: null }} />
         <Tabs.Screen name="doctor/[doctorId]/edit" options={{ href: null }} />
       </Tabs>
+      </WebScreenFrame>
     </ProviderWorkspaceProvider>
   );
 }

@@ -2,27 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Web: MaterialCommunityIcons — stable path (not node_modules). See scripts/copy-web-icon-font.js */
+/* MaterialCommunityIcons — web export */
 @font-face {
   font-family: "material-community";
   src: url("/assets/fonts/material-community.ttf") format("truetype");
   font-display: block;
 }
 
-/* Expo web: full-height shell + subtle desktop backdrop (native unchanged). */
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
+/* Semantic tokens — ThemeProvider `.dark` class on root */
+:root {
+  --app-bg: #f5f7fb;
+  --app-card: #ffffff;
+  --app-muted: #eef2f7;
+  --app-text: #0b1f3a;
+  --app-text-secondary: #334155;
+  --app-text-muted: #64748b;
+  --app-border: #e2e8f0;
+  --app-border-strong: #cbd5e1;
+  --app-brand-muted: #dbeafe;
+  --app-accent-muted: #ccfbf1;
+  --app-danger-muted: #fee2e2;
+  --app-warning-muted: #fef3c7;
+  --app-success-muted: #d1fae5;
+  --app-header: #ffffff;
+  --app-tab-bar: #ffffff;
+  --app-tab-border: #dbe3ef;
+  --app-shell-backdrop: #e8eef4;
 }
 
-body {
-  background-color: #e8eef4;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #0f172a;
-  }
+.dark {
+  --app-bg: #020617;
+  --app-card: #0f172a;
+  --app-muted: #1e293b;
+  --app-text: #f8fafc;
+  --app-text-secondary: #e2e8f0;
+  --app-text-muted: #94a3b8;
+  --app-border: #1e293b;
+  --app-border-strong: #334155;
+  --app-brand-muted: #1e3a5f;
+  --app-accent-muted: #134e4a;
+  --app-danger-muted: #7f1d1d;
+  --app-warning-muted: #78350f;
+  --app-success-muted: #064e3b;
+  --app-header: #0f172a;
+  --app-tab-bar: #0b1220;
+  --app-tab-border: #1f2a3a;
+  --app-shell-backdrop: #0f172a;
 }

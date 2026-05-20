@@ -46,14 +46,14 @@ export default function NotificationSettingsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Мэдэгдлийн тохиргоо" }} />
-      <FormScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <FormScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Мэдэгдлийн тохиргоо" subtitle="Push зөвшөөрөл болон туршилтын мэдэгдэл." />
         <Card className="mb-3">
           <Button label="Мэдэгдлийн зөвшөөрөл авах" loading={loading} onPress={onEnable} />
-          {status ? <Text className="mt-2 text-xs text-slate-600 dark:text-slate-300">{status}</Text> : null}
+          {status ? <Text className="mt-2 text-xs text-app-text-secondary">{status}</Text> : null}
         </Card>
         <Card>
-          <Text className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-50">Туршилтын мэдэгдэл</Text>
+          <Text className="mb-2 text-sm font-semibold text-app-text">Туршилтын мэдэгдэл</Text>
           <Button label="Захиалга үүссэн" variant="outline" className="mb-2" onPress={() => void notifyBookingCreated()} />
           <Button label="Захиалга баталгаажсан" variant="outline" className="mb-2" onPress={() => void notifyBookingConfirmed()} />
           <Button label="Захиалга цуцлагдсан" variant="outline" className="mb-2" onPress={() => void notifyBookingCancelled()} />

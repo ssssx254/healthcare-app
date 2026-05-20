@@ -7,6 +7,14 @@ export type { ClinicRow, ClinicByProviderResponse, ClinicListParams } from "./cl
 export { doctorApi } from "./doctorApi";
 export type { DoctorRow, DoctorListParams } from "./doctorApi";
 
+export { doctorReviewApi } from "./doctorReviewApi";
+export type {
+  DoctorReviewRow,
+  DoctorReviewSummary,
+  DoctorReviewViewer,
+  DoctorReviewsResponse,
+} from "./doctorReviewApi";
+
 export { serviceApi } from "./serviceApi";
 export type { ServiceRow, ServiceListParams } from "./serviceApi";
 
@@ -28,6 +36,15 @@ export type { NotificationRow, NotificationListParams } from "./notificationApi"
 export { medicalNotesApi } from "./medicalNotesApi";
 export type { MedicalNoteRow } from "./medicalNotesApi";
 
+export { labTestsApi } from "./labTestsApi";
+export type {
+  LabTestRow,
+  LabTestsListResponse,
+  CreateCustomerLabTestBody,
+  UpdateProviderLabTestBody,
+  CreateProviderLabTestBody,
+} from "./labTestsApi";
+
 export { chatApi } from "./chatApi";
 export type { EnsureChatConversationBody, SendChatMessageBody, MarkChatReadBody } from "./chatApi";
 
@@ -46,4 +63,4 @@ export { providerOnboardingApi } from "./providerOnboardingApi";
 export type { ProviderOnboardingSubmitBody, ProviderOnboardingSubmitResponse } from "./providerOnboardingApi";
 
 export { statsApi } from "./statsApi";
-export type { AdminStatsResponse } from "./statsApi";
+export type { AdminStatsResponse, CustomerStatsResponse } from "./statsApi";

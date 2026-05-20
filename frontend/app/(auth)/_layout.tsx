@@ -1,13 +1,21 @@
+import { HeaderThemeToggleButton } from "@/components";
+import { WebScreenFrame } from "@/components/WebScreenFrame";
 import { authStackScreenOptions } from "@/constants/navigationTheme";
 import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
+import { useNavigationColorScheme } from "@/hooks/useNavigationColorScheme";
 
 export default function AuthGroupLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useNavigationColorScheme();
   return (
-    <Stack screenOptions={() => authStackScreenOptions(colorScheme)}>
+    <WebScreenFrame>
+      <Stack
+        screenOptions={() => ({
+          ...authStackScreenOptions(colorScheme),
+          headerRight: () => <HeaderThemeToggleButton />,
+        })}
+      >
       <Stack.Screen name="splash" options={{ headerShown: false }} />
-      <Stack.Screen name="intro" options={{ title: "Танилцуулга" }} />
+      <Stack.Screen name="intro" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: "Нэвтрэх" }} />
       <Stack.Screen name="forgot-password" options={{ title: "Нууц үг мартсан" }} />
       <Stack.Screen name="reset-password" options={{ title: "Нууц үг шинэчлэх" }} />
@@ -15,5 +23,6 @@ export default function AuthGroupLayout() {
       <Stack.Screen name="provider-pending" options={{ title: "Бүртгэл шалгалтад байна" }} />
       <Stack.Screen name="register" options={{ title: "Бүртгүүлэх" }} />
     </Stack>
+    </WebScreenFrame>
   );
 }

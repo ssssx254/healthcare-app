@@ -100,7 +100,7 @@ export default function SystemAdminDashboardScreen() {
   return (
     <>
       <Tabs.Screen options={{ title: "Системийн админы самбар" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         <SectionHeader title="Системийн админы самбар" subtitle="Платформын бүртгэл, хяналт, удирдлага." />
 
         {loadError ? (
@@ -120,63 +120,63 @@ export default function SystemAdminDashboardScreen() {
           {statCards.map((item) => (
             <Card key={item.key} className="min-w-[48%] flex-1">
               <View className="flex-row items-center justify-between">
-                <Text className="flex-1 pr-2 text-xs text-slate-500 dark:text-slate-400">{item.label}</Text>
+                <Text className="flex-1 pr-2 text-xs text-app-text-muted">{item.label}</Text>
                 <MaterialCommunityIcons name={item.icon} size={18} color="#14b8a6" />
               </View>
-              <Text className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-50">{item.value}</Text>
+              <Text className="mt-2 text-3xl font-bold text-app-text">{item.value}</Text>
             </Card>
           ))}
         </View>
 
         <Card className="mb-4">
           <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Тайлан / статистик</Text>
+            <Text className="text-sm font-semibold text-app-text">Тайлан / статистик</Text>
             <MaterialCommunityIcons name="chart-box-outline" size={18} color="#14b8a6" />
           </View>
           <View className="gap-2">
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-slate-500 dark:text-slate-400">Нийт хэрэглэгч</Text>
-              <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{n(adminTotalUsers)}</Text>
+              <Text className="text-xs text-app-text-muted">Нийт хэрэглэгч</Text>
+              <Text className="text-sm font-semibold text-app-text">{n(adminTotalUsers)}</Text>
             </View>
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-slate-500 dark:text-slate-400">Нийт үзүүлэгч</Text>
-              <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{n(adminTotalProviders)}</Text>
+              <Text className="text-xs text-app-text-muted">Нийт үзүүлэгч</Text>
+              <Text className="text-sm font-semibold text-app-text">{n(adminTotalProviders)}</Text>
             </View>
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-slate-500 dark:text-slate-400">Хүлээгдэж буй эмнэлэг</Text>
-              <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{n(adminPendingClinics)}</Text>
+              <Text className="text-xs text-app-text-muted">Хүлээгдэж буй эмнэлэг</Text>
+              <Text className="text-sm font-semibold text-app-text">{n(adminPendingClinics)}</Text>
             </View>
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-slate-500 dark:text-slate-400">Нийт захиалга</Text>
-              <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{n(adminTotalBookings)}</Text>
+              <Text className="text-xs text-app-text-muted">Нийт захиалга</Text>
+              <Text className="text-sm font-semibold text-app-text">{n(adminTotalBookings)}</Text>
             </View>
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs text-slate-500 dark:text-slate-400">Төлөгдсөн нийт орлого</Text>
-              <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{money(adminRevenueTotal)}</Text>
+              <Text className="text-xs text-app-text-muted">Төлөгдсөн нийт орлого</Text>
+              <Text className="text-sm font-semibold text-app-text">{money(adminRevenueTotal)}</Text>
             </View>
           </View>
         </Card>
 
         <Card className="mb-4">
           <View className="mb-2 flex-row items-center justify-between">
-            <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Эмнэлэг тус бүрийн төлөгдсөн орлого</Text>
+            <Text className="text-sm font-semibold text-app-text">Эмнэлэг тус бүрийн төлөгдсөн орлого</Text>
             <MaterialCommunityIcons name="hospital-building" size={18} color="#14b8a6" />
           </View>
           {clinicRevenueRows.length === 0 ? (
-            <Text className="text-xs text-slate-500 dark:text-slate-400">Орлогын эмнэлгийн задлан мэдээлэл алга.</Text>
+            <Text className="text-xs text-app-text-muted">Орлогын эмнэлгийн задлан мэдээлэл алга.</Text>
           ) : (
             <View className="gap-2">
               {clinicRevenueRows.slice(0, 12).map((row, index) => (
-                <View key={row.clinic_id} className="flex-row items-center justify-between rounded-xl bg-slate-100 px-3 py-2 dark:bg-slate-800">
+                <View key={row.clinic_id} className="flex-row items-center justify-between rounded-xl px-3 py-2 bg-app-muted">
                   <View className="min-w-0 flex-1 pr-2">
-                    <Text className="text-xs font-semibold text-slate-800 dark:text-slate-100">
+                    <Text className="text-xs font-semibold text-app-text">
                       {index + 1}. {row.clinic_name}
                     </Text>
-                    <Text className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                    <Text className="mt-0.5 text-[11px] text-app-text-muted">
                       Төлөгдсөн захиалга: {row.paid_bookings_count}
                     </Text>
                   </View>
-                  <Text className="text-xs font-semibold text-slate-900 dark:text-slate-50">
+                  <Text className="text-xs font-semibold text-app-text">
                     {row.paid_revenue_total.toLocaleString("mn-MN")} ₮
                   </Text>
                 </View>
@@ -186,7 +186,7 @@ export default function SystemAdminDashboardScreen() {
         </Card>
 
         <Card className="mb-4">
-          <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Түргэн үйлдэл</Text>
+          <Text className="text-sm font-semibold text-app-text">Түргэн үйлдэл</Text>
           <View className="mt-3 gap-2">
             <Link href={routes.adminRegistrations} asChild>
               <Button label="Бүртгэл батлах" />
@@ -205,10 +205,10 @@ export default function SystemAdminDashboardScreen() {
 
         <Card>
           <View className="flex-row items-center justify-between">
-            <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Хүлээгдэж буй үзүүлэгч</Text>
+            <Text className="text-sm font-semibold text-app-text">Хүлээгдэж буй үзүүлэгч</Text>
             <Badge label={n(pendingProviders)} tone={pendingProviders != null && pendingProviders > 0 ? "warning" : "neutral"} />
           </View>
-          <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          <Text className="mt-2 text-xs text-app-text-muted">
             Дэлгэрэнгүйг «Үзүүлэгчийн бүртгэл батлах»-аас нээнэ үү.
           </Text>
         </Card>

@@ -64,7 +64,7 @@ export default function CustomerWalletScreen() {
     <>
       <Tabs.Screen options={{ tabBarLabel: "Цахим данс", headerTitle: "" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 36 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
@@ -108,7 +108,7 @@ export default function CustomerWalletScreen() {
         </Card>
 
         <View className="mb-3 flex-row items-center justify-between">
-          <Text className="text-base font-bold text-slate-900 dark:text-slate-50">Гүйлгээний түүх</Text>
+          <Text className="text-base font-bold text-app-text">Гүйлгээний түүх</Text>
           <MaterialCommunityIcons name="history" size={22} color="#64748b" />
         </View>
 
@@ -116,13 +116,13 @@ export default function CustomerWalletScreen() {
           <Card>
             <View className="items-center py-10">
               <ActivityIndicator />
-              <Text className="mt-3 text-sm text-slate-500 dark:text-slate-400">Ачааллаж байна…</Text>
+              <Text className="mt-3 text-sm text-app-text-muted">Ачааллаж байна…</Text>
             </View>
           </Card>
         ) : items.length === 0 ? (
           <Card>
-            <Text className="text-center text-sm text-slate-600 dark:text-slate-300">Гүйлгээ байхгүй байна.</Text>
-            <Text className="mt-2 text-center text-xs leading-5 text-slate-500 dark:text-slate-400">
+            <Text className="text-center text-sm text-app-text-secondary">Гүйлгээ байхгүй байна.</Text>
+            <Text className="mt-2 text-center text-xs leading-5 text-app-text-muted">
               Эхний цэнэглэлтээ хийснээр энд жагсаагдана.
             </Text>
           </Card>
@@ -132,13 +132,13 @@ export default function CustomerWalletScreen() {
               const amt = Number(tx.amount);
               const isCredit = tx.direction === "credit";
               return (
-                <Card key={tx.id} className="border border-slate-200 py-3.5 dark:border-slate-700" padded={false}>
+                <Card key={tx.id} className="border py-3.5 border-app-border" padded={false}>
                   <View className="flex-row items-center justify-between px-4">
                     <View className="min-w-0 flex-1 pr-3">
-                      <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                      <Text className="text-sm font-semibold text-app-text" numberOfLines={1}>
                         {txLabel(tx.transaction_type)}
                       </Text>
-                      <Text className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      <Text className="mt-0.5 text-xs text-app-text-muted">
                         {new Date(tx.created_at).toLocaleString("mn-MN", {
                           dateStyle: "short",
                           timeStyle: "short",
@@ -147,12 +147,12 @@ export default function CustomerWalletScreen() {
                     </View>
                     <View className="items-end">
                       <Text
-                        className={`text-base font-bold ${isCredit ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-slate-50"}`}
+                        className={`text-base font-bold ${isCredit ? "text-emerald-600 dark:text-emerald-400" : "text-app-text"}`}
                       >
                         {isCredit ? "+" : "−"}
                         {formatMnt(amt)}
                       </Text>
-                      <Text className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+                      <Text className="mt-0.5 text-[11px] text-app-text-muted">
                         Дараа: {formatMnt(tx.balance_after)}
                       </Text>
                     </View>

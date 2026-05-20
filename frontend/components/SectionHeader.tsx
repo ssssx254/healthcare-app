@@ -25,10 +25,10 @@ export function SectionHeader({
   const titleClass =
     variant === "hero"
       ? cn(
-          "font-bold tracking-tight text-slate-900 dark:text-slate-50",
+          "font-bold tracking-tight text-app-text",
           isWeb ? "text-xl" : "text-2xl",
         )
-      : "text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50";
+      : "text-xl font-bold tracking-tight text-app-text";
 
   return (
     <View className={cn("mb-4 flex-row items-start justify-between gap-3", className)} {...rest}>
@@ -39,7 +39,7 @@ export function SectionHeader({
         {subtitle ? (
           <Text
             className={cn(
-              "text-sm font-normal leading-5 text-slate-600 dark:text-slate-300",
+              "text-sm font-normal leading-5 text-app-text-secondary",
               subtitleClassName ?? "mt-1.5",
             )}
           >

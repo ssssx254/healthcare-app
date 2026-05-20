@@ -1,3 +1,4 @@
 export type UserRole = "customer" | "provider" | "system_admin";
 
-export type ThemePreference = "system" | "light" | "dark";
+/** @deprecated AppThemeMode — ThemeProvider `theme` */
+export type ThemePreference = "light" | "dark";

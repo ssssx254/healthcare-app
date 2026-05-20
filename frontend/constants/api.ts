@@ -1,6 +1,14 @@
 /**
- * Backend REST суурь хаяг. Хөгжүүлэлтэд `.env` эсвэл `app.config`‑аар `EXPO_PUBLIC_API_URL` тохируулна.
- * Android эмулятор: жишээ нь `http://10.0.2.2:4000/api`
- * Физик төхөөрөмж: компьютерын LAN IP ашиглана.
+ * @deprecated Импорт: `@/config/api` эсвэл `@/lib/api/config`
+ * Production build-д localhost ашиглахгүй.
  */
-export const DEFAULT_API_BASE_URL = "http://localhost:4000/api";
+export {
+  getApiBaseUrl,
+  resolveApiEnvironment,
+  isProductionApiBuild,
+  API_SERVER_PORT,
+  API_URL_BY_ENV,
+  API_URL_EXAMPLES,
+  type ApiEnvironment,
+  type ApiBasePreset,
+} from "@/config/api";

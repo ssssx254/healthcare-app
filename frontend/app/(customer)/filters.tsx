@@ -14,13 +14,13 @@ export default function FiltersScreen() {
     <>
       <Stack.Screen options={{ title: "Шүүлтүүр" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Шүүлтүүр" subtitle="Хайлтад хэрэглэх нөхцөл сонгоно уу." />
 
         <Card className="mb-4">
-          <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Хот</Text>
+          <Text className="text-sm font-semibold text-app-text">Хот</Text>
           <View className="mt-2 flex-row flex-wrap gap-2">
             {cities.map((c) => (
               <Button
@@ -35,7 +35,7 @@ export default function FiltersScreen() {
         </Card>
 
         <Card className="mb-4">
-          <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Мэргэшил</Text>
+          <Text className="text-sm font-semibold text-app-text">Мэргэшил</Text>
           <View className="mt-2 flex-row flex-wrap gap-2">
             {specialties.map((s) => (
               <Button

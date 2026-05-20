@@ -74,7 +74,7 @@ export default function QpayWalletTopupScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "КьюПэй цэнэглэлт" }} />
-      <FormScrollView className="flex-1 bg-slate-50 px-5 pt-5 dark:bg-slate-950" contentContainerStyle={{ paddingBottom: 40 }}>
+      <FormScrollView className="flex-1 px-5 pt-5 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
         <SectionHeader
           title="КьюПэй (жишээ)"
           subtitle="Жинхэнэ төлбөр биш: нэхэмжлэл үүсгээд, банкны апп-аар төлсөн гэж үзээд баталгаажуулна."
@@ -99,21 +99,21 @@ export default function QpayWalletTopupScreen() {
           <Card className="mb-4 border-2 border-violet-200 dark:border-violet-900/50">
             <View className="mb-4 flex-row items-center gap-2">
               <MaterialCommunityIcons name="check-decagram" size={22} color="#7c3aed" />
-              <Text className="text-base font-bold text-slate-900 dark:text-slate-50">Нэхэмжлэл бэлэн</Text>
+              <Text className="text-base font-bold text-app-text">Нэхэмжлэл бэлэн</Text>
             </View>
-            <Text className="text-xs text-slate-500 dark:text-slate-400">Дүн</Text>
-            <Text className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-50">{formatMnt(invoice.amount_mnt)}</Text>
-            <Text className="mt-4 text-xs text-slate-500 dark:text-slate-400">Дуусах хугацаа</Text>
-            <Text className="mt-1 text-sm text-slate-800 dark:text-slate-100">
+            <Text className="text-xs text-app-text-muted">Дүн</Text>
+            <Text className="mt-1 text-2xl font-bold text-app-text">{formatMnt(invoice.amount_mnt)}</Text>
+            <Text className="mt-4 text-xs text-app-text-muted">Дуусах хугацаа</Text>
+            <Text className="mt-1 text-sm text-app-text">
               {new Date(invoice.expires_at).toLocaleString("mn-MN", { dateStyle: "medium", timeStyle: "short" })}
             </Text>
-            <Text className="mt-4 text-xs font-semibold text-slate-600 dark:text-slate-300">QR болон өгөгдөл (жишээ)</Text>
+            <Text className="mt-4 text-xs font-semibold text-app-text-secondary">QR болон өгөгдөл (жишээ)</Text>
             <ScrollView horizontal className="mt-2 max-h-28 rounded-xl bg-slate-900 p-3" showsHorizontalScrollIndicator>
               <Text className="font-mono text-xs text-emerald-300" selectable>
                 {invoice.qr_payload}
               </Text>
             </ScrollView>
-            <Text className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{invoice.polling_hint_mn}</Text>
+            <Text className="mt-3 text-xs leading-5 text-app-text-muted">{invoice.polling_hint_mn}</Text>
             <Button label="Төлбөр төлөгдсөн гэж батлах" loading={confirming} onPress={confirmPaid} className="mt-5 shadow-md" />
             <Button
               label="Буцах"

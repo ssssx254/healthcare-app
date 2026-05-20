@@ -77,7 +77,7 @@ export default function SelectSlotScreen() {
     <>
       <Stack.Screen options={{ title: "Цаг сонгох" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader
@@ -98,16 +98,16 @@ export default function SelectSlotScreen() {
           </Card>
         ) : daySlots.length === 0 ? (
           <Card>
-            <Text className="text-sm text-slate-600 dark:text-slate-300">Энэ өдөр сонгох боломжтой цаг алга байна.</Text>
+            <Text className="text-sm text-app-text-secondary">Энэ өдөр сонгох боломжтой цаг алга байна.</Text>
           </Card>
         ) : (
           <View className="gap-3">
             <Card>
               <View className="flex-row items-center justify-between">
-                <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Боломжтой цагууд</Text>
-                <Text className="text-xs text-slate-500 dark:text-slate-400">{daySlots.length} цаг</Text>
+                <Text className="text-sm font-semibold text-app-text">Боломжтой цагууд</Text>
+                <Text className="text-xs text-app-text-muted">{daySlots.length} цаг</Text>
               </View>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Нэг цаг товшоод доорх “Үргэлжлүүлэх” дээр дарна уу.</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">Нэг цаг товшоод доорх “Үргэлжлүүлэх” дээр дарна уу.</Text>
             </Card>
 
             {(Object.keys(groupedSlots) as (keyof typeof groupedSlots)[]).map((period) => {
@@ -115,7 +115,7 @@ export default function SelectSlotScreen() {
               if (items.length === 0) return null;
               return (
                 <Card key={period}>
-                  <Text className="mb-2 text-xs font-semibold text-slate-600 dark:text-slate-300">{period}</Text>
+                  <Text className="mb-2 text-xs font-semibold text-app-text-secondary">{period}</Text>
                   <View className="flex-row flex-wrap gap-2">
                     {items.map((slot) => {
                       const selected = selectedSlotId === slot.id;
@@ -126,10 +126,10 @@ export default function SelectSlotScreen() {
                           className={`min-w-[92px] rounded-xl border px-3 py-2 ${
                             selected
                               ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                              : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                              : "border-slate-200 bg-white border-app-border bg-app-card"
                           }`}
                         >
-                          <Text className={`text-sm font-semibold ${selected ? "text-brand-700 dark:text-brand-300" : "text-slate-900 dark:text-slate-50"}`}>
+                          <Text className={`text-sm font-semibold ${selected ? "text-brand-700 dark:text-brand-300" : "text-app-text"}`}>
                             {slot.label.replace(slot.dateIso, "").trim() || slot.label}
                           </Text>
                           <Text className={`mt-1 text-[11px] ${selected ? "text-brand-700 dark:text-brand-300" : "text-emerald-600 dark:text-emerald-400"}`}>

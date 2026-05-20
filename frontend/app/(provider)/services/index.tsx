@@ -14,7 +14,7 @@ export default function ServicesManageScreen() {
     <>
       <Stack.Screen options={{ title: "Үйлчилгээ", headerTitle: "" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Үйлчилгээ удирдах" subtitle="Үнэгүй онлайн болон төлбөртэй үйлчилгээ." />
@@ -59,7 +59,7 @@ export default function ServicesManageScreen() {
             {services.map((s) => (
               <Card key={s.id}>
                 <View className="flex-row flex-wrap items-center justify-between gap-2">
-                  <Text className="min-w-0 flex-1 text-base font-semibold text-slate-900 dark:text-slate-50">
+                  <Text className="min-w-0 flex-1 text-base font-semibold text-app-text">
                     {s.title}
                   </Text>
                   <Badge
@@ -67,10 +67,10 @@ export default function ServicesManageScreen() {
                     tone={s.kind === "free_online" ? "success" : "warning"}
                   />
                 </View>
-                <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <Text className="mt-1 text-xs text-app-text-muted">
                   Эмч: {doctorName(s.doctorId)} · {s.durationMinutes} мин · Ангилал: {s.categoryName ?? "Ерөнхий"}
                 </Text>
-                <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <Text className="mt-1 text-xs text-app-text-muted">
                   Төлөв: {s.isActive === false ? "Идэвхгүй" : "Идэвхтэй"}
                 </Text>
                 {s.kind === "formal" ? (

@@ -56,14 +56,14 @@ export default function MyOrdersScreen() {
     <>
       <Stack.Screen options={{ title: "Миний захиалгууд" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <SectionHeader title="Миний захиалгууд" subtitle="Төлөв, үйлчилгээгээ энд хянаарай." />
         {!isOnline ? (
           <Card className="mb-3">
-            <Text className="text-xs text-slate-600 dark:text-slate-300">
+            <Text className="text-xs text-app-text-secondary">
               Офлайн горим: Захиалгаа харах боломжтой. Шинэ үйлдлүүд онлайн үед идэвхжинэ.
             </Text>
           </Card>
@@ -113,21 +113,21 @@ export default function MyOrdersScreen() {
                 <Pressable onPress={() => router.push(`/my-orders/${o.id}`)}>
                   <View className="flex-row items-start justify-between gap-2">
                     <View className="min-w-0 flex-1">
-                      <Text className="text-base font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                      <Text className="text-base font-semibold text-app-text" numberOfLines={2}>
                         {o.serviceTitle}
                       </Text>
-                      <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                      <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={2}>
                         {o.clinicName} · {o.doctorName}
                       </Text>
                       {o.slotLabel ? (
-                        <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                        <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={2}>
                           {o.slotLabel}
                         </Text>
                       ) : null}
                     </View>
                     <Badge label={orderStatusLabel[o.customerStatus]} tone={statusTone(o.customerStatus)} />
                   </View>
-                  <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  <Text className="mt-2 text-xs text-app-text-muted">
                     {new Date(o.createdAtIso).toLocaleString("mn-MN")}
                   </Text>
                 </Pressable>
@@ -152,9 +152,9 @@ function TabButton({ label, active, onPress }: { label: string; active: boolean;
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-1 rounded-xl border px-3 py-2 ${active ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900/50" : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+      className={`flex-1 rounded-xl border px-3 py-2 ${active ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900/50" : "border-slate-200 bg-white border-app-border bg-app-card"}`}
     >
-      <Text className={`text-center text-xs font-semibold ${active ? "text-brand-700 dark:text-brand-300" : "text-slate-600 dark:text-slate-300"}`}>
+      <Text className={`text-center text-xs font-semibold ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"}`}>
         {label}
       </Text>
     </Pressable>

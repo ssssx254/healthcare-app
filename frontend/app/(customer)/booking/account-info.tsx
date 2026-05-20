@@ -100,17 +100,17 @@ export default function AccountInfoScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Төлбөрийг баталгаажуулах" }} />
-      <FormScrollView className="flex-1 bg-slate-50 px-5 pt-5 dark:bg-slate-950" contentContainerStyle={{ paddingBottom: 40 }}>
+      <FormScrollView className="flex-1 px-5 pt-5 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
         <SectionHeader title="Төлбөр" subtitle="Дүн, аргаа шалгаад баталгаажуулна уу." />
 
         {!order ? (
           <Card>
-            <Text className="text-sm text-slate-600 dark:text-slate-300">Захиалга олдсонгүй.</Text>
+            <Text className="text-sm text-app-text-secondary">Захиалга олдсонгүй.</Text>
             <Button label="Захиалгууд" className="mt-4" onPress={() => router.replace("/(customer)/my-orders")} />
           </Card>
         ) : (
           <>
-            <Card className="mb-4 overflow-hidden border-0 bg-slate-900 p-0 dark:bg-slate-950">
+            <Card className="mb-4 overflow-hidden border-0 bg-slate-900 p-0 bg-app-bg">
               <View className="px-5 pb-5 pt-5">
                 <Text className="text-xs font-bold uppercase tracking-wider text-white/70">Төлөх дүн</Text>
                 <Text className="mt-2 text-4xl font-bold text-white" numberOfLines={1}>
@@ -131,12 +131,12 @@ export default function AccountInfoScreen() {
                   <MaterialCommunityIcons name={methodIcon[method] ?? "wallet-outline"} size={28} color="#2563eb" />
                 </View>
                 <View className="min-w-0 flex-1">
-                  <Text className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <Text className="text-xs font-semibold uppercase tracking-wide text-app-text-muted">
                     Төлбөрийн арга
                   </Text>
-                  <Text className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-50">{methodLabel[method]}</Text>
+                  <Text className="mt-1 text-lg font-bold text-app-text">{methodLabel[method]}</Text>
                   {method !== "wallet" ? (
-                    <Text className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                    <Text className="mt-2 text-xs leading-5 text-app-text-muted">
                       Жишээ орчин: сонгосон аргаар төлбөр төлөгдсөн гэж үзээд, дансаас суутгагдана.
                     </Text>
                   ) : null}
@@ -145,16 +145,16 @@ export default function AccountInfoScreen() {
             </Card>
 
             <Card className="mb-4">
-              <Text className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <Text className="text-xs font-bold uppercase tracking-wide text-app-text-muted">
                 Цахим данс
               </Text>
               {balanceLoading ? (
                 <ActivityIndicator className="mt-3" />
               ) : (
-                <Text className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">{formatMnt(walletBalance)}</Text>
+                <Text className="mt-2 text-2xl font-bold text-app-text">{formatMnt(walletBalance)}</Text>
               )}
               {order && method === "wallet" ? (
-                <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                <Text className="mt-2 text-xs text-app-text-muted">
                   Захиалгын дараа: {formatMnt(Math.max(0, walletBalance - order.priceMnt))}
                 </Text>
               ) : null}
@@ -184,10 +184,10 @@ export default function AccountInfoScreen() {
               ) : null}
 
               {method !== "wallet" && order ? (
-                <View className="mt-4 rounded-2xl bg-slate-100 p-4 dark:bg-slate-800/80">
-                  <Text className="text-xs font-semibold text-slate-600 dark:text-slate-300">Хүлээн авагч (жишээ)</Text>
-                  <Text className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-50">«Эрүүл мэндийн туслах» ХХК</Text>
-                  <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">Гүйлгээний утга: Захиалга № {order.id}</Text>
+                <View className="mt-4 rounded-2xl p-4 bg-app-muted/80">
+                  <Text className="text-xs font-semibold text-app-text-secondary">Хүлээн авагч (жишээ)</Text>
+                  <Text className="mt-1 text-sm font-medium text-app-text">«Эрүүл мэндийн туслах» ХХК</Text>
+                  <Text className="mt-2 text-xs text-app-text-muted">Гүйлгээний утга: Захиалга № {order.id}</Text>
                 </View>
               ) : null}
             </Card>

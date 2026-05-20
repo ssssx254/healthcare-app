@@ -21,8 +21,8 @@ const config = {
     iconColor: "#047857",
   },
   info: {
-    box: "border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-slate-800/80",
-    text: "text-slate-700 dark:text-slate-200",
+    box: "border-app-border-strong bg-app-muted/80",
+    text: "text-app-text-secondary",
     icon: "information-outline" as const,
     iconColor: "#475569",
   },

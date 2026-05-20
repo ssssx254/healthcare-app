@@ -13,12 +13,12 @@ export default function TermsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Үйлчилгээний нөхцөл" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Үйлчилгээний нөхцөл" subtitle="Апп ашиглах үндсэн нөхцөлүүд." />
         <Card>
           <View className="gap-3">
             {items.map((it) => (
-              <Text key={it} className="text-sm leading-6 text-slate-700 dark:text-slate-300">
+              <Text key={it} className="text-sm leading-6 text-app-text-secondary">
                 • {it}
               </Text>
             ))}

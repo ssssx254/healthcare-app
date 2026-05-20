@@ -16,6 +16,8 @@ const files = [
   "007_safe_catchup_core_columns_wallet_and_stats_indexes.sql",
   "008_chat_api_performance_indexes.sql",
   "009_safe_chat_core_tables.sql",
+  "010_doctor_reviews.sql",
+  "011_lab_tests.sql",
 ];
 
 for (const f of files) {

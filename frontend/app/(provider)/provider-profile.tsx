@@ -21,7 +21,7 @@ function SettingsRow({
 }) {
   return (
     <Pressable
-      className="flex-row items-center justify-between rounded-2xl border border-slate-200/80 bg-slate-50 px-3.5 py-3 active:opacity-85 dark:border-slate-700 dark:bg-slate-900/70"
+      className="flex-row items-center justify-between rounded-2xl border border-app-border bg-app-muted px-3.5 py-3 active:opacity-85"
       disabled={!onPress}
       onPress={onPress}
     >
@@ -30,8 +30,8 @@ function SettingsRow({
           <MaterialCommunityIcons name={icon} size={20} color="#2563eb" />
         </View>
         <View className="min-w-0 flex-1">
-          <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{label}</Text>
-          {subtitle ? <Text className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{subtitle}</Text> : null}
+          <Text className="text-sm font-semibold text-app-text">{label}</Text>
+          {subtitle ? <Text className="mt-0.5 text-xs text-app-text-muted">{subtitle}</Text> : null}
         </View>
       </View>
       {badge ? <Badge label={badge} tone="neutral" /> : onPress ? <MaterialCommunityIcons name="chevron-right" size={20} color="#94a3b8" /> : null}
@@ -51,16 +51,16 @@ export default function ProviderProfileScreen() {
     <>
       <Tabs.Screen options={{ title: "Профайл", headerTitle: "" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Профайл ба тохиргоо" subtitle="Эмнэлгийн удирдлага, аккаунтын тохиргоо нэг дор." />
 
         <Card className="mb-3">
-          <Text className="text-xs text-slate-500 dark:text-slate-400">Хувийн мэдээлэл</Text>
-          <Text className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-50">{user?.name ?? "—"}</Text>
-          <Text className="mt-1 text-sm text-slate-700 dark:text-slate-200">{user?.email ?? "—"}</Text>
-          <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">{user?.phone ?? "Утас бүртгэгдээгүй"}</Text>
+          <Text className="text-xs text-app-text-muted">Хувийн мэдээлэл</Text>
+          <Text className="mt-1 text-base font-semibold text-app-text">{user?.name ?? "—"}</Text>
+          <Text className="mt-1 text-sm text-app-text-secondary">{user?.email ?? "—"}</Text>
+          <Text className="mt-1 text-xs text-app-text-muted">{user?.phone ?? "Утас бүртгэгдээгүй"}</Text>
         </Card>
         {user?.approvalStatus !== "approved" ? (
           <Card className="mb-3 border border-amber-300 bg-amber-50 dark:border-amber-800/60 dark:bg-amber-900/20">
@@ -72,7 +72,7 @@ export default function ProviderProfileScreen() {
         ) : null}
 
         <View className="mb-2">
-          <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Тохиргооны хэсгүүд</Text>
+          <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-app-text-muted">Тохиргооны хэсгүүд</Text>
           <View className="gap-2">
             <SettingsRow label="Хувийн мэдээлэл" subtitle="Нэр, имэйл, утас" icon="account-outline" />
             <SettingsRow
@@ -110,15 +110,15 @@ export default function ProviderProfileScreen() {
         </View>
 
         <Card className="mb-3">
-          <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Эмнэлгийн бүрдэл</Text>
-          <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Профайлын бүрэн байдал: {completeness}%</Text>
-          <View className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+          <Text className="text-sm font-semibold text-app-text">Эмнэлгийн бүрдэл</Text>
+          <Text className="mt-1 text-xs text-app-text-muted">Профайлын бүрэн байдал: {completeness}%</Text>
+          <View className="mt-3 h-2 overflow-hidden rounded-full bg-app-muted">
             <View className="h-full rounded-full bg-brand-600" style={{ width: `${completeness}%` }} />
           </View>
         </Card>
         <Card className="mb-3">
-          <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Эмнэлгийн тохиргоо</Text>
-          <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          <Text className="text-sm font-semibold text-app-text">Эмнэлгийн тохиргоо</Text>
+          <Text className="mt-1 text-xs text-app-text-muted">
             Эмнэлгийн нэр, хаяг, холбоо барих мэдээлэл, ажиллах цаг зэрэг бүх мэдээллийг энэ хэсгээс удирдана.
           </Text>
           <Button

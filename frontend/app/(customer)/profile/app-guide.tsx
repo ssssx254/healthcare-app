@@ -13,12 +13,12 @@ export default function AppGuideScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Аппликэйшн ашиглах заавар" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Аппликэйшн ашиглах заавар" subtitle="Товч алхмуудаар тайлбарлав." />
         <Card>
           <View className="gap-3">
             {steps.map((step, idx) => (
-              <Text key={step} className="text-sm leading-6 text-slate-700 dark:text-slate-300">
+              <Text key={step} className="text-sm leading-6 text-app-text-secondary">
                 {idx + 1}. {step}
               </Text>
             ))}

@@ -1,15 +1,29 @@
-import { AppIcon, Button, Card, FormScrollView, SectionHeader } from "@/components";
+import {
+  AppIcon,
+  AuthScreenThemeToggle,
+  Button,
+  Card,
+  EmergencyCallButton,
+  FormScrollView,
+  SectionHeader,
+} from "@/components";
 import { copy } from "@/constants/copy";
 import { routes } from "@/constants/appRoutes";
+import { authHeaderlessScrollContent } from "@/utils/authScrollContent";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function IntroScreen() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <FormScrollView
-      className="flex-1 bg-slate-50 dark:bg-slate-950"
-      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 36 }}
-    >
+    <View className="flex-1 bg-app-bg">
+      <AuthScreenThemeToggle />
+      <FormScrollView
+        className="flex-1"
+        contentContainerStyle={authHeaderlessScrollContent(insets.top)}
+      >
       <SectionHeader
         variant="hero"
         title="Танилцуулга"
@@ -17,28 +31,30 @@ export default function IntroScreen() {
         className="mb-2"
       />
 
-      <Card className="mb-4 border border-slate-200 shadow-sm dark:border-slate-700">
+      <EmergencyCallButton className="mb-4" />
+
+      <Card className="mb-4 border shadow-sm border-app-border">
         <View className="flex-row gap-4">
           <View className="h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 dark:bg-brand-900/50">
             <AppIcon name="account-heart-outline" size={26} color="#2563eb" />
           </View>
           <View className="min-w-0 flex-1">
-            <Text className="text-base font-bold text-slate-900 dark:text-slate-50">Үйлчлүүлэгчид</Text>
-            <Text className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <Text className="text-base font-bold text-app-text">Үйлчлүүлэгчид</Text>
+            <Text className="mt-2 text-sm leading-6 text-app-text-secondary">
               Үнэгүй онлайн зөвлөгөө авах, мөн төлбөртэй албан ёсны цаг товлож эмчид хүрэх боломжтой. Бүх зүйл нэг аппаас.
             </Text>
           </View>
         </View>
       </Card>
 
-      <Card className="mb-6 border border-slate-200 shadow-sm dark:border-slate-700">
+      <Card className="mb-6 border shadow-sm border-app-border">
         <View className="flex-row gap-4">
           <View className="h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/40">
             <AppIcon name="hospital-building" size={26} color="#059669" />
           </View>
           <View className="min-w-0 flex-1">
-            <Text className="text-base font-bold text-slate-900 dark:text-slate-50">Үйлчилгээ үзүүлэгчид</Text>
-            <Text className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <Text className="text-base font-bold text-app-text">Үйлчилгээ үзүүлэгчид</Text>
+            <Text className="mt-2 text-sm leading-6 text-app-text-secondary">
               Эмнэлэг, клиник платформд бүртгүүлж эмч нэмэх, хуваарь удирдах, захиалга хүлээн авахад зориулсан хэрэгсэл.
             </Text>
           </View>
@@ -61,6 +77,7 @@ export default function IntroScreen() {
           <Text className="text-center text-sm font-semibold text-brand-600 underline dark:text-brand-400">Нууц үг мартсан уу?</Text>
         </Pressable>
       </Link>
-    </FormScrollView>
+      </FormScrollView>
+    </View>
   );
 }

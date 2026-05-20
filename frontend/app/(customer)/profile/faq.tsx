@@ -21,13 +21,13 @@ export default function FaqScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Түгээмэл асуулт, хариулт" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Түгээмэл асуулт, хариулт" subtitle="Хэрэглэгчдээс хамгийн их асуудаг асуултууд." />
         <View className="gap-3">
           {faqs.map((f) => (
             <Card key={f.q}>
-              <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{f.q}</Text>
-              <Text className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{f.a}</Text>
+              <Text className="text-sm font-semibold text-app-text">{f.q}</Text>
+              <Text className="mt-2 text-sm leading-6 text-app-text-secondary">{f.a}</Text>
             </Card>
           ))}
         </View>

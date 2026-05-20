@@ -1,8 +1,8 @@
 import { customerNestedStackScreenOptions } from "@/constants/navigationTheme";
 import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
+import { useNavigationColorScheme } from "@/hooks/useNavigationColorScheme";
 
 export default function ProviderScheduleStackLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useNavigationColorScheme();
   return <Stack screenOptions={() => customerNestedStackScreenOptions(colorScheme)} />;
 }

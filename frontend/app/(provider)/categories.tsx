@@ -27,7 +27,7 @@ export default function CategoriesScreen() {
     <>
       <Stack.Screen options={{ title: "Ангилал удирдах" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Ангилал удирдах" subtitle="Үйлчилгээг ангилж бүлэглэнэ." />
@@ -37,7 +37,7 @@ export default function CategoriesScreen() {
         </Card>
         {categories.length === 0 ? (
           <Card>
-            <Text className="text-sm text-slate-600 dark:text-slate-300">Одоогоор ангилал алга байна. Эхний ангиллаа нэмнэ үү.</Text>
+            <Text className="text-sm text-app-text-secondary">Одоогоор ангилал алга байна. Эхний ангиллаа нэмнэ үү.</Text>
           </Card>
         ) : (
           <View className="gap-2">
@@ -45,8 +45,8 @@ export default function CategoriesScreen() {
               <Card key={c.id}>
                 <View className="gap-3">
                   <View className="min-w-0">
-                    <Text className="text-xs text-slate-500 dark:text-slate-400">Ангиллын нэр</Text>
-                    <Text className="mt-1 font-medium text-slate-900 dark:text-slate-50">
+                    <Text className="text-xs text-app-text-muted">Ангиллын нэр</Text>
+                    <Text className="mt-1 font-medium text-app-text">
                       {c.name?.trim() || "Нэргүй ангилал"}
                     </Text>
                   </View>

@@ -1,10 +1,14 @@
-<<<<<<< HEAD
 # OS / editor
 .DS_Store
 *.log
+*.pem
 
-# Frontend (Expo / React Native)
+# Dependencies
+node_modules/
 frontend/node_modules/
+backend/node_modules/
+
+# Expo / frontend build
 frontend/.expo/
 frontend/dist/
 frontend/web-build/
@@ -15,60 +19,27 @@ frontend/*.p12
 frontend/*.key
 frontend/*.mobileprovision
 frontend/*.orig.*
-
-# Backend
-backend/node_modules/
-
-# Legacy root artifacts (safe if empty)
-node_modules/
-.expo/
-
-# @generated expo-cli
+frontend/.metro-health-check*
 frontend/expo-env.d.ts
 
-# Secrets
+# Env secrets (жишээ файлууд git-д үлдэнэ)
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+!frontend/.env.example
+!frontend/.env.production.example
 backend/.env
 !backend/.env.example
-=======
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
-node_modules/
-
-# Expo
+# Legacy root
 .expo/
 dist/
 web-build/
-expo-env.d.ts
 
-# Native
+# Native generated
 .kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-
-# generated native folders
 /ios
 /android
->>>>>>> d6f852828911c54bcde684006b011d4622df07a0

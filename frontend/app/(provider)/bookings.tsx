@@ -13,7 +13,7 @@ export default function ProviderBookingsScreen() {
   return (
     <>
       <Tabs.Screen options={{ title: "Захиалга", headerTitle: "" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Захиалга" subtitle="Батлах, хянах, дэлгэрэнгүй харах үйлдлүүд." />
         {workspaceError ? (
           <ErrorState
@@ -32,8 +32,8 @@ export default function ProviderBookingsScreen() {
         ) : null}
 
         <Card className="mb-4">
-          <Text className="text-base font-semibold text-slate-900 dark:text-slate-50">Захиалгын удирдлага</Text>
-          <Text className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <Text className="text-base font-semibold text-app-text">Захиалгын удирдлага</Text>
+          <Text className="mt-1 text-sm text-app-text-muted">
             Батлах, хянах, дэлгэрэнгүй харах үйлдлүүд.
           </Text>
           <View className="mt-3 gap-2">
@@ -54,13 +54,13 @@ export default function ProviderBookingsScreen() {
 
         <Card>
           <View className="mb-3 flex-row items-center justify-between gap-2">
-            <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+            <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={2}>
               Сүүлийн хүсэлтүүд
             </Text>
             <Badge label={String(pendingList.length)} tone={pendingList.length > 0 ? "warning" : "neutral"} />
           </View>
           {workspaceError ? (
-            <Text className="text-sm text-slate-500 dark:text-slate-400">
+            <Text className="text-sm text-app-text-muted">
               Дээрх алдааг засаад дахин ачаалсны дараа энд харагдана.
             </Text>
           ) : pendingList.length === 0 ? (
@@ -75,14 +75,14 @@ export default function ProviderBookingsScreen() {
             <View className="gap-2">
               {pendingList.map((b) => (
                 <Pressable key={b.id} onPress={() => router.push(`/orders/${b.id}`)}>
-                  <View className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+                  <View className="rounded-xl border px-3 py-2.5 border-app-border bg-app-muted">
                     <View className="flex-row items-center justify-between gap-2">
-                      <Text className="min-w-0 flex-1 font-medium text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                      <Text className="min-w-0 flex-1 font-medium text-app-text" numberOfLines={1}>
                         {b.patientName ?? "Үйлчлүүлэгч"}
                       </Text>
                       <Badge label={providerBookingStatusLabel[b.providerStatus]} tone="warning" />
                     </View>
-                    <Text className="mt-0.5 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                    <Text className="mt-0.5 text-xs text-app-text-muted" numberOfLines={2}>
                       {b.serviceTitle}
                     </Text>
                   </View>

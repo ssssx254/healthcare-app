@@ -44,7 +44,7 @@ export default function PaymentResultScreen() {
           headerBackVisible: !ok,
         }}
       />
-      <FormScrollView className="flex-1 bg-slate-50 px-5 pt-6 dark:bg-slate-950" contentContainerStyle={{ paddingBottom: 40 }}>
+      <FormScrollView className="flex-1 px-5 pt-6 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
         <View className="mb-4 items-center">
           <View
             className={`h-20 w-20 items-center justify-center rounded-3xl ${ok ? "bg-emerald-100 dark:bg-emerald-900/40" : "bg-red-100 dark:bg-red-900/30"}`}
@@ -62,8 +62,8 @@ export default function PaymentResultScreen() {
 
         {ok && !Number.isNaN(amt) && amt > 0 ? (
           <Card className="mb-4">
-            <Text className="text-xs text-slate-500 dark:text-slate-400">Дүн</Text>
-            <Text className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-50">{formatMnt(amt)}</Text>
+            <Text className="text-xs text-app-text-muted">Дүн</Text>
+            <Text className="mt-1 text-2xl font-bold text-app-text">{formatMnt(amt)}</Text>
           </Card>
         ) : null}
 

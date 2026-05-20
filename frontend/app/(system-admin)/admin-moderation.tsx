@@ -138,11 +138,11 @@ export default function AdminModerationScreen() {
   return (
     <>
       <Tabs.Screen options={{ title: "Хяналт" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         <SectionHeader title="Гомдол ба контентын хяналт" subtitle="Илгээсэн гомдол, зөрчлийг шийдвэрлэнэ." />
         <Card className="mb-4">
-          <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Push мэдэгдэл илгээх</Text>
-          <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Сонгосон бүлгийн хэрэглэгчдэд системийн мэдэгдэл илгээнэ.</Text>
+          <Text className="text-sm font-semibold text-app-text">Push мэдэгдэл илгээх</Text>
+          <Text className="mt-1 text-xs text-app-text-muted">Сонгосон бүлгийн хэрэглэгчдэд системийн мэдэгдэл илгээнэ.</Text>
           <View className="mt-3 flex-row flex-wrap gap-2">
             {[
               { id: "all", label: "Бүгд" },
@@ -171,11 +171,11 @@ export default function AdminModerationScreen() {
             className="mt-2"
           />
           <Button label="Мэдэгдэл илгээх" className="mt-3" loading={broadcastLoading} onPress={() => void onBroadcast()} />
-          {broadcastResult ? <Text className="mt-2 text-xs text-slate-600 dark:text-slate-300">{broadcastResult}</Text> : null}
+          {broadcastResult ? <Text className="mt-2 text-xs text-app-text-secondary">{broadcastResult}</Text> : null}
         </Card>
 
         <Card className="mb-4">
-          <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Гомдлын төлөв</Text>
+          <Text className="text-sm font-semibold text-app-text">Гомдлын төлөв</Text>
           <View className="mt-3 flex-row flex-wrap gap-2">
             {reportFilterButtons.map((f) => {
               const active = reportStatusFilter === f.id;
@@ -201,23 +201,23 @@ export default function AdminModerationScreen() {
 
         {reportsLoading ? (
           <Card className="mb-3">
-            <Text className="text-sm text-slate-500 dark:text-slate-400">Гомдлууд ачааллаж байна…</Text>
+            <Text className="text-sm text-app-text-muted">Гомдлууд ачааллаж байна…</Text>
           </Card>
         ) : null}
         <View className="gap-3">
           {reports.map((item) => (
             <Card key={item.id}>
               <View className="flex-row items-center justify-between">
-                <Text className="text-base font-semibold text-slate-900 dark:text-slate-50">Гомдол #{item.id}</Text>
+                <Text className="text-base font-semibold text-app-text">Гомдол #{item.id}</Text>
                 <Badge label={item.status} tone={item.status === "open" ? "warning" : item.status === "resolved" ? "success" : "neutral"} />
               </View>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <Text className="mt-1 text-xs text-app-text-muted">
                 Төрөл: {item.target_type === "clinic" ? "Эмнэлэг" : item.target_type === "doctor" ? "Эмч" : "Нийтлэл"}
               </Text>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Reporter: {item.reporter_full_name ?? item.reporter_email ?? "—"}</Text>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Шалтгаан: {item.reason_code}</Text>
-              {item.details ? <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Дэлгэрэнгүй: {item.details}</Text> : null}
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Огноо: {new Date(item.created_at).toLocaleString("mn-MN")}</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">Reporter: {item.reporter_full_name ?? item.reporter_email ?? "—"}</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">Шалтгаан: {item.reason_code}</Text>
+              {item.details ? <Text className="mt-1 text-xs text-app-text-muted">Дэлгэрэнгүй: {item.details}</Text> : null}
+              <Text className="mt-1 text-xs text-app-text-muted">Огноо: {new Date(item.created_at).toLocaleString("mn-MN")}</Text>
               <Input
                 label="Админы тэмдэглэл"
                 value={reportNoteById[item.id] ?? item.admin_notes ?? ""}
@@ -240,8 +240,8 @@ export default function AdminModerationScreen() {
         </View>
 
         <Card className="mt-4">
-          <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Онцлох контентын удирдлага</Text>
-          <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          <Text className="text-sm font-semibold text-app-text">Онцлох контентын удирдлага</Text>
+          <Text className="mt-1 text-xs text-app-text-muted">
             Backend бүтцээр дэмжигдсэн үед platform featured items-ийг эндээс удирдана.
           </Text>
           <Input
@@ -257,12 +257,12 @@ export default function AdminModerationScreen() {
 
           <View className="mt-3 gap-2">
             {featured.length === 0 && !featuredLoading ? (
-              <Text className="text-xs text-slate-500 dark:text-slate-400">Онцлох контент одоогоор алга.</Text>
+              <Text className="text-xs text-app-text-muted">Онцлох контент одоогоор алга.</Text>
             ) : null}
             {featured.map((f) => (
-              <Card key={String(f.id)} className="border border-slate-200 dark:border-slate-700">
+              <Card key={String(f.id)} className="border border-app-border">
                 <View className="flex-row items-center justify-between gap-2">
-                  <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                  <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={1}>
                     {f.item_type === "clinic" ? `Эмнэлэг #${f.clinic_id ?? "—"}` : f.article_title ?? "Нийтлэл"}
                   </Text>
                   <Badge label={f.is_active ? "Идэвхтэй" : "Идэвхгүй"} tone={f.is_active ? "success" : "neutral"} />

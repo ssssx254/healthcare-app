@@ -1,21 +1,14 @@
+import { useAppTheme } from "@/components/ThemeProvider";
 import {
   APP_MAX_WIDTH,
   WEB_HORIZONTAL_GUTTER,
-  WEB_SHELL_BACKGROUND,
-  WEB_SHELL_BACKGROUND_DARK,
   getWebBreakpoint,
   isWeb,
 } from "@/constants/webLayout";
+import { useWebLayoutMode } from "@/hooks/useWebViewportWidth";
 import { cn } from "@/utils/cn";
 import { useMemo } from "react";
-import {
-  Platform,
-  StyleSheet,
-  useColorScheme,
-  useWindowDimensions,
-  View,
-  type ViewProps,
-} from "react-native";
+import { Platform, StyleSheet, View, type ViewProps } from "react-native";
 
 export type AppContainerProps = ViewProps & {
   /**
@@ -38,8 +31,8 @@ export function AppContainer({
   style,
   ...rest
 }: AppContainerProps) {
-  const colorScheme = useColorScheme();
-  const { width: viewportWidth } = useWindowDimensions();
+  const { palette } = useAppTheme();
+  const { viewportWidth, mobileFullscreen, desktopPreview } = useWebLayoutMode();
 
   const breakpoint = useMemo(
     () => (isWeb ? getWebBreakpoint(viewportWidth) : "mobile"),
@@ -55,26 +48,35 @@ export function AppContainer({
   }
 
   if (shell) {
-    const shellBg = colorScheme === "dark" ? WEB_SHELL_BACKGROUND_DARK : WEB_SHELL_BACKGROUND;
+    const shellBg = palette.background;
     const isDesktop = breakpoint === "desktop";
 
     return (
       <View
+        className={cn(
+          "web-app-shell",
+          mobileFullscreen ? "web-app-shell--mobile" : "web-app-shell--preview",
+        )}
         style={[
           styles.shell,
-          { backgroundColor: shellBg },
-          isDesktop && styles.shellDesktop,
+          mobileFullscreen ? styles.shellMobile : { backgroundColor: shellBg },
+          desktopPreview && isDesktop && styles.shellDesktop,
         ]}
       >
         <View
+          className={cn(
+            "web-app-column",
+            mobileFullscreen ? "web-app-column--mobile" : "web-app-column--preview",
+            desktopPreview && isDesktop && "web-app-column--desktop",
+            className,
+          )}
           style={[
             styles.column,
-            { maxWidth: APP_MAX_WIDTH },
-            isDesktop && styles.columnDesktop,
-            padded && { paddingHorizontal: WEB_HORIZONTAL_GUTTER },
+            mobileFullscreen ? styles.columnMobile : styles.columnPreview,
+            desktopPreview && isDesktop && styles.columnDesktop,
+            desktopPreview && padded && { paddingHorizontal: WEB_HORIZONTAL_GUTTER },
             style,
           ]}
-          className={className}
           {...rest}
         >
           {children}
@@ -85,11 +87,15 @@ export function AppContainer({
 
   return (
     <View
-      className={cn("w-full flex-1", centerContent && "justify-center", className)}
+      className={cn(
+        "w-full flex-1 web-app-inner",
+        mobileFullscreen ? "web-app-inner--mobile" : "web-app-inner--preview",
+        centerContent && "justify-center",
+        className,
+      )}
       style={[
         styles.inner,
-        { maxWidth: APP_MAX_WIDTH, alignSelf: "center" },
-        padded && { paddingHorizontal: WEB_HORIZONTAL_GUTTER },
+        mobileFullscreen ? styles.innerMobile : styles.innerPreview,
         centerContent && styles.centered,
         style,
       ]}
@@ -110,26 +116,57 @@ const styles = StyleSheet.create({
       default: {},
     }),
   },
+  shellMobile: {
+    alignItems: "stretch",
+    backgroundColor: "transparent",
+  },
   shellDesktop: {
     paddingVertical: 24,
   },
   column: {
     flex: 1,
-    width: "100%",
     alignSelf: "center",
-    overflow: "hidden",
+  },
+  columnPreview: {
+    width: APP_MAX_WIDTH,
+    maxWidth: APP_MAX_WIDTH,
+    overflow: "visible",
+  },
+  columnMobile: {
+    width: "100%",
+    maxWidth: "100%",
+    alignSelf: "stretch",
+    overflow: "visible",
+    ...Platform.select({
+      web: { minHeight: "100vh" as unknown as number },
+      default: {},
+    }),
   },
   columnDesktop: Platform.select({
     web: {
       borderRadius: 20,
-      overflow: "hidden",
-      // RN Web box shadow
+      overflow: "visible",
       boxShadow: "0 12px 40px rgba(15, 23, 42, 0.14)",
+      paddingBottom: 4,
     },
     default: {},
   }) as object,
   inner: {
     width: "100%",
+  },
+  innerPreview: {
+    width: APP_MAX_WIDTH,
+    maxWidth: APP_MAX_WIDTH,
+    alignSelf: "center",
+  },
+  innerMobile: {
+    width: "100%",
+    maxWidth: "100%",
+    alignSelf: "stretch",
+    ...Platform.select({
+      web: { minHeight: "100vh" as unknown as number },
+      default: {},
+    }),
   },
   centered: {
     justifyContent: "center",

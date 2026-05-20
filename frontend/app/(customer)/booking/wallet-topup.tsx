@@ -92,7 +92,7 @@ export default function WalletTopupScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Данс цэнэглэх" }} />
-      <FormScrollView className="flex-1 bg-slate-50 px-5 pt-5 dark:bg-slate-950" contentContainerStyle={{ paddingBottom: 40 }}>
+      <FormScrollView className="flex-1 px-5 pt-5 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
         <SectionHeader
           title="Данс цэнэглэх"
           subtitle={
@@ -104,18 +104,18 @@ export default function WalletTopupScreen() {
 
         {error ? <AuthMessageBanner variant="error" message={error} className="mb-4" /> : null}
 
-        <Card className="mb-4 border border-slate-200 dark:border-slate-700">
-          <Text className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Одоогийн үлдэгдэл</Text>
+        <Card className="mb-4 border border-app-border">
+          <Text className="text-xs font-bold uppercase tracking-wide text-app-text-muted">Одоогийн үлдэгдэл</Text>
           {loadingBalance ? (
             <ActivityIndicator className="mt-3" />
           ) : (
-            <Text className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-50">
+            <Text className="mt-2 text-3xl font-bold text-app-text">
               {formatMnt(currentBalance ?? 0)}
             </Text>
           )}
           {required > 0 ? (
             <>
-              <View className="my-4 h-px bg-slate-200 dark:bg-slate-700" />
+              <View className="my-4 h-px dark:bg-slate-700" />
               <Text className="text-xs font-semibold text-amber-800 dark:text-amber-200">Нэмж цэнэглэх шаардлагатай</Text>
               <Text className="mt-1 text-lg font-bold text-amber-700 dark:text-amber-300">{formatMnt(required)}</Text>
             </>
@@ -133,22 +133,22 @@ export default function WalletTopupScreen() {
             hint="Дүн тоогоор оруулна уу."
             className="min-h-[52px]"
           />
-          <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-app-text-muted">
             Түргэн сонголт
           </Text>
           <View className="flex-row flex-wrap gap-2">
             {presets.map((p) => (
               <Pressable
                 key={p}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 active:opacity-80 dark:border-slate-600 dark:bg-slate-800"
+                className="rounded-2xl border px-4 py-2.5 active:opacity-80 border-app-border-strong bg-app-muted"
                 onPress={() => setAmount(String(p))}
               >
-                <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">{formatMnt(p)}</Text>
+                <Text className="text-sm font-semibold text-app-text">{formatMnt(p)}</Text>
               </Pressable>
             ))}
           </View>
-          <View className="mt-4 rounded-2xl bg-slate-100 px-4 py-3 dark:bg-slate-800/80">
-            <Text className="text-xs text-slate-600 dark:text-slate-300">Цэнэглэсний дараа</Text>
+          <View className="mt-4 rounded-2xl px-4 py-3 bg-app-muted/80">
+            <Text className="text-xs text-app-text-secondary">Цэнэглэсний дараа</Text>
             <Text className="mt-1 text-lg font-bold text-brand-700 dark:text-brand-300">{formatMnt(nextBalance)}</Text>
           </View>
         </Card>
@@ -159,12 +159,12 @@ export default function WalletTopupScreen() {
           onPress={onInstantTopUp}
           className="shadow-md"
         />
-        <Text className="mt-2 text-center text-xs leading-5 text-slate-500 dark:text-slate-400">
+        <Text className="mt-2 text-center text-xs leading-5 text-app-text-muted">
           Жинхэнэ банкны холболт биш — үлдэгдэл шууд нэмэгдэнэ.
         </Text>
 
         <Pressable
-          className="mt-6 flex-row items-center justify-between rounded-2xl border-2 border-slate-200 bg-white p-4 active:opacity-90 dark:border-slate-600 dark:bg-slate-900"
+          className="mt-6 flex-row items-center justify-between rounded-2xl border-2 border-slate-200 bg-white p-4 active:opacity-90 border-app-border-strong bg-app-card"
           onPress={() =>
             router.push({
               pathname: "/booking/qpay-wallet",
@@ -182,8 +182,8 @@ export default function WalletTopupScreen() {
               <MaterialCommunityIcons name="qrcode" size={26} color="#7c3aed" />
             </View>
             <View>
-              <Text className="text-base font-bold text-slate-900 dark:text-slate-50">КьюПэй-ээр цэнэглэх</Text>
-              <Text className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">QR · жишээ 2 алхамт урсгал</Text>
+              <Text className="text-base font-bold text-app-text">КьюПэй-ээр цэнэглэх</Text>
+              <Text className="mt-0.5 text-xs text-app-text-muted">QR · жишээ 2 алхамт урсгал</Text>
             </View>
           </View>
           <MaterialCommunityIcons name="chevron-right" size={24} color="#94a3b8" />

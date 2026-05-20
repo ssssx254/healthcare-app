@@ -67,7 +67,7 @@ export default function ClinicRegisterScreen() {
     <>
       <Stack.Screen options={{ title: "Эмнэлэг бүртгэх" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       >
         <SectionHeader
@@ -147,7 +147,7 @@ export default function ClinicRegisterScreen() {
         ) : null}
 
         <Button label="Бүртгэл илгээх" loading={loading} onPress={onSubmit} />
-        <Text className="mt-3 text-center text-xs leading-5 text-slate-500 dark:text-slate-400">
+        <Text className="mt-3 text-center text-xs leading-5 text-app-text-muted">
           Илгээсний дараа админ баталгаажуулалт хийгдэх хүртэл зарим үйлдэл хязгаарлагдмал байж болно.
         </Text>
         <Button label="Буцах" variant="ghost" className="mt-2" onPress={() => router.back()} />

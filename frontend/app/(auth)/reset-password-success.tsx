@@ -13,7 +13,7 @@ export default function ResetPasswordSuccessScreen() {
     : "Нууц үг сэргээх заавар илгээгдлээ. Имэйл эсвэл мессежээ шалгаад, зааврын дагуу шинэ нууц үг тохируулна уу.";
 
   return (
-    <FormScrollView className="flex-1 bg-slate-50 px-5 pt-6 dark:bg-slate-950" contentContainerStyle={{ paddingBottom: 40 }}>
+    <FormScrollView className="flex-1 px-5 pt-6 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
       <View className="mb-4 items-center">
         <View className="h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/40">
           <MaterialCommunityIcons name="email-check-outline" size={36} color="#059669" />
@@ -32,8 +32,8 @@ export default function ResetPasswordSuccessScreen() {
         className="mb-4"
       />
 
-      <Card className="border-2 border-slate-200 shadow-md dark:border-slate-600">
-        <Text className="text-sm leading-6 text-slate-700 dark:text-slate-300">{detail}</Text>
+      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+        <Text className="text-sm leading-6 text-app-text-secondary">{detail}</Text>
         <Link href={routes.login} asChild>
           <Button label="Нэвтрэх хуудас руу" className="mt-6 shadow-sm" />
         </Link>

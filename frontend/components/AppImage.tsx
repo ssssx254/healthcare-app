@@ -36,7 +36,7 @@ export function AppImage({
     return (
       <View
         className={cn(
-          "items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-800",
+          "items-center justify-center overflow-hidden bg-app-muted",
           className,
           placeholderClassName,
         )}

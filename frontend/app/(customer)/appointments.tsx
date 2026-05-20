@@ -30,7 +30,7 @@ export default function AppointmentsScreen() {
 
   return (
     <ScreenScrollView
-      className="flex-1 bg-slate-50 dark:bg-slate-950"
+      className="flex-1 bg-app-bg"
       contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
     >
       <Tabs.Screen options={{ tabBarLabel: "Цаг захиалга", headerTitle: "" }} />
@@ -43,12 +43,12 @@ export default function AppointmentsScreen() {
             className={`min-h-[48px] flex-1 items-center justify-center rounded-xl border px-2 py-2.5 ${
               activeTab === "online"
                 ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                : "border-slate-200 bg-white border-app-border bg-app-card"
             }`}
           >
             <Text
               className={`text-center text-sm font-medium ${
-                activeTab === "online" ? "text-brand-700 dark:text-brand-300" : "text-slate-600 dark:text-slate-300"
+                activeTab === "online" ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"
               }`}
               numberOfLines={2}
             >
@@ -60,12 +60,12 @@ export default function AppointmentsScreen() {
             className={`min-h-[48px] flex-1 items-center justify-center rounded-xl border px-2 py-2.5 ${
               activeTab === "ambulatory"
                 ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                : "border-slate-200 bg-white border-app-border bg-app-card"
             }`}
           >
             <Text
               className={`text-center text-sm font-medium ${
-                activeTab === "ambulatory" ? "text-brand-700 dark:text-brand-300" : "text-slate-600 dark:text-slate-300"
+                activeTab === "ambulatory" ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"
               }`}
               numberOfLines={2}
             >
@@ -108,14 +108,14 @@ export default function AppointmentsScreen() {
             <Card key={o.id}>
               <View className="flex-row items-start justify-between gap-2">
                 <View className="min-w-0 flex-1 pr-1">
-                  <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={3}>
+                  <Text className="text-sm font-semibold text-app-text" numberOfLines={3}>
                     {o.serviceTitle}
                   </Text>
-                  <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                  <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={2}>
                     {o.clinicName} · {o.doctorName}
                   </Text>
                   {o.slotLabel ? (
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                    <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={2}>
                       {o.slotLabel}
                     </Text>
                   ) : null}

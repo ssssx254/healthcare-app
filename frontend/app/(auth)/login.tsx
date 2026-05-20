@@ -1,4 +1,13 @@
-import { AppContainer, AuthMessageBanner, Button, Card, FormScrollView, Input, SectionHeader } from "@/components";
+import {
+  AppContainer,
+  AuthMessageBanner,
+  Button,
+  Card,
+  EmergencyCallButton,
+  FormScrollView,
+  Input,
+  SectionHeader,
+} from "@/components";
 import { webAuthScrollContent } from "@/utils/webScrollContent";
 import { routes } from "@/constants/appRoutes";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,7 +67,7 @@ export default function LoginScreen() {
   return (
     <AppContainer centerContent className="flex-1">
       <FormScrollView
-        className="flex-1 bg-slate-50 px-5 pt-6 dark:bg-slate-950"
+        className="flex-1 px-5 pt-6 bg-app-bg"
         contentContainerStyle={webAuthScrollContent({ paddingBottom: 40 })}
       >
       <SectionHeader
@@ -68,14 +77,16 @@ export default function LoginScreen() {
         className="mb-2"
       />
 
+      <EmergencyCallButton className="mb-4" />
+
       {formError ? <AuthMessageBanner variant="error" message={formError} className="mb-5" /> : null}
 
-      <Card className="border-2 border-slate-200 shadow-md dark:border-slate-600">
-        <Text className="mb-5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+        <Text className="mb-5 text-xs font-bold uppercase tracking-wider text-app-text-muted">
           Нэвтрэх мэдээлэл
         </Text>
 
-        <View className="mb-1 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/40">
+        <View className="mb-1 rounded-2xl p-4 bg-app-muted/40">
           <Input
             label="Имэйл"
             appearance="prominent"
@@ -92,7 +103,7 @@ export default function LoginScreen() {
             placeholder="нэр@имэйл.mn"
             error={errors.email}
             hint="Бүртгэлтэй имэйл хаягаа оруулна уу."
-            className="min-h-[52px] border-slate-200 bg-white py-4 dark:border-slate-600 dark:bg-slate-900"
+            className="min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
           />
           <Input
             label="Нууц үг"
@@ -108,7 +119,7 @@ export default function LoginScreen() {
             placeholder="Нууц үгээ оруулна уу"
             error={errors.password}
             hint="Түлхүүр үгээ нууцлан хадгална уу."
-            className="min-h-[52px] border-slate-200 bg-white py-4 dark:border-slate-600 dark:bg-slate-900"
+            className="min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
           />
         </View>
 
@@ -130,14 +141,14 @@ export default function LoginScreen() {
               className="rounded-lg py-2 active:opacity-80"
               hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
             >
-              <Text className="text-sm font-semibold text-slate-600 underline dark:text-slate-400">Токеноор солих</Text>
+              <Text className="text-sm font-semibold text-slate-600 underline text-app-text-muted">Токеноор солих</Text>
             </Pressable>
           </Link>
         </View>
 
         <Button label="Нэвтрэх" loading={loading} onPress={onLogin} className="min-h-[54px] shadow-md" />
 
-        <View className="mt-8 border-t border-slate-200 pt-6 dark:border-slate-700">
+        <View className="mt-8 border-t border-slate-200 pt-6 border-app-border">
           <Link href={routes.register} asChild>
             <Pressable
               accessibilityRole="link"

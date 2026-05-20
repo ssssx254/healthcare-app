@@ -80,6 +80,7 @@ export function mapBookingRowToCustomerOrder(
     time,
     healthSummary: extras?.healthSummary,
     meetingLink: extras?.meetingLink ?? (row.meeting_link ?? undefined) ?? undefined,
+    patientId: String(row.patient_user_id),
     patientName: extras?.patientName,
     paymentStatus: row.payment_status === "paid" ? "paid" : row.payment_status === "refunded" ? "refunded" : "unpaid",
     customerStatus: resolveCustomerStatus(row),

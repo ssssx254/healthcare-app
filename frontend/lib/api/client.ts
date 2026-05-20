@@ -57,6 +57,8 @@ function shouldBlockWhenOffline(method: string, path: string, json: unknown): bo
   if (path.includes("/payment") || path.startsWith("/wallet") || path.includes("pay-booking")) return true; // payments
   if (/^\/chat\/conversations\/[^/]+\/messages$/.test(path) && method === "POST") return true; // chat send
   if (isImageUploadPayload(json)) return true; // image upload
+  if (path.startsWith("/lab-tests") && method === "POST") return true;
+  if (path.startsWith("/lab-tests") && method === "PATCH") return true;
   return false;
 }
 

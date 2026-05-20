@@ -46,6 +46,8 @@ export function mapDoctorRow(row: DoctorRow): MockDoctor {
     ...(profile ? { imageUrl: profile } : {}),
     ...(education ? { education } : {}),
     ...(workExperience ? { workExperience } : {}),
+    averageRating: row.average_rating != null ? Number(row.average_rating) : null,
+    reviewCount: Number(row.review_count ?? 0),
   };
 }
 

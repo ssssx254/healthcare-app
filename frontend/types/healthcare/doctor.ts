@@ -16,4 +16,6 @@ export type Doctor = {
   supportsOnlineConsultation?: boolean;
   supportsAmbulatoryConsultation?: boolean;
   bio: string;
+  averageRating?: number | null;
+  reviewCount?: number;
 };

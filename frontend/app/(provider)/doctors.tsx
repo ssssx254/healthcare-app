@@ -12,7 +12,7 @@ export default function DoctorsListScreen() {
     <>
       <Stack.Screen options={{ title: "Эмчийн жагсаалт" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Эмчийн жагсаалт" subtitle="Бүртгэлтэй эмч нар, үйлчилгээ болон слотын тоо." />
@@ -55,13 +55,13 @@ export default function DoctorsListScreen() {
                   <AppImage
                     source={{ uri: resolveDoctorAvatarUri(d, 80) }}
                     fallbackIcon="doctor"
-                    className="h-14 w-14 rounded-2xl border border-slate-200 dark:border-slate-700"
+                    className="h-14 w-14 rounded-2xl border border-app-border"
                   />
                   <View className="min-w-0 flex-1">
-                    <Text className="text-lg font-semibold text-slate-900 dark:text-slate-50">{d.name}</Text>
-                    <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">{d.specialty}</Text>
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">{d.phone}</Text>
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    <Text className="text-lg font-semibold text-app-text">{d.name}</Text>
+                    <Text className="mt-1 text-sm text-app-text-secondary">{d.specialty}</Text>
+                    <Text className="mt-1 text-xs text-app-text-muted">{d.phone}</Text>
+                    <Text className="mt-1 text-xs text-app-text-muted">
                       Үйлчилгээ: {services.filter((s) => s.doctorId === d.id).length} · Слот:{" "}
                       {slots.filter((s) => s.doctorId === d.id).length}
                     </Text>

@@ -15,6 +15,8 @@ export type DoctorRow = {
   work_history?: string | null;
   created_at?: string;
   clinic_name?: string;
+  average_rating?: number | null;
+  review_count?: number;
 };
 
 export type DoctorListParams = {
@@ -46,6 +48,14 @@ export const doctorApi = {
 
   getById(id: string | number): Promise<DoctorRow> {
     return apiRequest<DoctorRow>(`/doctors/${id}`, { method: "GET" });
+  },
+
+  listFeatured(params?: { minRating?: number; limit?: number }): Promise<{ items: DoctorRow[] }> {
+    const q = new URLSearchParams();
+    if (params?.minRating != null) q.set("minRating", String(params.minRating));
+    if (params?.limit != null) q.set("limit", String(params.limit));
+    const suffix = q.toString() ? `?${q.toString()}` : "";
+    return apiRequest<{ items: DoctorRow[] }>(`/doctors/featured${suffix}`, { method: "GET" });
   },
 
   create(body: {

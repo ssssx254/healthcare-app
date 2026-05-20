@@ -24,7 +24,7 @@ export default function AdviceListScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Зөвлөгөө" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Зөвлөгөө" subtitle="Эрүүл мэндийн зөвлөмж, мэдээлэл, нийтлэл." />
 
         <Card className="mb-4">
@@ -39,7 +39,7 @@ export default function AdviceListScreen() {
 
         <Card className="mb-4">
           <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Ангилал</Text>
+            <Text className="text-sm font-semibold text-app-text">Ангилал</Text>
             {adviceCategories.length > 5 ? (
               <Pressable onPress={() => setExpanded((s) => !s)}>
                 <Text className="text-xs font-medium text-brand-700 dark:text-brand-300">{expanded ? "Хураах" : "Дэлгэрүүлэх"}</Text>
@@ -56,10 +56,10 @@ export default function AdviceListScreen() {
                   className={`rounded-full border px-3 py-2 ${
                     active
                       ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                      : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                      : "border-slate-200 bg-white border-app-border bg-app-card"
                   }`}
                 >
-                  <Text className={`text-xs font-medium ${active ? "text-brand-700 dark:text-brand-300" : "text-slate-600 dark:text-slate-300"}`}>{c}</Text>
+                  <Text className={`text-xs font-medium ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"}`}>{c}</Text>
                 </Pressable>
               );
             })}
@@ -67,8 +67,8 @@ export default function AdviceListScreen() {
         </Card>
 
         <View className="mb-2 flex-row items-center justify-between">
-          <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Нийтлэлүүд</Text>
-          <Text className="text-xs text-slate-500 dark:text-slate-400">{filtered.length} нийтлэл</Text>
+          <Text className="text-sm font-semibold text-app-text">Нийтлэлүүд</Text>
+          <Text className="text-xs text-app-text-muted">{filtered.length} нийтлэл</Text>
         </View>
 
         <View className="gap-3">
@@ -83,21 +83,21 @@ export default function AdviceListScreen() {
                     resizeMode="cover"
                   />
                   <View className="p-4">
-                    <Text className="text-base font-semibold text-slate-900 dark:text-slate-50">{article.title}</Text>
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">{article.author} · {article.publishedAt}</Text>
-                    <Text className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{article.excerpt}</Text>
+                    <Text className="text-base font-semibold text-app-text">{article.title}</Text>
+                    <Text className="mt-1 text-xs text-app-text-muted">{article.author} · {article.publishedAt}</Text>
+                    <Text className="mt-2 text-xs leading-5 text-app-text-secondary">{article.excerpt}</Text>
                     <View className="mt-3 flex-row items-center gap-3">
                       <View className="flex-row items-center">
                         <MaterialCommunityIcons name="eye-outline" size={14} color="#64748b" />
-                        <Text className="ml-1 text-[11px] text-slate-500 dark:text-slate-400">{article.viewCount}</Text>
+                        <Text className="ml-1 text-[11px] text-app-text-muted">{article.viewCount}</Text>
                       </View>
                       <View className="flex-row items-center">
                         <MaterialCommunityIcons name="thumb-up-outline" size={14} color="#64748b" />
-                        <Text className="ml-1 text-[11px] text-slate-500 dark:text-slate-400">{article.likeCount}</Text>
+                        <Text className="ml-1 text-[11px] text-app-text-muted">{article.likeCount}</Text>
                       </View>
                       <View className="flex-row items-center">
                         <MaterialCommunityIcons name="comment-text-outline" size={14} color="#64748b" />
-                        <Text className="ml-1 text-[11px] text-slate-500 dark:text-slate-400">{article.commentCount}</Text>
+                        <Text className="ml-1 text-[11px] text-app-text-muted">{article.commentCount}</Text>
                       </View>
                     </View>
                   </View>

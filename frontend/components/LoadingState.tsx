@@ -31,7 +31,7 @@ export function LoadingState({
       {title ? (
         <Text
           className={cn(
-            "mt-3 text-center font-semibold text-slate-800 dark:text-slate-100",
+            "mt-3 text-center font-semibold text-app-text",
             compact ? "text-sm" : "text-base",
           )}
         >
@@ -39,7 +39,7 @@ export function LoadingState({
         </Text>
       ) : null}
       {subtitle ? (
-        <Text className="mt-2 max-w-sm px-2 text-center text-sm leading-5 text-slate-500 dark:text-slate-400">{subtitle}</Text>
+        <Text className="mt-2 max-w-sm px-2 text-center text-sm leading-5 text-app-text-muted">{subtitle}</Text>
       ) : null}
       {withSkeleton ? (
         <View className="mt-4 w-full">

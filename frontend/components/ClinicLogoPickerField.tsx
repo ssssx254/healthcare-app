@@ -25,20 +25,20 @@ export function ClinicLogoPickerField({ value, onChange }: ClinicLogoPickerField
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-sm font-medium text-slate-800 dark:text-slate-100">Эмнэлгийн лого (заавал биш)</Text>
+      <Text className="mb-2 text-sm font-medium text-app-text">Эмнэлгийн лого (заавал биш)</Text>
       {hasLogo ? (
         <AppImage
           source={{ uri: value!.trim() }}
           fallbackIcon="hospital-building"
-          className="mb-3 h-28 w-28 rounded-2xl border border-slate-200 dark:border-slate-700"
+          className="mb-3 h-28 w-28 rounded-2xl border border-app-border"
           accessibilityLabel="Эмнэлгийн логоны урьдчилан харагдац"
         />
       ) : (
-        <View className="mb-3 h-28 w-28 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-900/60">
-          <Text className="px-2 text-center text-xs text-slate-500 dark:text-slate-400">Лого сонгоогүй</Text>
+        <View className="mb-3 h-28 w-28 items-center justify-center rounded-2xl border border-dashed border-slate-300 border-app-border-strong bg-app-card/60">
+          <Text className="px-2 text-center text-xs text-app-text-muted">Лого сонгоогүй</Text>
         </View>
       )}
-      <Text className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+      <Text className="mb-2 text-xs text-app-text-muted">
         Утасны зурагны сангаас сонгоно. Илгээхийн өмнө энд харагдана.
       </Text>
       <View className="flex-row flex-wrap gap-2">

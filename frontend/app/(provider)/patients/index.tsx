@@ -8,11 +8,15 @@ export default function ProviderPatientsScreen() {
   const { bookings, workspaceLoading, workspaceError, refreshWorkspace } = useProviderWorkspace();
 
   const patients = Object.values(
-    bookings.reduce<Record<string, { name: string; phone: string; lastVisit: string; total: number }>>((acc, b) => {
-      const key = b.patientName ?? "Үйлчлүүлэгч";
+    bookings.reduce<
+      Record<string, { patientId: string; name: string; phone: string; lastVisit: string; total: number }>
+    >((acc, b) => {
+      const pid = b.patientId ?? b.id;
+      const key = pid;
+      const name = b.patientName ?? "Үйлчлүүлэгч";
       const lastVisit = b.date ?? b.createdAtIso.slice(0, 10);
       if (!acc[key]) {
-        acc[key] = { name: key, phone: "9900-0000", lastVisit, total: 1 };
+        acc[key] = { patientId: pid, name, phone: "—", lastVisit, total: 1 };
       } else {
         acc[key].total += 1;
         if (lastVisit > acc[key].lastVisit) acc[key].lastVisit = lastVisit;
@@ -24,7 +28,7 @@ export default function ProviderPatientsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Өвчтөн" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         <SectionHeader title="Өвчтөний жагсаалт" subtitle="Захиалгад тулгуурласан өвчтөний мэдээлэл." />
 
         {workspaceError ? (
@@ -58,16 +62,15 @@ export default function ProviderPatientsScreen() {
           <View className="gap-3">
             {patients.map((p) => (
               <Pressable
-                key={p.name}
-                onPress={() => router.push(`/patients/${encodeURIComponent(p.name)}` as Href)}
+                key={p.patientId}
+                onPress={() => router.push(`/patients/${encodeURIComponent(p.patientId)}` as Href)}
               >
                 <Card>
                   <View className="flex-row items-center justify-between">
-                    <Text className="text-base font-semibold text-slate-900 dark:text-slate-50">{p.name}</Text>
+                    <Text className="text-base font-semibold text-app-text">{p.name}</Text>
                     <Badge label={`${p.total} үзлэг`} tone="neutral" />
                   </View>
-                  <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Утас: {p.phone}</Text>
-                  <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Сүүлийн үзлэг: {p.lastVisit}</Text>
+                  <Text className="mt-1 text-xs text-app-text-muted">Сүүлийн үзлэг: {p.lastVisit}</Text>
                 </Card>
               </Pressable>
             ))}

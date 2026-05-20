@@ -83,7 +83,7 @@ export default function AddSlotScreen() {
     <>
       <Stack.Screen options={{ title: "Боломжит цаг нэмэх" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader
@@ -118,7 +118,7 @@ export default function AddSlotScreen() {
               </View>
             )}
             {errors.doc ? <Text className="mb-2 text-xs text-red-600 dark:text-red-400">{errors.doc}</Text> : null}
-            <Text className="mb-2 text-sm font-medium text-slate-800 dark:text-slate-100">Үйлчилгээ</Text>
+            <Text className="mb-2 text-sm font-medium text-app-text">Үйлчилгээ</Text>
             {doctorServices.length === 0 ? (
               <Text className="mb-2 text-xs text-amber-700 dark:text-amber-300">Энэ эмчид идэвхтэй үйлчилгээ алга. Эхлээд үйлчилгээ нэмнэ үү.</Text>
             ) : (

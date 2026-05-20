@@ -1,5 +1,5 @@
 # Healthcare 
-
+# npm run deploy:web
 
 
 ## Getting started

@@ -48,9 +48,9 @@ export default function ServiceEditScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Үйлчилгээ засах" }} />
-        <FormScrollView className="flex-1 bg-slate-50 p-4 dark:bg-slate-950">
+        <FormScrollView className="flex-1 p-4 bg-app-bg">
           <Card>
-            <Text className="text-center text-slate-600 dark:text-slate-300">Үйлчилгээ олдсонгүй.</Text>
+            <Text className="text-center text-app-text-secondary">Үйлчилгээ олдсонгүй.</Text>
             <Button label="Жагсаалт руу" className="mt-4" onPress={() => router.replace(routes.providerServices)} />
           </Card>
         </FormScrollView>
@@ -115,7 +115,7 @@ export default function ServiceEditScreen() {
     <>
       <Stack.Screen options={{ title: "Үйлчилгээ засах" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Үйлчилгээ засах" subtitle="Одоогийн үйлчилгээг засварлаад хадгална." />
@@ -186,20 +186,20 @@ export default function ServiceEditScreen() {
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: isOnline }}
-                className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${isOnline ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${isOnline ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-card"}`}
                 onPress={() => setIsOnline((p) => !p)}
               >
-                <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Онлайн зөвлөгөө</Text>
-                <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Үнэгүй загвар.</Text>
+                <Text className="text-sm font-medium text-app-text">Онлайн зөвлөгөө</Text>
+                <Text className="mt-1 text-xs text-app-text-muted">Үнэгүй загвар.</Text>
               </Pressable>
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: isAmbulatory }}
-                className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${isAmbulatory ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${isAmbulatory ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-card"}`}
                 onPress={() => setIsAmbulatory((p) => !p)}
               >
-                <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Амбулаторийн үзлэг</Text>
-                <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Төлбөртэй.</Text>
+                <Text className="text-sm font-medium text-app-text">Амбулаторийн үзлэг</Text>
+                <Text className="mt-1 text-xs text-app-text-muted">Төлбөртэй.</Text>
               </Pressable>
             </View>
             {errors.modes ? <Text className="mb-2 text-xs text-red-600 dark:text-red-400">{errors.modes}</Text> : null}
@@ -226,11 +226,11 @@ export default function ServiceEditScreen() {
             <Pressable
               accessibilityRole="checkbox"
               accessibilityState={{ checked: isActive }}
-              className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${isActive ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/30" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+              className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${isActive ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/30" : "border-app-border bg-app-card"}`}
               onPress={() => setIsActive((p) => !p)}
             >
-              <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Идэвхтэй эсэх</Text>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <Text className="text-sm font-medium text-app-text">Идэвхтэй эсэх</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">
                 {isActive ? "Идэвхтэй: үйлчлүүлэгчид харагдана." : "Идэвхгүй: түр нуусан төлөв."}
               </Text>
             </Pressable>

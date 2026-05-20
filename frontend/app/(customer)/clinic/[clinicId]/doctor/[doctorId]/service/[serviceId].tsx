@@ -59,7 +59,7 @@ export default function ServiceDetailScreen() {
     <>
       <Stack.Screen options={{ title: "Үйлчилгээний дэлгэрэнгүй" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         {service === undefined ? (
@@ -71,13 +71,13 @@ export default function ServiceDetailScreen() {
           </Card>
         ) : service == null ? (
           <Card>
-            <Text className="text-center text-slate-600 dark:text-slate-300">Үйлчилгээ олдсонгүй.</Text>
+            <Text className="text-center text-app-text-secondary">Үйлчилгээ олдсонгүй.</Text>
           </Card>
         ) : (
           <>
             <SectionHeader title={service.title} subtitle={`${service.durationMinutes} минут`} />
             <Card className="mb-4">
-              <Text className="text-sm leading-6 text-slate-600 dark:text-slate-300">{service.description}</Text>
+              <Text className="text-sm leading-6 text-app-text-secondary">{service.description}</Text>
               <View className="mt-4 flex-row flex-wrap gap-2">
                 <Badge
                   label={service.kind === "free_online" ? orderStatusLabel.free_consult : orderStatusLabel.payment_required}
@@ -85,7 +85,7 @@ export default function ServiceDetailScreen() {
                 />
               </View>
               {service.kind === "formal" ? (
-                <Text className="mt-4 text-lg font-bold text-slate-900 dark:text-slate-50">
+                <Text className="mt-4 text-lg font-bold text-app-text">
                   {service.priceMnt.toString()} ₮
                 </Text>
               ) : (

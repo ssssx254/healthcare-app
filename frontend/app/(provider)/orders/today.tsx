@@ -14,7 +14,7 @@ export default function OrdersTodayScreen() {
     <>
       <Stack.Screen options={{ title: "Өнөөдрийн захиалгууд" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Өнөөдрийн захиалгууд" subtitle={`Огноо: ${todayIso}`} />
@@ -51,8 +51,8 @@ export default function OrdersTodayScreen() {
             {list.map((b) => (
               <Pressable key={b.id} onPress={() => router.push(`/orders/${b.id}`)}>
                 <Card className="active:opacity-90">
-                  <Text className="font-semibold text-slate-900 dark:text-slate-50">{b.patientName ?? "Үйлчлүүлэгч"}</Text>
-                  <Text className="text-sm text-slate-600 dark:text-slate-300">{b.serviceTitle}</Text>
+                  <Text className="font-semibold text-app-text">{b.patientName ?? "Үйлчлүүлэгч"}</Text>
+                  <Text className="text-sm text-app-text-secondary">{b.serviceTitle}</Text>
                   <View className="mt-2 flex-row flex-wrap gap-2">
                     <Badge label={providerBookingStatusLabel[b.providerStatus]} tone="neutral" />
                   </View>

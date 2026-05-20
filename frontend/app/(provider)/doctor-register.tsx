@@ -310,7 +310,7 @@ export default function DoctorRegisterScreen() {
     <>
       <Stack.Screen options={{ title: "Эмч бүртгэх" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader
@@ -323,10 +323,10 @@ export default function DoctorRegisterScreen() {
           </Card>
         ) : null}
         <Card>
-          <Text className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <Text className="mb-1 text-xs font-medium uppercase tracking-wide text-app-text-muted">
             Алхам {step} / 4
           </Text>
-          <Text className="mb-4 text-base font-semibold text-slate-800 dark:text-slate-100">{stepTitles[step - 1]}</Text>
+          <Text className="mb-4 text-base font-semibold text-app-text">{stepTitles[step - 1]}</Text>
 
           {step === 1 ? (
             <>
@@ -468,20 +468,20 @@ export default function DoctorRegisterScreen() {
                 <Pressable
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: onlineEnabled }}
-                  className={`rounded-xl border px-3 py-3 ${onlineEnabled ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                  className={`rounded-xl border px-3 py-3 ${onlineEnabled ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-card"}`}
                   onPress={() => setOnlineEnabled((p) => !p)}
                 >
-                  <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Онлайн зөвлөгөө</Text>
-                  <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Үнэгүй, чат/видео загвар.</Text>
+                  <Text className="text-sm font-medium text-app-text">Онлайн зөвлөгөө</Text>
+                  <Text className="mt-1 text-xs text-app-text-muted">Үнэгүй, чат/видео загвар.</Text>
                 </Pressable>
                 <Pressable
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: ambulatoryEnabled }}
-                  className={`rounded-xl border px-3 py-3 ${ambulatoryEnabled ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                  className={`rounded-xl border px-3 py-3 ${ambulatoryEnabled ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-card"}`}
                   onPress={() => setAmbulatoryEnabled((p) => !p)}
                 >
-                  <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Амбулаторийн үзлэг</Text>
-                  <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Цаг захиалгатай, үнэ шаардлагатай.</Text>
+                  <Text className="text-sm font-medium text-app-text">Амбулаторийн үзлэг</Text>
+                  <Text className="mt-1 text-xs text-app-text-muted">Цаг захиалгатай, үнэ шаардлагатай.</Text>
                 </Pressable>
               </View>
               {errors.serviceMode ? <Text className="mb-3 text-xs text-red-600 dark:text-red-400">{errors.serviceMode}</Text> : null}
@@ -532,12 +532,12 @@ export default function DoctorRegisterScreen() {
                       key={d}
                       accessibilityRole="button"
                       accessibilityState={{ selected: active }}
-                      className={`min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border px-3 py-2 ${active ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                      className={`min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border px-3 py-2 ${active ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-card"}`}
                       onPress={() =>
                         setWorkingDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]))
                       }
                     >
-                      <Text className="text-sm text-slate-700 dark:text-slate-200">{d}</Text>
+                      <Text className="text-sm text-app-text-secondary">{d}</Text>
                     </Pressable>
                   );
                 })}
@@ -574,7 +574,7 @@ export default function DoctorRegisterScreen() {
                 hint="5–120 минут. Үргэлжлэх хугацаатай ойр утга сонгох нь зөв."
                 error={errors.slotMinutes}
               />
-              <Text className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+              <Text className="text-xs leading-5 text-app-text-muted">
                 Хадгалахад сонгосон өдрүүдээр ирэх 14 хоногийн боломжит цаг автоматаар үүснэ. Одоогийн тохиргоогоор слот гарвал л дараагийн алхам руу гарна.
               </Text>
             </>

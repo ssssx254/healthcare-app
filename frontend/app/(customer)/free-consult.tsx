@@ -52,7 +52,7 @@ export default function FreeConsultScreen() {
     <>
       <Stack.Screen options={{ title: "Үнэгүй онлайн зөвлөгөө" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader
@@ -62,7 +62,7 @@ export default function FreeConsultScreen() {
 
         {!canStart ? (
           <Card>
-            <Text className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <Text className="text-sm leading-6 text-app-text-secondary">
               Эхлээд эмнэлэг, дараа нь эмч, үнэгүй үйлчилгээг сонгоно уу. Дараа нь энд буцаж ирнэ үү.
             </Text>
             <Button label="Эмнэлгүүд рүү" className="mt-4" onPress={() => router.push("/(customer)/clinics")} />
@@ -70,23 +70,23 @@ export default function FreeConsultScreen() {
         ) : (
           <>
             <Card className="mb-3">
-              <Text className="text-sm text-slate-600 dark:text-slate-300">
+              <Text className="text-sm text-app-text-secondary">
                 Эмнэлэг: {draft.clinicName}
               </Text>
-              <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">Эмч: {draft.doctorName}</Text>
-              <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              <Text className="mt-1 text-sm text-app-text-secondary">Эмч: {draft.doctorName}</Text>
+              <Text className="mt-1 text-sm text-app-text-secondary">
                 Үйлчилгээ: {draft.serviceTitle}
               </Text>
             </Card>
 
             <Card>
-              <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Чат (жишээ)</Text>
-              <View className="mt-3 rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                <Text className="text-sm text-slate-600 dark:text-slate-300">
+              <Text className="text-sm font-semibold text-app-text">Чат (жишээ)</Text>
+              <View className="mt-3 rounded-xl p-3 bg-app-muted">
+                <Text className="text-sm text-app-text-secondary">
                   Систем: Сайн байна уу? Таны асуудлыг товчхон бичнэ үү.
                 </Text>
               </View>
-              <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+              <Text className="mt-3 text-xs text-app-text-muted">
                 Доорх талбарт өөрийн мэдээллийг бичээд дуусгана уу.
               </Text>
               <Button
@@ -97,7 +97,7 @@ export default function FreeConsultScreen() {
               />
               {message ? (
                 <View className="mt-2 rounded-xl bg-brand-50 p-3 dark:bg-brand-900">
-                  <Text className="text-sm text-slate-800 dark:text-slate-100">{message}</Text>
+                  <Text className="text-sm text-app-text">{message}</Text>
                 </View>
               ) : null}
             </Card>
@@ -106,7 +106,7 @@ export default function FreeConsultScreen() {
               <Text className="mt-2 text-sm text-red-600 dark:text-red-400">{formError}</Text>
             ) : null}
             <Button label="Зөвлөгөөг дуусгах" className="mt-4" loading={loading} onPress={onFinish} />
-            <Text className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+            <Text className="mt-2 text-center text-xs text-app-text-muted">
               Үнэгүй зөвлөгөө — төлбөр шаардлагагүй.
             </Text>
           </>

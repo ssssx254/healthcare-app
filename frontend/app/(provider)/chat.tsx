@@ -43,7 +43,7 @@ export default function ProviderChatScreen() {
     <>
       <Stack.Screen options={{ title: "Чатын самбар", headerTitle: "" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Чатын самбар" subtitle="Үйлчлүүлэгчдийн ирсэн чат, уншаагүй зурвас, сүүлийн хариуг нэг дороос харна." />
@@ -90,13 +90,13 @@ export default function ProviderChatScreen() {
                       />
                       <View className="min-w-0 flex-1">
                         <View className="flex-row items-center justify-between">
-                          <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                          <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={1}>
                             {c.customer.name}
                           </Text>
-                          <Text className="ml-2 text-[11px] text-slate-500 dark:text-slate-400">{lastTime}</Text>
+                          <Text className="ml-2 text-[11px] text-app-text-muted">{lastTime}</Text>
                         </View>
                         <View className="mt-1 flex-row items-center justify-between gap-2">
-                          <Text className="min-w-0 flex-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={1}>
+                          <Text className="min-w-0 flex-1 text-xs text-app-text-muted" numberOfLines={1}>
                             {last?.text || "Сүүлд ирсэн мессеж алга"}
                           </Text>
                           <Badge label={String(c.unreadForProvider)} tone={c.unreadForProvider > 0 ? "warning" : "neutral"} />

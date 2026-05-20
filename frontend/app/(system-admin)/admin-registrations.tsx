@@ -80,7 +80,7 @@ export default function AdminRegistrationsScreen() {
   return (
     <>
       <Tabs.Screen options={{ title: "Бүртгэл хяналт" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         <SectionHeader
           title="Үзүүлэгчийн бүртгэл батлах"
           subtitle="Шинээр бүртгэсэн үйлчилгээ үзүүлэгчдийг баталгаажуулж, эмнэлгийн мэдээллийг үүсгэнэ (илгээлт байвал)."
@@ -95,11 +95,11 @@ export default function AdminRegistrationsScreen() {
         {loading ? (
           <View className="items-center py-10">
             <ActivityIndicator size="large" />
-            <Text className="mt-3 text-sm text-slate-500 dark:text-slate-400">Ачааллаж байна…</Text>
+            <Text className="mt-3 text-sm text-app-text-muted">Ачааллаж байна…</Text>
           </View>
         ) : queue.length === 0 ? (
           <Card>
-            <Text className="text-center text-sm text-slate-600 dark:text-slate-300">
+            <Text className="text-center text-sm text-app-text-secondary">
               Хүлээгдэж буй үзүүлэгчийн бүртгэл одоогоор алга.
             </Text>
             <Button label="Дахин ачаалах" variant="outline" className="mt-4" onPress={() => void load()} />
@@ -116,18 +116,18 @@ export default function AdminRegistrationsScreen() {
               return (
                 <Card key={String(id)}>
                   <View className="flex-row items-center justify-between gap-2">
-                    <Text className="min-w-0 flex-1 text-base font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                    <Text className="min-w-0 flex-1 text-base font-semibold text-app-text" numberOfLines={2}>
                       {title}
                     </Text>
                     <Badge label="Хүлээгдэж буй" tone="warning" />
                   </View>
-                  <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  <Text className="mt-1 text-xs text-app-text-muted">
                     Эзэмшигч: {item.provider_full_name} · {item.provider_email}
                   </Text>
-                  <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  <Text className="mt-1 text-xs text-app-text-muted">
                     {item.city ? `${item.city}${item.district ? ` · ${item.district}` : ""}` : "Байршил оруулаагүй"}
                   </Text>
-                  <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  <Text className="mt-1 text-xs text-app-text-muted">
                     Илгээсэн: {formatSubmittedAt(item)}
                     {hasSubmission ? "" : " · Анхаар: API-р илгээлт хадгалагдаагүй (зөвхөн хэрэглэгч pending)."}
                   </Text>

@@ -35,7 +35,7 @@ export default function ClinicsScreen() {
     <>
       <Stack.Screen options={{ title: "Эмнэлгүүд" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Эмнэлгүүд" subtitle="Бүртгэлтэй эмнэлгүүдээс сонгоно уу." />
@@ -65,13 +65,13 @@ export default function ClinicsScreen() {
           <View className="gap-3">
             {clinics.map((c) => (
               <Card key={c.id}>
-                <Text className="text-lg font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                <Text className="text-lg font-semibold text-app-text" numberOfLines={2}>
                   {c.name}
                 </Text>
-                <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300" numberOfLines={1}>
+                <Text className="mt-1 text-sm text-app-text-secondary" numberOfLines={1}>
                   {c.city}
                 </Text>
-                <Text className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400" numberOfLines={4}>
+                <Text className="mt-2 text-xs leading-5 text-app-text-muted" numberOfLines={4}>
                   {c.description}
                 </Text>
                 <Link href={`/clinic/${c.id}`} asChild>

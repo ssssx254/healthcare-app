@@ -3,7 +3,7 @@ import {
   Button,
   Card,
   ErrorState,
-  HeaderLogoutButton,
+  HeaderThemeAndLogout,
   HeaderNotificationLink,
   ListSkeleton,
   LoadingState,
@@ -173,11 +173,11 @@ export default function ProviderDashboardScreen() {
           title: "Самбар",
           headerTitle: "",
           headerLeft: () => <HeaderNotificationLink href={routes.providerNotifications} />,
-          headerRight: () => <HeaderLogoutButton onPress={onLogout} />,
+          headerRight: () => <HeaderThemeAndLogout onPress={onLogout} />,
         }}
       />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader
@@ -209,7 +209,7 @@ export default function ProviderDashboardScreen() {
           </Card>
         ) : (
           <View className="mb-4">
-            <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Товч үзүүлэлт</Text>
+            <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-app-text-muted">Товч үзүүлэлт</Text>
             <View className="gap-3">
               {summaryCardRows.map((row, rowIndex) => (
                 <View key={`summary-row-${rowIndex}`} className="flex-row gap-3">
@@ -233,7 +233,7 @@ export default function ProviderDashboardScreen() {
         ) : null}
 
         <Card className="mb-4">
-          <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Шуурхай үйлдэл</Text>
+          <Text className="text-sm font-semibold text-app-text">Шуурхай үйлдэл</Text>
           <View className="mt-4 flex-row flex-wrap gap-3">
             {quickActions.map((action) => (
               <Pressable
@@ -245,8 +245,8 @@ export default function ProviderDashboardScreen() {
                 }}
                 className={`min-h-[96px] min-w-[48%] flex-1 rounded-2xl border px-3 py-3.5 ${
                   isApproved
-                    ? "border-slate-200/80 bg-slate-50/80 active:opacity-90 dark:border-slate-700 dark:bg-slate-800/70"
-                    : "border-slate-200 bg-slate-100/70 opacity-60 dark:border-slate-700 dark:bg-slate-900/40"
+                    ? "border-slate-200/80 bg-slate-50/80 active:opacity-90 border-app-border bg-app-muted/70"
+                    : "border-slate-200 bg-slate-100/70 opacity-60 border-app-border bg-app-card/40"
                 }`}
               >
                   <View className="flex-row items-start gap-3">
@@ -254,10 +254,10 @@ export default function ProviderDashboardScreen() {
                       <MaterialCommunityIcons name={action.icon} size={22} color="#2563eb" />
                     </View>
                     <View className="min-w-0 flex-1 pt-0.5">
-                      <Text className="text-[15px] font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                      <Text className="text-[15px] font-semibold text-app-text" numberOfLines={2}>
                         {action.label}
                       </Text>
-                      <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300" numberOfLines={2}>
+                      <Text className="mt-1 text-xs text-app-text-secondary" numberOfLines={2}>
                         {action.subtitle}
                       </Text>
                     </View>
@@ -266,7 +266,7 @@ export default function ProviderDashboardScreen() {
             ))}
           </View>
           {!isApproved ? (
-            <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            <Text className="mt-3 text-xs text-app-text-muted">
               Баталгаажсаны дараа эдгээр үйлдэл бүрэн нээгдэнэ.
             </Text>
           ) : null}
@@ -274,7 +274,7 @@ export default function ProviderDashboardScreen() {
 
         <Card className="mb-4">
           <View className="mb-3 flex-row items-center justify-between gap-2">
-            <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+            <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={2}>
               Өнөөдрийн цагийн товч
             </Text>
             <Link href={routes.providerOrdersToday} asChild>
@@ -282,16 +282,16 @@ export default function ProviderDashboardScreen() {
             </Link>
           </View>
           {todayAppointments.length === 0 ? (
-            <Text className="text-sm text-slate-500 dark:text-slate-400">Өнөөдөр баталгаажсан цаг хараахан алга.</Text>
+            <Text className="text-sm text-app-text-muted">Өнөөдөр баталгаажсан цаг хараахан алга.</Text>
           ) : (
             <View className="gap-2">
               {todayAppointments.map((b) => (
                 <Pressable key={b.id} onPress={() => router.push(`/orders/${b.id}`)}>
-                  <View className="rounded-xl border border-slate-200/80 bg-slate-50 px-3.5 py-3 dark:border-slate-700 dark:bg-slate-800/80">
-                    <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                  <View className="rounded-xl border border-app-border bg-app-muted px-3.5 py-3 border-app-border bg-app-muted/80">
+                    <Text className="text-sm font-semibold text-app-text" numberOfLines={1}>
                       {b.patientName ?? "Үйлчлүүлэгч"}
                     </Text>
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300" numberOfLines={2}>
+                    <Text className="mt-1 text-xs text-app-text-secondary" numberOfLines={2}>
                       {b.serviceTitle}
                     </Text>
                   </View>
@@ -303,25 +303,25 @@ export default function ProviderDashboardScreen() {
 
         <Card className="mb-4">
           <View className="mb-3 flex-row items-center justify-between gap-2">
-            <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+            <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={2}>
               Шинэ захиалгын хүсэлтүүд
             </Text>
             <Badge label={String(pendingRequestsCount)} tone={pendingRequestsCount > 0 ? "warning" : "neutral"} />
           </View>
           {newRequests.length === 0 ? (
-            <Text className="text-sm text-slate-500 dark:text-slate-400">Хүлээгдэж буй хүсэлт алга.</Text>
+            <Text className="text-sm text-app-text-muted">Хүлээгдэж буй хүсэлт алга.</Text>
           ) : (
             <View className="gap-2">
               {newRequests.map((b) => (
                 <Pressable key={b.id} onPress={() => router.push(`/orders/${b.id}`)}>
-                  <View className="rounded-xl border border-slate-200/80 bg-slate-50 px-3.5 py-3 dark:border-slate-700 dark:bg-slate-800/80">
+                  <View className="rounded-xl border border-app-border bg-app-muted px-3.5 py-3 border-app-border bg-app-muted/80">
                     <View className="flex-row items-center justify-between gap-2">
-                      <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                      <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={1}>
                         {b.patientName ?? "Үйлчлүүлэгч"}
                       </Text>
                       <Badge label={providerBookingStatusLabel[b.providerStatus]} tone="warning" />
                     </View>
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-300" numberOfLines={2}>
+                    <Text className="mt-1 text-xs text-app-text-secondary" numberOfLines={2}>
                       {b.serviceTitle}
                     </Text>
                   </View>
@@ -333,13 +333,13 @@ export default function ProviderDashboardScreen() {
 
         <Card className="mb-4">
           <View className="mb-3 flex-row items-center justify-between gap-2">
-            <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+            <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={2}>
               Сүүлийн чат хүсэлтүүд
             </Text>
             <Badge label={String(pendingChatUnreadCount)} tone={pendingChatUnreadCount > 0 ? "warning" : "neutral"} />
           </View>
           {pendingProviderChats.length === 0 ? (
-            <Text className="text-sm text-slate-500 dark:text-slate-400">Шинэ чат хүсэлт алга.</Text>
+            <Text className="text-sm text-app-text-muted">Шинэ чат хүсэлт алга.</Text>
           ) : (
             <View className="gap-2">
               {pendingProviderChats.slice(0, 4).map((c) => {
@@ -349,17 +349,17 @@ export default function ProviderDashboardScreen() {
                     key={c.id}
                     onPress={() => router.push({ pathname: routes.providerChat, params: { conversationId: c.id, patient: c.customer.name } })}
                   >
-                    <View className="rounded-xl border border-slate-200/80 bg-slate-50 px-3.5 py-3 dark:border-slate-700 dark:bg-slate-800/80">
+                    <View className="rounded-xl border border-app-border bg-app-muted px-3.5 py-3 border-app-border bg-app-muted/80">
                       <View className="flex-row items-center justify-between gap-2">
-                        <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                        <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={1}>
                           {c.customer.name}
                         </Text>
-                        <Text className="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
+                        <Text className="shrink-0 text-[11px] text-app-text-muted">
                           {new Date(c.updatedAtIso).toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}
                         </Text>
                       </View>
                       <View className="mt-1 flex-row items-center justify-between gap-2">
-                        <Text className="min-w-0 flex-1 text-xs text-slate-500 dark:text-slate-300" numberOfLines={2}>
+                        <Text className="min-w-0 flex-1 text-xs text-app-text-secondary" numberOfLines={2}>
                           {last?.text ?? "Мессеж алга"}
                         </Text>
                         <Badge label={`${c.unreadForProvider}`} tone={c.unreadForProvider > 0 ? "warning" : "neutral"} />
@@ -373,17 +373,17 @@ export default function ProviderDashboardScreen() {
         </Card>
 
         <Card>
-          <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Эмнэлгийн төлөв</Text>
+          <Text className="text-sm font-semibold text-app-text">Эмнэлгийн төлөв</Text>
           <View className="mt-3 flex-row items-center justify-between">
-            <Text className="text-xs text-slate-500 dark:text-slate-400">Баталгаажуулалтын төлөв</Text>
+            <Text className="text-xs text-app-text-muted">Баталгаажуулалтын төлөв</Text>
             <Badge
               label={user?.approvalStatus === "approved" ? "Баталгаажсан" : user?.approvalStatus === "rejected" ? "Татгалзсан" : "Шалгалтад"}
               tone={user?.approvalStatus === "approved" ? "success" : "warning"}
             />
           </View>
           <View className="mt-2 flex-row items-center justify-between">
-            <Text className="text-xs text-slate-500 dark:text-slate-400">Профайлын бүрдэлт</Text>
-            <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{clinicCompleteness}%</Text>
+            <Text className="text-xs text-app-text-muted">Профайлын бүрдэлт</Text>
+            <Text className="text-sm font-semibold text-app-text">{clinicCompleteness}%</Text>
           </View>
           {clinicMissing.length > 0 ? (
             <View className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-900/50 dark:bg-amber-900/20">

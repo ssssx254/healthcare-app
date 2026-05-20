@@ -59,7 +59,7 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <FormScrollView className="flex-1 bg-slate-50 px-5 pt-6 dark:bg-slate-950" contentContainerStyle={{ paddingBottom: 40 }}>
+    <FormScrollView className="flex-1 px-5 pt-6 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
       <SectionHeader
         variant="hero"
         title="Нууц үг шинэчлэх"
@@ -69,8 +69,8 @@ export default function ResetPasswordScreen() {
 
       {formError ? <AuthMessageBanner variant="error" message={formError} className="mb-4" /> : null}
 
-      <Card className="border-2 border-slate-200 shadow-md dark:border-slate-600">
-        <View className="mb-5 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800/40">
+      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+        <View className="mb-5 rounded-2xl p-4 bg-app-muted/40">
           <Input
             label="Сэргээх токен"
             appearance="prominent"
@@ -85,7 +85,7 @@ export default function ResetPasswordScreen() {
             placeholder="JWT токен"
             error={fieldErrors.token}
             hint="«Нууц үг мартсан»-аас ирсэн бол автоматаар бөглөгдөнө."
-            className="min-h-[52px] border-slate-200 bg-white py-4 dark:border-slate-600 dark:bg-slate-900"
+            className="min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
           />
           <Input
             label="Шинэ нууц үг"
@@ -100,7 +100,7 @@ export default function ResetPasswordScreen() {
             }}
             placeholder="4–72 тэмдэгт"
             error={fieldErrors.newPassword}
-            className="mt-4 min-h-[52px] border-slate-200 bg-white py-4 dark:border-slate-600 dark:bg-slate-900"
+            className="mt-4 min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
           />
           <Input
             label="Шинэ нууц үг (давтах)"
@@ -115,7 +115,7 @@ export default function ResetPasswordScreen() {
             }}
             placeholder="Дахин оруулна уу"
             error={fieldErrors.confirmPassword}
-            className="mt-4 min-h-[52px] border-slate-200 bg-white py-4 dark:border-slate-600 dark:bg-slate-900"
+            className="mt-4 min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
           />
         </View>
 
@@ -126,7 +126,7 @@ export default function ResetPasswordScreen() {
           onPress={() => router.replace(routes.login)}
           className="mt-4 items-center py-3 active:opacity-80"
         >
-          <Text className="text-center text-sm font-medium text-slate-600 dark:text-slate-400">Нэвтрэх хуудас руу буцах</Text>
+          <Text className="text-center text-sm font-medium text-app-text-muted">Нэвтрэх хуудас руу буцах</Text>
         </Pressable>
 
         <Link href="/forgot-password" asChild>

@@ -32,7 +32,7 @@ export default function AdminUsersScreen() {
   return (
     <>
       <Tabs.Screen options={{ title: "Хэрэглэгчид" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         <SectionHeader title="Хэрэглэгчдийн жагсаалт" subtitle="Иргэдийн бүртгэлийг харах хэсэг." />
         {loading ? (
           <Card className="mb-3">
@@ -50,10 +50,10 @@ export default function AdminUsersScreen() {
         <View className="gap-3">
           {customers.map((u) => (
             <Card key={u.id}>
-              <Text className="text-base font-semibold text-slate-900 dark:text-slate-50">{u.full_name}</Text>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">{u.email}</Text>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Утас: {u.phone ?? "—"}</Text>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <Text className="text-base font-semibold text-app-text">{u.full_name}</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">{u.email}</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">Утас: {u.phone ?? "—"}</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">
                 Бүртгүүлсэн огноо: {u.created_at ? new Date(u.created_at).toLocaleDateString("mn-MN") : "—"}
               </Text>
             </Card>

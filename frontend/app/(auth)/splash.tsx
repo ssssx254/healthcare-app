@@ -1,6 +1,7 @@
-import { AppContainer, AppIcon } from "@/components";
+import { AppContainer, AppIcon, AuthScreenThemeToggle } from "@/components";
 import { copy } from "@/constants/copy";
 import { isWeb } from "@/constants/webLayout";
+import { useWebLayoutMode } from "@/hooks/useWebViewportWidth";
 import { SPLASH_BACKGROUND } from "@/constants/splashTheme";
 import { routes } from "@/constants/appRoutes";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function SplashScreen() {
   const { user, authLoading } = useAuth();
   const insets = useSafeAreaInsets();
+  const { mobileFullscreen: mobileWeb } = useWebLayoutMode();
 
   if (!authLoading && user?.role === "customer") {
     return <Redirect href={routes.customerHome} />;
@@ -25,6 +27,7 @@ export default function SplashScreen() {
 
   return (
     <AppContainer centerContent className="flex-1" style={{ backgroundColor: SPLASH_BACKGROUND }}>
+      <AuthScreenThemeToggle variant="onDark" />
       <StatusBar style="light" />
       <View className="flex-1 items-center justify-center px-8">
         <View className="mb-2 h-24 w-24 items-center justify-center rounded-3xl bg-white/10">
@@ -42,7 +45,7 @@ export default function SplashScreen() {
       </View>
       <View
         style={{ paddingBottom: Math.max(insets.bottom, 24) + 8 }}
-        className={`px-8 ${isWeb ? "w-full max-w-sm self-center pb-6" : ""}`}
+        className={`px-8 ${isWeb ? (mobileWeb ? "w-full pb-6" : "w-full max-w-sm self-center pb-6") : ""}`}
       >
         <Link href={routes.intro} asChild>
           <Pressable className="w-full rounded-2xl bg-white py-4 active:opacity-90">

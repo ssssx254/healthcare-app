@@ -68,7 +68,7 @@ export default function ClinicEditScreen() {
     <>
       <Stack.Screen options={{ title: "Эмнэлгийн мэдээлэл засах" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       >
         <SectionHeader

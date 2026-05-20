@@ -30,7 +30,7 @@ export default function ClinicDetailScreen() {
     <>
       <Stack.Screen options={{ title: "Эмнэлгийн дэлгэрэнгүй" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         {clinic === undefined ? (
@@ -42,18 +42,18 @@ export default function ClinicDetailScreen() {
           </Card>
         ) : clinic == null ? (
           <Card>
-            <Text className="text-center text-slate-600 dark:text-slate-300">Эмнэлэг олдсонгүй.</Text>
+            <Text className="text-center text-app-text-secondary">Эмнэлэг олдсонгүй.</Text>
           </Card>
         ) : (
           <>
             <SectionHeader title={clinic.name} subtitle={clinic.city} />
             <Card className="mb-4">
-              <Text className="text-sm font-medium text-slate-700 dark:text-slate-200">Хаяг</Text>
-              <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">{clinic.address}</Text>
-              <Text className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">Утас</Text>
-              <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">{clinic.phone}</Text>
-              <Text className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{clinic.description}</Text>
-              <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">Эмч нар: {clinic.doctorsCount}</Text>
+              <Text className="text-sm font-medium text-app-text-secondary">Хаяг</Text>
+              <Text className="mt-1 text-sm text-app-text-secondary">{clinic.address}</Text>
+              <Text className="mt-3 text-sm font-medium text-app-text-secondary">Утас</Text>
+              <Text className="mt-1 text-sm text-app-text-secondary">{clinic.phone}</Text>
+              <Text className="mt-3 text-sm leading-6 text-app-text-secondary">{clinic.description}</Text>
+              <Text className="mt-3 text-xs text-app-text-muted">Эмч нар: {clinic.doctorsCount}</Text>
             </Card>
             <Link href={`/clinic/${clinic.id}/doctors`} asChild>
               <Button label="Эмч нар харах" />

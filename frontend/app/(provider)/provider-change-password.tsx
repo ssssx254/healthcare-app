@@ -18,7 +18,7 @@ export default function ProviderChangePasswordScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Нууц үг солих" }} />
-      <FormScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <FormScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Нууц үг солих" subtitle="Аюулгүй байдлын үүднээс шинэ нууц үг ашиглана уу." />
         <Card>
           <Input label="Одоогийн нууц үг" value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry />

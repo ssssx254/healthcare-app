@@ -73,9 +73,9 @@ export default function ProviderOrderDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Захиалгын дэлгэрэнгүй" }} />
-        <ScreenScrollView className="flex-1 bg-slate-50 p-4 dark:bg-slate-950">
+        <ScreenScrollView className="flex-1 p-4 bg-app-bg">
           <Card>
-            <Text className="text-center text-slate-600 dark:text-slate-300">Захиалга олдсонгүй.</Text>
+            <Text className="text-center text-app-text-secondary">Захиалга олдсонгүй.</Text>
             <Button label="Жагсаалт руу" className="mt-4" onPress={() => router.replace(routes.providerOrdersRequests)} />
           </Card>
         </ScreenScrollView>
@@ -90,7 +90,7 @@ export default function ProviderOrderDetailScreen() {
     <>
       <Stack.Screen options={{ title: "Захиалгын дэлгэрэнгүй" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       >
         <SectionHeader
@@ -104,53 +104,53 @@ export default function ProviderOrderDetailScreen() {
         ) : null}
 
         <Card className="mb-3">
-          <Text className="text-xs text-slate-500 dark:text-slate-400">Эмч</Text>
-          <Text className="mt-1 text-base text-slate-900 dark:text-slate-50">{booking.doctorName}</Text>
+          <Text className="text-xs text-app-text-muted">Эмч</Text>
+          <Text className="mt-1 text-base text-app-text">{booking.doctorName}</Text>
           {booking.slotLabel ? (
             <>
-              <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">Цаг</Text>
-              <Text className="mt-1 text-base text-slate-900 dark:text-slate-50">{booking.slotLabel}</Text>
+              <Text className="mt-3 text-xs text-app-text-muted">Цаг</Text>
+              <Text className="mt-1 text-base text-app-text">{booking.slotLabel}</Text>
             </>
           ) : null}
-          <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">Төлбөр</Text>
-          <Text className="mt-1 text-base text-slate-900 dark:text-slate-50">
+          <Text className="mt-3 text-xs text-app-text-muted">Төлбөр</Text>
+          <Text className="mt-1 text-base text-app-text">
             {booking.kind === "free_online" ? orderStatusLabel.free_consult : `${booking.priceMnt.toString()} ₮`}
           </Text>
-          <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">Төлбөр төлөгдсөн эсэх</Text>
-          <Text className="mt-1 text-base text-slate-900 dark:text-slate-50">
+          <Text className="mt-3 text-xs text-app-text-muted">Төлбөр төлөгдсөн эсэх</Text>
+          <Text className="mt-1 text-base text-app-text">
             {booking.paymentStatus === "paid" ? "Төлөгдсөн" : booking.paymentStatus === "refunded" ? "Буцаалттай" : "Төлөгдөөгүй"}
           </Text>
-          <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">Огноо</Text>
-          <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+          <Text className="mt-3 text-xs text-app-text-muted">Огноо</Text>
+          <Text className="mt-1 text-sm text-app-text-secondary">
             {new Date(booking.createdAtIso).toLocaleString("mn-MN")}
           </Text>
         </Card>
 
         {healthLoading ? (
           <Card className="mb-3">
-            <Text className="text-sm text-slate-500 dark:text-slate-400">Анкет ачааллаж байна…</Text>
+            <Text className="text-sm text-app-text-muted">Анкет ачааллаж байна…</Text>
           </Card>
         ) : healthText ? (
           <Card className="mb-3">
-            <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+            <Text className="text-sm font-semibold text-app-text">
               {bookingId && isConsultationOrderId(bookingId) ? "Өвчтөний зурвас" : "Анкет харах"}
             </Text>
-            <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <Text className="mt-1 text-xs text-app-text-muted">
               {bookingId && isConsultationOrderId(bookingId)
                 ? "Үнэгүй зөвлөгөөний хүсэлтээр ирсэн мэдээлэл."
                 : "Өвчтөний бөглөсөн мэдээлэл."}
             </Text>
-            <Text className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-200">{healthText}</Text>
+            <Text className="mt-3 text-sm leading-6 text-app-text-secondary">{healthText}</Text>
           </Card>
         ) : (
           <Card className="mb-3">
-            <Text className="text-sm text-slate-500 dark:text-slate-400">Анкетын мэдээлэл ирээгүй байна.</Text>
+            <Text className="text-sm text-app-text-muted">Анкетын мэдээлэл ирээгүй байна.</Text>
           </Card>
         )}
 
         <Card className="mb-3">
-          <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Онлайн уулзалтын холбоос илгээх</Text>
-          <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Видео уулзалтын холбоосыг (жишээ нь Meet, Zoom) энд хадгална.</Text>
+          <Text className="text-sm font-semibold text-app-text">Онлайн уулзалтын холбоос илгээх</Text>
+          <Text className="mt-1 text-xs text-app-text-muted">Видео уулзалтын холбоосыг (жишээ нь Meet, Zoom) энд хадгална.</Text>
           <Input
             label="Холбоос"
             value={link}
@@ -196,8 +196,8 @@ export default function ProviderOrderDetailScreen() {
         />
 
         <Card className="mb-3">
-          <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Эмчийн тэмдэглэл</Text>
-          <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          <Text className="text-sm font-semibold text-app-text">Эмчийн тэмдэглэл</Text>
+          <Text className="mt-1 text-xs text-app-text-muted">
             Үзлэгийн дараа онош, зөвлөгөө, эмчилгээг хадгална.
           </Text>
           <Input label="Онош" value={diagnosis} onChangeText={setDiagnosis} placeholder="Онош оруулна уу" />
@@ -314,7 +314,7 @@ export default function ProviderOrderDetailScreen() {
                 }}
               />
             ) : null}
-            <Text className="text-center text-sm text-slate-500 dark:text-slate-400">
+            <Text className="text-center text-sm text-app-text-muted">
               Энэ захиалгын төлөв: {providerBookingStatusLabel[booking.providerStatus]}
             </Text>
           </View>

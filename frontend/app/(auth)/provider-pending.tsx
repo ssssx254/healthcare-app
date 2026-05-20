@@ -28,7 +28,7 @@ export default function ProviderPendingScreen() {
   const isRejected = user.approvalStatus === "rejected";
 
   return (
-    <FormScrollView className="flex-1 bg-slate-50 px-5 pt-6 dark:bg-slate-950" contentContainerStyle={{ paddingBottom: 40 }}>
+    <FormScrollView className="flex-1 px-5 pt-6 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
       <View className="mb-4 items-center">
         <View
           className={`h-16 w-16 items-center justify-center rounded-2xl ${
@@ -63,8 +63,8 @@ export default function ProviderPendingScreen() {
         className="mb-4"
       />
 
-      <Card className="border-2 border-slate-200 shadow-md dark:border-slate-600">
-        <Text className="text-sm leading-6 text-slate-700 dark:text-slate-200">
+      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+        <Text className="text-sm leading-6 text-app-text-secondary">
           Илгээсэн мэдээллийг шинэчлэх шаардлагатай бол дэмжлэгтэй холбогдож эсвэл дахин нэвтэрч шалгана уу.
         </Text>
         <Button label="Нэвтрэх хуудас руу" className="mt-6 shadow-sm" onPress={() => router.replace(routes.login)} />

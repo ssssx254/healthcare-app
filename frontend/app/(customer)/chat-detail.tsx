@@ -114,7 +114,7 @@ export default function CustomerChatDetailScreen() {
     <>
       <Stack.Screen options={{ title: "Чатын дэлгэрэнгүй" }} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 14, paddingBottom: 34 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 14, paddingBottom: 34 }}>
         {!isOnline ? (
           <Card className="mb-3 border border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/20">
             <Text className="text-xs text-amber-700 dark:text-amber-300">Интернетгүй тул зурвас илгээх боломжгүй</Text>
@@ -144,14 +144,14 @@ export default function CustomerChatDetailScreen() {
                   className="h-12 w-12 rounded-xl"
                 />
                 <View className="min-w-0 flex-1">
-                  <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                  <Text className="text-sm font-semibold text-app-text" numberOfLines={1}>
                     {conversation.provider.name}
                   </Text>
-                  <Text className="mt-0.5 text-xs text-slate-500 dark:text-slate-400" numberOfLines={1}>
+                  <Text className="mt-0.5 text-xs text-app-text-muted" numberOfLines={1}>
                     {conversation.providerTitle || "Эмнэлэг"}
                   </Text>
                 </View>
-                <Text className="text-xs text-slate-500 dark:text-slate-400">
+                <Text className="text-xs text-app-text-muted">
                   {conversation.providerPresence === "online" && isOnline ? "Онлайн" : "Оффлайн (placeholder)"}
                 </Text>
               </View>
@@ -174,7 +174,7 @@ export default function CustomerChatDetailScreen() {
                     <View key={m.id} className="gap-1">
                       {showDate ? (
                         <View className="items-center py-1">
-                          <Text className="rounded-full bg-slate-100 px-3 py-1 text-[11px] text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                          <Text className="rounded-full px-3 py-1 text-[11px] text-slate-500 bg-app-muted text-app-text-muted">
                             {dateLabel(m.sentAtIso)}
                           </Text>
                         </View>
@@ -182,16 +182,16 @@ export default function CustomerChatDetailScreen() {
                     <View className={mine ? "items-end" : "items-start"}>
                       <View
                         className={`max-w-[86%] rounded-2xl px-3.5 py-2.5 ${
-                          mine ? "bg-brand-600" : "border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                          mine ? "bg-brand-600" : "border-app-border bg-app-card"
                         }`}
                       >
-                        <Text className={`text-sm leading-6 ${mine ? "text-white" : "text-slate-700 dark:text-slate-200"}`}>{m.text}</Text>
+                        <Text className={`text-sm leading-6 ${mine ? "text-white" : "text-app-text-secondary"}`}>{m.text}</Text>
                       </View>
-                      <Text className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                      <Text className="mt-1 text-[11px] text-app-text-muted">
                         {timeLabel(m.sentAtIso)}
                       </Text>
                       {mine && m.deliveryState === "sending" ? (
-                        <Text className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">Илгээж байна...</Text>
+                        <Text className="mt-0.5 text-[11px] text-app-text-muted">Илгээж байна...</Text>
                       ) : null}
                       {mine && m.deliveryState === "failed" ? (
                         <Pressable onPress={() => void retryMessage(conversation.id, m.id)}>
@@ -211,7 +211,7 @@ export default function CustomerChatDetailScreen() {
                   <View className="h-2 w-2 rounded-full bg-slate-400" />
                   <View className="h-2 w-2 rounded-full bg-slate-400" />
                   <View className="h-2 w-2 rounded-full bg-slate-400" />
-                  <Text className="ml-1 text-xs text-slate-500 dark:text-slate-400">Эмч бичиж байна…</Text>
+                  <Text className="ml-1 text-xs text-app-text-muted">Эмч бичиж байна…</Text>
                 </View>
               ) : null}
               <View className="flex-row items-end gap-2">
@@ -223,7 +223,7 @@ export default function CustomerChatDetailScreen() {
                   multiline
                   numberOfLines={3}
                   textAlignVertical="top"
-                  className="min-h-11 max-h-28 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm leading-5 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50"
+                  className="min-h-11 max-h-28 flex-1 rounded-xl px-3 py-2.5 text-sm leading-5 text-slate-900 border-app-border bg-app-card dark:text-slate-50"
                 />
                 <Pressable
                   onPress={() => void onSend()}

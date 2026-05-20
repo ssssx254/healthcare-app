@@ -47,7 +47,7 @@ export default function AdminProvidersScreen() {
   return (
     <>
       <Tabs.Screen options={{ title: "Үзүүлэгч удирдлага" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
         <SectionHeader title="Үйлчилгээ үзүүлэгч удирдах" subtitle="Платформын хэмжээнд үзүүлэгчийн эрхийг удирдана." />
         {loading ? (
           <Card className="mb-3">
@@ -69,11 +69,11 @@ export default function AdminProvidersScreen() {
             return (
             <Card key={item.id}>
               <View className="flex-row items-center justify-between">
-                <Text className="text-base font-semibold text-slate-900 dark:text-slate-50">{item.full_name}</Text>
+                <Text className="text-base font-semibold text-app-text">{item.full_name}</Text>
                 <Badge label={suspended ? "Түр түдгэлзсэн" : "Идэвхтэй"} tone={suspended ? "warning" : "success"} />
               </View>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.email}</Text>
-              <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Эмнэлэг: {item.clinic_name ?? "—"}</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">{item.email}</Text>
+              <Text className="mt-1 text-xs text-app-text-muted">Эмнэлэг: {item.clinic_name ?? "—"}</Text>
               <View className="mt-3 flex-row gap-2">
                 <Button
                   label="Идэвхжүүлэх"

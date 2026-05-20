@@ -14,7 +14,7 @@ export function AppIcon({ name, size = 24, color = "#64748b", style, ...rest }: 
     return (
       <View
         style={{ width: size, height: size }}
-        className={cn("items-center justify-center rounded-md bg-slate-200 dark:bg-slate-700")}
+        className={cn("items-center justify-center rounded-md dark:bg-slate-700")}
         accessibilityRole="image"
         accessibilityLabel={typeof name === "string" ? name : "icon"}
       >

@@ -16,8 +16,8 @@ export type QuickIconMenuProps = {
 /** Figma-тай ойролцоо: дугуй цэнхэр icon, доор бичиг */
 export function QuickIconMenu({ title, items }: QuickIconMenuProps) {
   return (
-    <View className="rounded-2xl border border-slate-200 bg-white px-2 pb-4 pt-3 dark:border-slate-700 dark:bg-slate-900">
-      <Text className="mb-4 px-2 text-sm font-semibold text-slate-800 dark:text-slate-100">{title}</Text>
+    <View className="rounded-2xl px-2 pb-4 pt-3 border-app-border bg-app-card">
+      <Text className="mb-4 px-2 text-sm font-semibold text-app-text">{title}</Text>
       <View className="flex-row flex-wrap justify-between gap-y-5">
         {items.map((item) => (
           <View key={String(item.href)} className="w-[23%] items-center">
@@ -31,7 +31,7 @@ export function QuickIconMenu({ title, items }: QuickIconMenuProps) {
                   <AppIcon name={item.icon} size={26} color="#ffffff" />
                 </View>
                 <Text
-                  className="mt-2 px-0.5 text-center text-[10px] font-medium leading-3 text-slate-600 dark:text-slate-300"
+                  className="mt-2 px-0.5 text-center text-[10px] font-medium leading-3 text-app-text-secondary"
                   numberOfLines={3}
                 >
                   {item.label}

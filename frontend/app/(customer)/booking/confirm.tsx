@@ -57,7 +57,7 @@ export default function ConfirmBookingScreen() {
     <>
       <Stack.Screen options={{ title: "Захиалга баталгаажуулах" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader
@@ -87,7 +87,7 @@ export default function ConfirmBookingScreen() {
               <Row label="Хугацаа" value={(draft.duration ?? draft.durationMinutes) != null ? `${draft.duration ?? draft.durationMinutes} минут` : "—"} />
               <Row label="Үнэ" value={`${(draft.price ?? draft.priceMnt)?.toString() ?? "0"} ₮`} />
               <View className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
-                <Text className="text-sm text-slate-600 dark:text-slate-300">Төлөв</Text>
+                <Text className="text-sm text-app-text-secondary">Төлөв</Text>
                 <Text className="mt-1 text-sm font-medium text-amber-700 dark:text-amber-300">
                   {orderStatusLabel.pending} — дараагийн алхамд төлбөр төлнө үү.
                 </Text>
@@ -109,10 +109,10 @@ export default function ConfirmBookingScreen() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <View className="mb-3">
-      <Text className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+      <Text className="text-xs font-medium uppercase tracking-wide text-app-text-muted">
         {label}
       </Text>
-      <Text className="mt-0.5 text-base text-slate-900 dark:text-slate-50">{value}</Text>
+      <Text className="mt-0.5 text-base text-app-text">{value}</Text>
     </View>
   );
 }

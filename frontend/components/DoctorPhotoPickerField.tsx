@@ -54,25 +54,25 @@ export function DoctorPhotoPickerField({
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-sm font-medium text-slate-800 dark:text-slate-100">Профайл зураг</Text>
+      <Text className="mb-2 text-sm font-medium text-app-text">Профайл зураг</Text>
       {hasPreview ? (
         <AppImage
           source={{ uri: previewUri!.trim() }}
           fallbackIcon="account-circle-outline"
-          className="mb-3 h-28 w-28 rounded-2xl border border-slate-200 dark:border-slate-700"
+          className="mb-3 h-28 w-28 rounded-2xl border border-app-border"
           accessibilityLabel="Эмчийн зургийн урьдчилан харагдац"
         />
       ) : (
-        <View className="mb-3 h-28 w-28 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-900/60">
-          <Text className="px-2 text-center text-xs text-slate-500 dark:text-slate-400">Зураг сонгоогүй байна</Text>
+        <View className="mb-3 h-28 w-28 items-center justify-center rounded-2xl border border-dashed border-slate-300 border-app-border-strong bg-app-card/60">
+          <Text className="px-2 text-center text-xs text-app-text-muted">Зураг сонгоогүй байна</Text>
           {nameForFallback.trim() ? (
-            <Text className="mt-1 px-2 text-center text-[10px] text-slate-400 dark:text-slate-500" numberOfLines={1}>
+            <Text className="mt-1 px-2 text-center text-[10px] text-app-text-muted" numberOfLines={1}>
               {nameForFallback.trim()}
             </Text>
           ) : null}
         </View>
       )}
-      <Text className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+      <Text className="mb-2 text-xs text-app-text-muted">
         Галерейгаас сонгоно. Хадгалахаас өмнө урьдчилан харагдана.
       </Text>
       <View className="flex-row flex-wrap gap-2">

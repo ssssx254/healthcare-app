@@ -29,6 +29,30 @@ function requireAuth(req, res, next) {
   }
 }
 
+/** Bearer байвал `req.user` тохируулна; байхгүй бол алгасна. */
+function attachUserIfAuthenticated(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer ")) {
+    return next();
+  }
+  const token = header.slice(7).trim();
+  if (!token) {
+    return next();
+  }
+  try {
+    const payload = verifyToken(token);
+    req.user = {
+      id: Number(payload.sub),
+      role: payload.role,
+      email: payload.email,
+      onboarding_status: payload.onboarding_status,
+    };
+  } catch {
+    /* public endpoint — токен буруу бол viewer мэдээлэлгүй */
+  }
+  return next();
+}
+
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user) {
@@ -64,4 +88,4 @@ async function requireApprovedProvider(req, res, next) {
   return next();
 }
 
-module.exports = { requireAuth, requireRole, requireApprovedProvider };
+module.exports = { requireAuth, attachUserIfAuthenticated, requireRole, requireApprovedProvider };

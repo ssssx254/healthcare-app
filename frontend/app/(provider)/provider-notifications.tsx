@@ -58,7 +58,7 @@ export default function ProviderNotificationsScreen() {
     <>
       <Stack.Screen options={{ title: "Мэдэгдэл" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Мэдэгдэл" subtitle="Захиалга, төлбөр, цагийн сануулга." />
@@ -97,16 +97,16 @@ export default function ProviderNotificationsScreen() {
               <Card key={n.id}>
                 <View className="flex-row items-start justify-between gap-2">
                   <Text
-                    className="min-w-0 flex-1 text-base font-semibold text-slate-900 dark:text-slate-50"
+                    className="min-w-0 flex-1 text-base font-semibold text-app-text"
                   >
                     {n.titleMn}
                   </Text>
                   <Badge label={n.read ? "Уншсан" : "Шинэ"} tone={n.tone ?? "neutral"} />
                 </View>
-                <Text className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                <Text className="mt-2 text-sm leading-6 text-app-text-secondary">
                   {n.bodyMn}
                 </Text>
-                <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">{n.timeLabelMn}</Text>
+                <Text className="mt-2 text-xs text-app-text-muted">{n.timeLabelMn}</Text>
               </Card>
             ))}
           </View>

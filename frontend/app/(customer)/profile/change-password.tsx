@@ -27,7 +27,7 @@ export default function ChangePasswordScreen() {
   };
 
   return (
-    <FormScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+    <FormScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
       <SectionHeader title="Нууц үг солих" subtitle="Нууц үгээ шинэчилж аюулгүй байдлаа нэмэгдүүлнэ үү." />
       <Card>
         <Input

@@ -24,6 +24,8 @@ const tables = {
   questionnaires: "questionnaires",
   notifications: "notifications",
   reviews: "reviews",
+  doctorReviews: "doctor_reviews",
+  labTests: "lab_tests",
 };
 
 module.exports = { tables };

@@ -2,6 +2,7 @@ import { AppImage, Button, Card, EmptyState, ErrorState, LoadingState, ScreenScr
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { routes } from "@/constants/appRoutes";
 import { useAuth } from "@/hooks/useAuth";
+import { formatDoctorRatingLabel } from "@/lib/formatDoctorRating";
 import { resolveDoctorAvatarUri } from "@/lib/doctorAvatar";
 import { getClinicList, getProviderServiceCategories, getSpotlightDoctors } from "@/services/customerCatalog";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -63,11 +64,6 @@ export default function CustomerHomeScreen() {
     };
   }, []);
 
-  function doctorScoreLabel(id: string): string {
-    const n = Number(id.replace(/\D/g, "").slice(-1) || "7");
-    return (4.5 + (n % 5) * 0.1).toFixed(1);
-  }
-
   const topClinics = (clinics ?? []).slice(0, 2);
 
   return (
@@ -79,37 +75,37 @@ export default function CustomerHomeScreen() {
         }}
       />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 34 }}
       >
         <View className="mb-4 min-w-0">
-          <Text className="text-xl font-bold leading-7 text-slate-900 dark:text-slate-50" numberOfLines={2}>
+          <Text className="text-xl font-bold leading-7 text-app-text" numberOfLines={2}>
             Сайн байна уу, {user?.name?.trim() || "үйлчлүүлэгч"}!
           </Text>
-          <Text className="mt-1.5 text-sm leading-5 text-slate-500 dark:text-slate-400" numberOfLines={2}>
+          <Text className="mt-1.5 text-sm leading-5 text-app-text-muted" numberOfLines={2}>
             Өнөөдөр танд ямар тусламж хэрэгтэй вэ?
           </Text>
         </View>
 
         <Pressable
           onPress={() => router.push(routes.customerSearch)}
-          className="mb-6 min-h-[52px] flex-row items-center rounded-2xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+          className="mb-6 min-h-[52px] flex-row items-center rounded-2xl px-4 py-3.5 shadow-sm border-app-border bg-app-card"
         >
           <MaterialCommunityIcons name="magnify" size={20} color="#64748b" />
-          <Text className="ml-2 min-w-0 flex-1 text-sm text-slate-500 dark:text-slate-400" numberOfLines={2}>
+          <Text className="ml-2 min-w-0 flex-1 text-sm text-app-text-muted" numberOfLines={2}>
             Эмч, эмнэлэг, үйлчилгээ хайх
           </Text>
         </Pressable>
 
         <Link href={routes.customerWallet} asChild>
-          <Pressable className="mb-6 flex-row items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm active:opacity-95 dark:border-slate-700 dark:bg-slate-900">
+          <Pressable className="mb-6 flex-row items-center justify-between gap-3 rounded-2xl px-4 py-3.5 shadow-sm active:opacity-95 border-app-border bg-app-card">
             <View className="flex-row items-center gap-3">
               <View className="h-10 w-10 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-900/40">
                 <MaterialCommunityIcons name="wallet-outline" size={22} color="#2563eb" />
               </View>
               <View className="min-w-0 flex-1">
-                <Text className="text-sm font-bold text-slate-900 dark:text-slate-50">Цахим данс</Text>
-                <Text className="mt-0.5 text-xs text-slate-500 dark:text-slate-400" numberOfLines={1}>
+                <Text className="text-sm font-bold text-app-text">Цахим данс</Text>
+                <Text className="mt-0.5 text-xs text-app-text-muted" numberOfLines={1}>
                   Төлбөр, цэнэглэлт, гүйлгээ
                 </Text>
               </View>
@@ -120,7 +116,7 @@ export default function CustomerHomeScreen() {
 
         <View className="mb-6">
           <View className="mb-3 flex-row items-center justify-between gap-3">
-            <Text className="min-w-0 flex-1 text-base font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+            <Text className="min-w-0 flex-1 text-base font-semibold text-app-text" numberOfLines={1}>
               Зөвлөгөө
             </Text>
             <Link href={routes.customerAdvice} asChild>
@@ -131,14 +127,14 @@ export default function CustomerHomeScreen() {
           </View>
           <View>
             <Link href={routes.customerFreeConsult} asChild>
-              <Pressable className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+              <Pressable className="rounded-2xl p-4 shadow-sm border-app-border bg-app-card">
                 <View className="h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40">
                   <MaterialCommunityIcons name="video-outline" size={20} color="#2563eb" />
                 </View>
-                <Text className="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                <Text className="mt-3 text-sm font-semibold text-app-text" numberOfLines={2}>
                   Онлайн зөвлөгөө
                 </Text>
-                <Text className="mt-1 text-xs leading-4 text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                <Text className="mt-1 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
                   Шуурхай зөвлөгөө авах
                 </Text>
               </Pressable>
@@ -148,7 +144,7 @@ export default function CustomerHomeScreen() {
 
         <View className="mb-6">
           <View className="mb-3 flex-row items-center justify-between gap-3">
-            <Text className="min-w-0 flex-1 text-base font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+            <Text className="min-w-0 flex-1 text-base font-semibold text-app-text" numberOfLines={2}>
               Үзлэгийн төрөл
             </Text>
             <Link href={routes.customerAppointments} asChild>
@@ -161,10 +157,10 @@ export default function CustomerHomeScreen() {
             <Link href={routes.customerAppointments} asChild>
               <Pressable className="flex-row items-center justify-between gap-3">
                 <View className="min-w-0 flex-1">
-                  <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                  <Text className="text-sm font-semibold text-app-text" numberOfLines={2}>
                     Төлбөртэй үзлэг
                   </Text>
-                  <Text className="mt-1 text-xs leading-4 text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                  <Text className="mt-1 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
                     Эмнэлэг дээр цаг товлож үзүүлэх
                   </Text>
                 </View>
@@ -176,10 +172,10 @@ export default function CustomerHomeScreen() {
             <Link href={routes.customerFreeConsult} asChild>
               <Pressable className="flex-row items-center justify-between gap-3">
                 <View className="min-w-0 flex-1">
-                  <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                  <Text className="text-sm font-semibold text-app-text" numberOfLines={2}>
                     Үнэгүй зөвлөгөө
                   </Text>
-                  <Text className="mt-1 text-xs leading-4 text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                  <Text className="mt-1 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
                     Анхан шатны онлайн зөвлөгөө
                   </Text>
                 </View>
@@ -188,20 +184,20 @@ export default function CustomerHomeScreen() {
             </Link>
           </Card>
           <Card className="mt-3">
-            <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Үйлчилгээний ангиллууд</Text>
+            <Text className="text-sm font-semibold text-app-text">Үйлчилгээний ангиллууд</Text>
             {serviceCategories === null ? (
-              <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">Ачааллаж байна…</Text>
+              <Text className="mt-2 text-xs text-app-text-muted">Ачааллаж байна…</Text>
             ) : serviceCategories.length === 0 ? (
-              <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">Үзүүлэгчийн ангилал хараахан бүртгэгдээгүй байна.</Text>
+              <Text className="mt-2 text-xs text-app-text-muted">Үзүүлэгчийн ангилал хараахан бүртгэгдээгүй байна.</Text>
             ) : (
               <View className="mt-3 flex-row flex-wrap gap-2">
                 {serviceCategories.slice(0, 10).map((cat) => (
                   <Pressable
                     key={cat}
                     onPress={() => router.push({ pathname: routes.customerSearch, params: { q: cat } })}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+                    className="rounded-full px-3 py-2 border-app-border bg-app-card"
                   >
-                    <Text className="text-xs text-slate-700 dark:text-slate-300">{cat}</Text>
+                    <Text className="text-xs text-app-text-secondary">{cat}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -211,7 +207,7 @@ export default function CustomerHomeScreen() {
 
         <View className="mb-6">
           <View className="mb-3 flex-row items-center justify-between gap-3">
-            <Text className="min-w-0 flex-1 text-base font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+            <Text className="min-w-0 flex-1 text-base font-semibold text-app-text" numberOfLines={1}>
               Эмнэлэг
             </Text>
             <Link href={routes.customerClinics} asChild>
@@ -268,14 +264,14 @@ export default function CustomerHomeScreen() {
             <View className="gap-3">
               {topClinics.map((c) => (
                 <Link key={c.id} href={`/clinic/${c.id}`} asChild>
-                  <Pressable className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                    <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                  <Pressable className="rounded-2xl p-4 shadow-sm border-app-border bg-app-card">
+                    <Text className="text-sm font-semibold text-app-text" numberOfLines={2}>
                       {c.name}
                     </Text>
-                    <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={1}>
+                    <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={1}>
                       {c.city}
                     </Text>
-                    <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                    <Text className="mt-2 text-xs text-app-text-muted" numberOfLines={2}>
                       {c.description}
                     </Text>
                   </Pressable>
@@ -287,7 +283,7 @@ export default function CustomerHomeScreen() {
 
         <View className="mb-6">
           <View className="mb-3 flex-row items-center justify-between gap-3">
-            <Text className="min-w-0 flex-1 text-base font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+            <Text className="min-w-0 flex-1 text-base font-semibold text-app-text" numberOfLines={1}>
               Даатгал
             </Text>
             <Link href={routes.customerInsurance} asChild>
@@ -300,10 +296,10 @@ export default function CustomerHomeScreen() {
             <Link href={routes.customerInsurance} asChild>
               <Pressable className="flex-row items-center justify-between gap-3">
                 <View className="min-w-0 flex-1">
-                  <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+                  <Text className="text-sm font-semibold text-app-text" numberOfLines={2}>
                     ЭМД мэдээлэл шалгах
                   </Text>
-                  <Text className="mt-1 text-xs leading-4 text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                  <Text className="mt-1 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
                     Эрхийн мэдээлэл, хамрах үйлчилгээ харах
                   </Text>
                 </View>
@@ -315,7 +311,7 @@ export default function CustomerHomeScreen() {
 
         <View>
           <View className="mb-3 flex-row items-center justify-between gap-3">
-            <Text className="min-w-0 flex-1 text-base font-semibold text-slate-900 dark:text-slate-50" numberOfLines={2}>
+            <Text className="min-w-0 flex-1 text-base font-semibold text-app-text" numberOfLines={2}>
               Онцлох эмч нар
             </Text>
             <Link href={routes.customerDoctors} asChild>
@@ -334,32 +330,32 @@ export default function CustomerHomeScreen() {
                 <EmptyState
                   icon="doctor"
                   title="Онцлох эмч алга"
-                  description="Одоогоор бүртгэлтэй эмч харагдахгүй байна. Эмнэлгээс сонгон үзлэг захиална уу."
+                  description="4.5+ дундаж үнэлгээтэй эмч одоогоор байхгүй байна. Бүх эмчийн жагсаалтаас сонгоно уу."
                   action={{ label: "Эмнэлгүүд", onPress: () => router.push(routes.customerClinics), variant: "outline" }}
                 />
               </Card>
             ) : (
               featuredDoctors.map((doctor) => (
                 <Link key={doctor.id} href={`/clinic/${doctor.clinicId}/doctor/${doctor.id}`} asChild>
-                  <Pressable className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                  <Pressable className="rounded-2xl p-4 shadow-sm border-app-border bg-app-card">
                     <View className="flex-row items-center justify-between gap-3">
                       <AppImage
                         source={{ uri: resolveDoctorAvatarUri(doctor, 72) }}
                         fallbackIcon="account-circle-outline"
-                        className="h-12 w-12 rounded-2xl border border-slate-200 dark:border-slate-700"
+                        className="h-12 w-12 rounded-2xl border border-app-border"
                       />
                       <View className="min-w-0 flex-1">
-                        <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                        <Text className="text-sm font-semibold text-app-text" numberOfLines={1}>
                           {doctor.name}
                         </Text>
-                        <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                        <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={2}>
                           {doctor.specialty}
                         </Text>
                       </View>
                       <View className="flex-row items-center rounded-full bg-amber-100 px-2 py-1 dark:bg-amber-900/40">
                         <MaterialCommunityIcons name="star" size={12} color="#f59e0b" />
                         <Text className="ml-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
-                          {doctorScoreLabel(doctor.id)}
+                          {formatDoctorRatingLabel(doctor)}
                         </Text>
                       </View>
                     </View>

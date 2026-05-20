@@ -80,9 +80,9 @@ export default function DoctorEditScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Эмчийн мэдээлэл засах" }} />
-        <FormScrollView className="flex-1 bg-slate-50 p-4 dark:bg-slate-950">
+        <FormScrollView className="flex-1 p-4 bg-app-bg">
           <Card>
-            <Text className="text-center text-slate-600 dark:text-slate-300">Эмч олдсонгүй.</Text>
+            <Text className="text-center text-app-text-secondary">Эмч олдсонгүй.</Text>
             <Button label="Жагсаалт руу" className="mt-4" onPress={() => router.replace(routes.providerDoctors)} />
           </Card>
         </FormScrollView>
@@ -179,7 +179,7 @@ export default function DoctorEditScreen() {
     <>
       <Stack.Screen options={{ title: "Эмчийн мэдээлэл засах" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Эмчийн мэдээлэл засах" subtitle="Профайл, зураг, зөвлөгөөний төрөл, долоо хоногийн хуваарь." />
@@ -298,20 +298,20 @@ export default function DoctorEditScreen() {
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: online }}
-                className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${online ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${online ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-card"}`}
                 onPress={() => setOnline((p) => !p)}
               >
-                <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Онлайн зөвлөгөө</Text>
-                <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Үнэгүй зөвлөгөөний загвар.</Text>
+                <Text className="text-sm font-medium text-app-text">Онлайн зөвлөгөө</Text>
+                <Text className="mt-1 text-xs text-app-text-muted">Үнэгүй зөвлөгөөний загвар.</Text>
               </Pressable>
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: ambulatory }}
-                className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${ambulatory ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                className={`min-h-[48px] justify-center rounded-xl border px-3 py-3 ${ambulatory ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-card"}`}
                 onPress={() => setAmbulatory((p) => !p)}
               >
-                <Text className="text-sm font-medium text-slate-800 dark:text-slate-100">Амбулаторийн үзлэг</Text>
-                <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">Төлбөртэй цагийн үзлэг.</Text>
+                <Text className="text-sm font-medium text-app-text">Амбулаторийн үзлэг</Text>
+                <Text className="mt-1 text-xs text-app-text-muted">Төлбөртэй цагийн үзлэг.</Text>
               </Pressable>
             </View>
             {errors.serviceMode ? <Text className="mb-2 text-xs text-red-600 dark:text-red-400">{errors.serviceMode}</Text> : null}
@@ -345,12 +345,12 @@ export default function DoctorEditScreen() {
                     key={d.key}
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
-                    className={`min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border px-3 py-2 ${active ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"}`}
+                    className={`min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border px-3 py-2 ${active ? "border-brand-500 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-card"}`}
                     onPress={() =>
                       setWorkingDays((prev) => (prev.includes(d.key) ? prev.filter((x) => x !== d.key) : [...prev, d.key]))
                     }
                   >
-                    <Text className="text-xs font-medium text-slate-700 dark:text-slate-200">{d.label}</Text>
+                    <Text className="text-xs font-medium text-app-text-secondary">{d.label}</Text>
                   </Pressable>
                 );
               })}

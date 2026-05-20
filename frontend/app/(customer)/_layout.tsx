@@ -1,15 +1,22 @@
 import { routes } from "@/constants/appRoutes";
 import { CustomerBookingProvider } from "@/contexts/CustomerBookingContext";
-import { HeaderChatLink, HeaderLogoutButton, HeaderNotificationLink } from "@/components";
-import { tabScreenOptions } from "@/constants/navigationTheme";
+import {
+  HeaderChatLink,
+  HeaderEmergencyCallButton,
+  HeaderThemeAndLogout,
+  HeaderNotificationLink,
+} from "@/components";
+import { WebBottomTabBar } from "@/components/WebBottomTabBar";
+import { WebScreenFrame } from "@/components/WebScreenFrame";
 import { useAuth } from "@/hooks/useAuth";
+import { useTabScreenOptions } from "@/hooks/useTabScreenOptions";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
-import { useColorScheme, View } from "react-native";
+import { View } from "react-native";
 
 export default function CustomerGroupLayout() {
   const { isAuthenticated, user, authLoading, signOut } = useAuth();
-  const colorScheme = useColorScheme();
+  const tabOptions = useTabScreenOptions();
 
   if (authLoading) return null;
   if (!isAuthenticated || user?.role !== "customer") {
@@ -18,17 +25,20 @@ export default function CustomerGroupLayout() {
 
   return (
     <CustomerBookingProvider>
+      <WebScreenFrame>
       <Tabs
+        tabBar={(props) => <WebBottomTabBar {...props} />}
         screenOptions={() => ({
-          ...tabScreenOptions(colorScheme),
+          ...tabOptions,
           headerTitle: "",
           headerLeft: () => (
             <View className="ml-1 flex-row items-center">
               <HeaderNotificationLink href={routes.customerNotifications} />
               <HeaderChatLink href={routes.customerChat} />
+              <HeaderEmergencyCallButton />
             </View>
           ),
-          headerRight: () => <HeaderLogoutButton onPress={signOut} />,
+          headerRight: () => <HeaderThemeAndLogout onPress={signOut} />,
         })}
       >
         <Tabs.Screen
@@ -95,6 +105,7 @@ export default function CustomerGroupLayout() {
         <Tabs.Screen name="filters" options={{ href: null }} />
         <Tabs.Screen name="free-consult" options={{ href: null }} />
         <Tabs.Screen name="insurance" options={{ href: null }} />
+        <Tabs.Screen name="lab-tests" options={{ href: null }} />
         <Tabs.Screen name="medical-results" options={{ href: null }} />
         <Tabs.Screen name="doctor-notes" options={{ href: null }} />
         <Tabs.Screen name="health-form" options={{ href: null }} />
@@ -107,6 +118,7 @@ export default function CustomerGroupLayout() {
         <Tabs.Screen name="clinic/[clinicId]/doctor/[doctorId]/reviews" options={{ href: null }} />
         <Tabs.Screen name="clinic/[clinicId]/doctor/[doctorId]/service/[serviceId]" options={{ href: null }} />
       </Tabs>
+      </WebScreenFrame>
     </CustomerBookingProvider>
   );
 }

@@ -29,7 +29,7 @@ export function Input({
 
   return (
     <View className="mb-4 w-full max-w-full">
-      <Text className="mb-1.5 text-sm font-semibold text-slate-800 dark:text-slate-100">{label}</Text>
+      <Text className="mb-1.5 text-sm font-semibold text-app-text">{label}</Text>
       <TextInput
         placeholderTextColor="#64748b"
         underlineColorAndroid="transparent"
@@ -40,19 +40,19 @@ export function Input({
         autoComplete={autoComplete ?? (secureTextEntry ? "password" : undefined)}
         importantForAutofill={importantForAutofill ?? (secureTextEntry ? "yes" : undefined)}
         className={cn(
-          "rounded-2xl border bg-white px-3.5 py-3.5 text-base leading-6 text-slate-900 dark:bg-slate-900 dark:text-slate-50",
+          "rounded-2xl border bg-app-card px-3.5 py-3.5 text-base leading-6 text-app-text",
           multiline ? "min-h-[120px] max-h-[220px]" : "",
           error
             ? "border-2 border-red-500"
             : appearance === "prominent"
-              ? "border-2 border-slate-300 shadow-sm dark:border-slate-500"
-              : "border border-slate-300 dark:border-slate-600",
+              ? "border-2 border-app-border-strong shadow-sm"
+              : "border border-app-border-strong",
           className,
         )}
         {...rest}
       />
       {hint && !error ? (
-        <Text className="mt-1.5 text-xs leading-4 text-slate-500 dark:text-slate-400">{hint}</Text>
+        <Text className="mt-1.5 text-xs leading-4 text-app-text-muted">{hint}</Text>
       ) : null}
       {error ? (
         <Text className="mt-1.5 text-xs leading-4 text-red-600 dark:text-red-400">{error}</Text>

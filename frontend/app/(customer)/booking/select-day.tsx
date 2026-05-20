@@ -108,7 +108,7 @@ export default function SelectDayScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Цаг авах / Өдөр сонгох" }} />
-      <ScreenScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Өдөр сонгох" subtitle="Танд тохирох үзлэгийн өдрийг сонгоно уу." />
 
         {slots === null ? (
@@ -124,12 +124,12 @@ export default function SelectDayScreen() {
           </Card>
         ) : days.length === 0 ? (
           <Card>
-            <Text className="text-sm text-slate-600 dark:text-slate-300">Сонгох боломжтой өдөр алга байна.</Text>
+            <Text className="text-sm text-app-text-secondary">Сонгох боломжтой өдөр алга байна.</Text>
           </Card>
         ) : (
           <View className="gap-3">
             <Card>
-              <Text className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-50">Өдрүүд</Text>
+              <Text className="mb-3 text-sm font-semibold text-app-text">Өдрүүд</Text>
               <View className="flex-row flex-wrap gap-2">
                 {days.map((d) => {
                   const active = d === selectedDate;
@@ -140,10 +140,10 @@ export default function SelectDayScreen() {
                       className={`rounded-xl border px-3 py-2 ${
                         active
                           ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                          : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                          : "border-slate-200 bg-white border-app-border bg-app-card"
                       }`}
                     >
-                      <Text className={`text-xs font-medium ${active ? "text-brand-700 dark:text-brand-300" : "text-slate-600 dark:text-slate-300"}`}>
+                      <Text className={`text-xs font-medium ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"}`}>
                         {formatDayLabel(d)}
                       </Text>
                     </Pressable>
@@ -152,10 +152,10 @@ export default function SelectDayScreen() {
               </View>
             </Card>
 
-            <Text className="text-base font-semibold text-slate-900 dark:text-slate-50">Цаг сонгох</Text>
+            <Text className="text-base font-semibold text-app-text">Цаг сонгох</Text>
             <Card className="border-l-4 border-l-amber-400">
-              <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">Анхааруулга:</Text>
-              <Text className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              <Text className="text-sm font-semibold text-app-text">Анхааруулга:</Text>
+              <Text className="mt-1 text-sm text-app-text-secondary">
                 Та өөрийн амьдарч буй улсын/бүсийн цагаар цагаа сонгоно уу.
               </Text>
             </Card>
@@ -172,10 +172,10 @@ export default function SelectDayScreen() {
                         className={`min-w-[88px] rounded-xl border px-3 py-3 ${
                           active
                             ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                            : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                            : "border-slate-200 bg-white border-app-border bg-app-card"
                         }`}
                       >
-                        <Text className={`text-center text-sm font-semibold ${active ? "text-brand-700 dark:text-brand-300" : "text-slate-800 dark:text-slate-100"}`}>
+                        <Text className={`text-center text-sm font-semibold ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text"}`}>
                           {slotText}
                         </Text>
                       </Pressable>
@@ -185,7 +185,7 @@ export default function SelectDayScreen() {
               </Card>
             ) : (
               <Card>
-                <Text className="text-sm text-slate-600 dark:text-slate-300">Сонгосон өдөрт боломжтой цаг алга байна.</Text>
+                <Text className="text-sm text-app-text-secondary">Сонгосон өдөрт боломжтой цаг алга байна.</Text>
               </Card>
             )}
 

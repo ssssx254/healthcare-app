@@ -110,12 +110,15 @@ export async function getSlotsByDoctor(
   return fallbackRows.map(mapSlotRow);
 }
 
-/** Нүүр болон онцлох хэсэгт — баталгаажсан эмнэлгийн эмч нар (API). */
+/** Нүүр «Онцлох эмч нар» — дундаж үнэлгээ >= 4.5 (API). */
 export async function getSpotlightDoctors(limit: number): Promise<MockDoctor[]> {
-  const rows = await doctorApi.listAll();
-  const mapped = await mergeDoctorPhotosIntoDoctors(rows.map(mapDoctorRow));
   const n = Math.max(0, Math.floor(limit));
-  return mapped.slice(0, n);
+  try {
+    const { items } = await doctorApi.listFeatured({ minRating: 4.5, limit: n });
+    return mergeDoctorPhotosIntoDoctors(items.map(mapDoctorRow));
+  } catch {
+    return [];
+  }
 }
 
 export async function searchCatalogAsync(

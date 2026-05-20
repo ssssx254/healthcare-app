@@ -1,4 +1,13 @@
-import { Card, EmptyState, ErrorState, LoadingState, ScreenScrollView, SectionHeader, StatCard } from "@/components";
+import {
+  Card,
+  COMPACT_STAT_CARD_HEIGHT,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  ScreenScrollView,
+  SectionHeader,
+  StatCard,
+} from "@/components";
 import { ApiError } from "@/lib/api/client";
 import { providerBookingStatusLabel } from "@/constants/providerBookingStatus";
 import { useProviderWorkspace } from "@/contexts/ProviderWorkspaceContext";
@@ -113,7 +122,7 @@ export default function ProviderRevenueScreen() {
     <>
       <Stack.Screen options={{ title: "Орлого / статистик" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       >
         <SectionHeader title="Статистик" subtitle="Захиалга, төлөв, орлогын үзүүлэлтүүд." />
@@ -134,39 +143,63 @@ export default function ProviderRevenueScreen() {
 
         {stats ? (
           <>
-            <View className="mb-4 flex-row flex-wrap gap-3">
-              <StatCard title="Нийт захиалга" value={String(stats.totalBookings)} hint="Бүх төрөл" />
-              <StatCard title="Баталгаажсан" value={String(stats.confirmed)} hint="Идэвхтэй" />
-            </View>
-            <View className="mb-4 flex-row flex-wrap gap-3">
-              <StatCard title="Цуцлагдсан" value={String(stats.cancelled)} hint="Цуцалсан/татгалзсан" />
-              <StatCard title="Дууссан" value={String(stats.completed)} hint="Хаагдсан захиалга" />
-            </View>
-            <View className="mb-4 flex-row flex-wrap gap-3">
-              <StatCard title="Нийт орлого" value={`${stats.totalRevenueMnt.toLocaleString("mn-MN")} ₮`} hint="Баталгаажсан/дууссан" />
-              <StatCard title="Их захиалагдсан үйлчилгээ" value={stats.topServiceName} hint="Топ үйлчилгээ" />
+            <View
+              className="mb-4"
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                rowGap: 10,
+                columnGap: 10,
+              }}
+            >
+              <View style={{ width: "48%", height: COMPACT_STAT_CARD_HEIGHT }}>
+                <StatCard compact fillContainer title="Нийт захиалга" value={String(stats.totalBookings)} hint="Бүх төрөл" />
+              </View>
+              <View style={{ width: "48%", height: COMPACT_STAT_CARD_HEIGHT }}>
+                <StatCard compact fillContainer title="Баталгаажсан" value={String(stats.confirmed)} hint="Идэвхтэй" />
+              </View>
+              <View style={{ width: "48%", height: COMPACT_STAT_CARD_HEIGHT }}>
+                <StatCard compact fillContainer title="Цуцлагдсан" value={String(stats.cancelled)} hint="Цуцалсан/татгалзсан" />
+              </View>
+              <View style={{ width: "48%", height: COMPACT_STAT_CARD_HEIGHT }}>
+                <StatCard compact fillContainer title="Дууссан" value={String(stats.completed)} hint="Хаагдсан захиалга" />
+              </View>
+              <View style={{ width: "48%", height: COMPACT_STAT_CARD_HEIGHT }}>
+                <StatCard
+                  compact
+                  fillContainer
+                  title="Нийт орлого"
+                  value={`${stats.totalRevenueMnt.toLocaleString("mn-MN")} ₮`}
+                  hint="Баталгаажсан/дууссан"
+                />
+              </View>
+              <View style={{ width: "48%", height: COMPACT_STAT_CARD_HEIGHT }}>
+                <StatCard compact fillContainer title="Их захиалагдсан үйлчилгээ" value={stats.topServiceName} hint="Топ үйлчилгээ" />
+              </View>
             </View>
           </>
         ) : null}
 
         <Card className="mb-3">
-          <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Төлөвөөр</Text>
+          <Text className="text-sm font-semibold text-app-text">Төлөвөөр</Text>
           <View className="mt-3 gap-2">
             {(Object.keys(byStatus) as (keyof typeof providerBookingStatusLabel)[]).map((k) => (
               <View key={k} className="flex-row items-center justify-between">
-                <Text className="text-sm text-slate-600 dark:text-slate-300">{providerBookingStatusLabel[k]}</Text>
-                <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50">{byStatus[k] ?? 0}</Text>
+                <Text className="text-sm text-app-text-secondary">{providerBookingStatusLabel[k]}</Text>
+                <Text className="text-sm font-semibold text-app-text">{byStatus[k] ?? 0}</Text>
               </View>
             ))}
           </View>
         </Card>
 
         <Card className="mb-3">
-          <Text className="text-sm font-semibold text-slate-800 dark:text-slate-100">Үйлчилгээний төрөл</Text>
-          <Text className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          <Text className="text-sm font-semibold text-app-text">Үйлчилгээний төрөл</Text>
+          <Text className="mt-2 text-sm text-app-text-secondary">
             Албан ёсны баталгаажсан: {formalConfirmed.length} · Үнэгүй онлайн баталгаажсан: {freeConfirmed.length}
           </Text>
-          <Text className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          <Text className="mt-2 text-xs text-app-text-muted">
             Өнөөдөр: {todayBookingsCount} · Хүлээгдэж буй: {pendingRequestsCount} · Үйлчлүүлэгч: {totalCustomers} · Орлого:{" "}
             {totalRevenueMnt.toLocaleString("mn-MN")} ₮
           </Text>

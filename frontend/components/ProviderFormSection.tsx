@@ -14,7 +14,7 @@ export function ProviderFormSection({ title, description, children }: ProviderFo
     <View className="mb-5">
       <Text className="mb-1.5 text-xs font-bold uppercase tracking-wide text-brand-700 dark:text-brand-300">{title}</Text>
       {description ? (
-        <Text className="mb-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{description}</Text>
+        <Text className="mb-3 text-xs leading-5 text-app-text-muted">{description}</Text>
       ) : null}
       {children ?? null}
     </View>

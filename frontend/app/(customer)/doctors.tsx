@@ -1,5 +1,6 @@
 import { AppImage, Button, Card, EmptyState, ErrorState, Input, ListSkeleton, LoadingState, ScreenScrollView, SectionHeader } from "@/components";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
+import { formatDoctorRatingLabel } from "@/lib/formatDoctorRating";
 import { resolveDoctorAvatarUri } from "@/lib/doctorAvatar";
 import { getClinicList, searchCatalogAsync } from "@/services/customerCatalog";
 import type { MockClinicDetail, MockDoctor } from "@/types/customer";
@@ -31,11 +32,6 @@ function doctorExperience(doctor: MockDoctor): string {
   return `${years} жил`;
 }
 
-function doctorRating(id: string): string {
-  const n = Number(id.replace(/\D/g, "").slice(-1) || "7");
-  return (4.5 + (n % 5) * 0.1).toFixed(1);
-}
-
 export default function DoctorsHubScreen() {
   const [query, setQuery] = useState("");
   const [expandedCategories, setExpandedCategories] = useState(false);
@@ -59,7 +55,7 @@ export default function DoctorsHubScreen() {
           specialty: d.specialty,
           rank: specialtyRank(d.specialty),
           experience: doctorExperience(d),
-          rating: doctorRating(d.id),
+          rating: formatDoctorRatingLabel(d),
           clinicName: clinicNameMap.get(d.clinicId) ?? "Эмнэлэг",
           photoUrl: resolveDoctorAvatarUri(d, 96),
         }));
@@ -98,7 +94,7 @@ export default function DoctorsHubScreen() {
     <>
       <Tabs.Screen options={{ tabBarLabel: "Эмч нар", headerTitle: "" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       >
         <SectionHeader title="Эмч нар" subtitle="Мэргэжил болон туршлагаар эмчээ сонгоно уу." />
@@ -115,7 +111,7 @@ export default function DoctorsHubScreen() {
 
         <Card className="mb-4">
           <View className="mb-3 flex-row items-center justify-between gap-2">
-            <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+            <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={1}>
               Ангилал
             </Text>
             {categories.length > 8 ? (
@@ -136,11 +132,11 @@ export default function DoctorsHubScreen() {
                   className={`rounded-full border px-3 py-2 ${
                     active
                       ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                      : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                      : "border-slate-200 bg-white border-app-border bg-app-card"
                   }`}
                 >
                   <Text
-                    className={`text-center text-xs font-medium ${active ? "text-brand-700 dark:text-brand-300" : "text-slate-600 dark:text-slate-300"}`}
+                    className={`text-center text-xs font-medium ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"}`}
                     numberOfLines={2}
                   >
                     {cat}
@@ -152,10 +148,10 @@ export default function DoctorsHubScreen() {
         </Card>
 
         <View className="mb-3 flex-row items-center justify-between gap-2">
-          <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+          <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={1}>
             Эмчийн жагсаалт
           </Text>
-          <Text className="shrink-0 text-xs text-slate-500 dark:text-slate-400">{filteredDoctors.length} эмч</Text>
+          <Text className="shrink-0 text-xs text-app-text-muted">{filteredDoctors.length} эмч</Text>
         </View>
 
         {loading ? (
@@ -180,7 +176,7 @@ export default function DoctorsHubScreen() {
                     specialty: d.specialty,
                     rank: specialtyRank(d.specialty),
                     experience: doctorExperience(d),
-                    rating: doctorRating(d.id),
+                    rating: formatDoctorRatingLabel(d),
                     clinicName: clinicNameMap.get(d.clinicId) ?? "Эмнэлэг",
                     photoUrl: resolveDoctorAvatarUri(d, 96),
                   }));
@@ -223,22 +219,22 @@ export default function DoctorsHubScreen() {
                     <AppImage
                       source={{ uri: doctor.photoUrl }}
                       fallbackIcon="doctor"
-                      className="h-16 w-16 rounded-2xl border border-slate-200 dark:border-slate-700"
+                      className="h-16 w-16 rounded-2xl border border-app-border"
                     />
                     <View className="min-w-0 flex-1">
-                      <Text className="text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                      <Text className="text-sm font-semibold text-app-text" numberOfLines={1}>
                         {doctor.name}
                       </Text>
                       <Text className="mt-1 text-xs text-brand-700 dark:text-brand-300" numberOfLines={2}>
                         {doctor.specialty}
                       </Text>
-                      <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                      <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={2}>
                         {doctor.rank}
                       </Text>
-                      <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                      <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={2}>
                         Туршлага: {doctor.experience} · Үнэлгээ: {doctor.rating}
                       </Text>
-                      <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={2}>
+                      <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={2}>
                         {doctor.clinicName}
                       </Text>
                     </View>

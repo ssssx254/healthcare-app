@@ -43,7 +43,7 @@ export default function PaymentScreen() {
     <>
       <Stack.Screen options={{ title: "Төлбөр" }} />
       <FormScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Төлбөр" subtitle="Төлбөрийн модуль — одоогоор жишээ." />
@@ -53,35 +53,35 @@ export default function PaymentScreen() {
 
         {!order ? (
           <Card>
-            <Text className="text-center text-sm text-slate-600 dark:text-slate-300">Захиалга олдсонгүй.</Text>
+            <Text className="text-center text-sm text-app-text-secondary">Захиалга олдсонгүй.</Text>
             <Button label="Миний захиалгууд" className="mt-4" onPress={() => router.replace("/(customer)/my-orders")} />
           </Card>
         ) : order.customerStatus === "confirmed" ? (
           <Card>
-            <Text className="text-sm text-slate-600 dark:text-slate-300">
+            <Text className="text-sm text-app-text-secondary">
               Энэ захиалга аль хэдийн баталгаажсан байна.
             </Text>
             <Button label="Миний захиалгууд" className="mt-4" onPress={() => router.replace("/(customer)/my-orders")} />
           </Card>
         ) : order.kind === "free_online" || order.priceMnt === 0 ? (
           <Card>
-            <Text className="text-sm text-slate-600 dark:text-slate-300">
+            <Text className="text-sm text-app-text-secondary">
               Энэ захиалгад төлбөр шаардлагагүй.
             </Text>
             <Button label="Буцах" className="mt-4" onPress={() => router.replace("/(customer)/my-orders")} />
           </Card>
         ) : order.customerStatus === "cancelled" ? (
           <Card>
-            <Text className="text-sm text-slate-600 dark:text-slate-300">Энэ захиалга цуцлагдсан байна.</Text>
+            <Text className="text-sm text-app-text-secondary">Энэ захиалга цуцлагдсан байна.</Text>
             <Button label="Миний захиалгууд" className="mt-4" onPress={() => router.replace("/(customer)/my-orders")} />
           </Card>
         ) : (
           <Card>
-            <Text className="text-sm text-slate-600 dark:text-slate-300">{order.serviceTitle}</Text>
-            <Text className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-50">
+            <Text className="text-sm text-app-text-secondary">{order.serviceTitle}</Text>
+            <Text className="mt-2 text-2xl font-bold text-app-text">
               {order.priceMnt.toString()} ₮
             </Text>
-            <Text className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            <Text className="mt-3 text-xs text-app-text-muted">
               Төлөв: {orderStatusLabel[order.customerStatus]}
             </Text>
             <Button
@@ -90,7 +90,7 @@ export default function PaymentScreen() {
               className="mt-4"
               onPress={onPay}
             />
-            <Text className="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
+            <Text className="mt-2 text-center text-xs text-app-text-muted">
               Бодит төлбөрийн систем холбогдохоор энд солигдоно.
             </Text>
           </Card>

@@ -41,7 +41,7 @@ export default function ChatScreen() {
     <>
       <Stack.Screen options={{ title: "Чат" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Миний чат" subtitle="Үзүүлэгчтэй хийсэн онлайн зөвлөгөөний ярианууд." />
@@ -81,18 +81,18 @@ export default function ChatScreen() {
                     />
                     <View className="min-w-0 flex-1">
                       <View className="flex-row items-center justify-between">
-                        <Text className="min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-slate-50" numberOfLines={1}>
+                        <Text className="min-w-0 flex-1 text-sm font-semibold text-app-text" numberOfLines={1}>
                           {c.provider.name}
                         </Text>
-                        <Text className="ml-2 text-[11px] text-slate-500 dark:text-slate-400">
+                        <Text className="ml-2 text-[11px] text-app-text-muted">
                           {new Date(c.updatedAtIso).toLocaleTimeString("mn-MN", { hour: "2-digit", minute: "2-digit" })}
                         </Text>
                       </View>
-                      <Text className="mt-0.5 text-xs text-slate-500 dark:text-slate-400" numberOfLines={1}>
+                      <Text className="mt-0.5 text-xs text-app-text-muted" numberOfLines={1}>
                         {c.providerTitle || "Эмнэлэг"}
                       </Text>
                       <View className="mt-1 flex-row items-center justify-between gap-2">
-                        <Text className="min-w-0 flex-1 text-xs text-slate-500 dark:text-slate-400" numberOfLines={1}>
+                        <Text className="min-w-0 flex-1 text-xs text-app-text-muted" numberOfLines={1}>
                           {c.messages[c.messages.length - 1]?.text || "Сүүлд ирсэн мессеж алга"}
                         </Text>
                         <Badge label={String(c.unreadForCustomer)} tone={c.unreadForCustomer > 0 ? "warning" : "neutral"} />

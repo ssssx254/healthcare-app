@@ -27,7 +27,7 @@ export default function DoctorsScreen() {
     <>
       <Stack.Screen options={{ title: "Эмч нар" }} />
       <ScreenScrollView
-        className="flex-1 bg-slate-50 dark:bg-slate-950"
+        className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
         <SectionHeader title="Эмч нар" subtitle="Эмч сонгоод үйлчилгээ үзнэ үү." />
@@ -40,7 +40,7 @@ export default function DoctorsScreen() {
           </Card>
         ) : doctors.length === 0 ? (
           <Card>
-            <Text className="text-center text-slate-600 dark:text-slate-300">Эмч бүртгэлгүй байна.</Text>
+            <Text className="text-center text-app-text-secondary">Эмч бүртгэлгүй байна.</Text>
           </Card>
         ) : (
           <View className="gap-3">
@@ -50,15 +50,15 @@ export default function DoctorsScreen() {
                   <AppImage
                     source={{ uri: resolveDoctorAvatarUri(d, 72) }}
                     fallbackIcon="doctor"
-                    className="h-14 w-14 rounded-2xl border border-slate-200 dark:border-slate-700"
+                    className="h-14 w-14 rounded-2xl border border-app-border"
                   />
                   <View className="min-w-0 flex-1">
                     <View className="flex-row items-center justify-between gap-2">
-                      <Text className="flex-1 text-lg font-semibold text-slate-900 dark:text-slate-50">{d.name}</Text>
+                      <Text className="flex-1 text-lg font-semibold text-app-text">{d.name}</Text>
                       <Badge label={d.specialty} tone="brand" />
                     </View>
-                    <Text className="mt-2 text-sm text-slate-600 dark:text-slate-300">Туршлага: {d.experienceYears} жил</Text>
-                    <Text className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{d.bio}</Text>
+                    <Text className="mt-2 text-sm text-app-text-secondary">Туршлага: {d.experienceYears} жил</Text>
+                    <Text className="mt-2 text-sm leading-6 text-app-text-secondary">{d.bio}</Text>
                     <Button
                       label="Дэлгэрэнгүй"
                       className="mt-4"

@@ -14,10 +14,10 @@ export default function DeleteAccountScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Бүртгэл устгах" }} />
-      <FormScrollView className="flex-1 bg-slate-50 dark:bg-slate-950" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+      <FormScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         <SectionHeader title="Бүртгэл устгах" subtitle="Анхааруулга: Энэ үйлдлийг буцаах боломжгүй." />
         <Card>
-          <Text className="text-sm leading-6 text-slate-700 dark:text-slate-300">
+          <Text className="text-sm leading-6 text-app-text-secondary">
             Бүртгэлээ устгах бол доорх талбарт <Text className="font-semibold">УСТГАХ</Text> гэж бичнэ үү.
           </Text>
           <Input
