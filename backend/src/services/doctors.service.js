@@ -212,4 +212,48 @@ async function updateDoctor(doctorId, ownerUserId, body) {
   return getDoctorById(doctorId);
 }
 
-module.exports = { createDoctor, listDoctors, listFeaturedDoctors, getDoctorById, updateDoctor };
+/**
+ * Эмч устгах — үйлчилгээ, слот, хуваарь хамт. Захиалга/зөвлөгөө байвал зогсооно.
+ */
+async function deleteDoctor(doctorId, ownerUserId) {
+  const id = assertPositiveIntId(doctorId, "id");
+  await assertDoctorInOwnedClinic(id, ownerUserId);
+
+  const [[bookingRow]] = await pool.execute(
+    `SELECT COUNT(*) AS c FROM bookings WHERE doctor_id = ?`,
+    [id],
+  );
+  if (Number(bookingRow?.c || 0) > 0) {
+    throw new AppError(409, "Энэ эмчид холбоотой захиалга байгаа тул устгах боломжгүй.");
+  }
+
+  const [[consultRow]] = await pool.execute(
+    `SELECT COUNT(*) AS c FROM consultation_requests WHERE doctor_id = ?`,
+    [id],
+  );
+  if (Number(consultRow?.c || 0) > 0) {
+    throw new AppError(409, "Энэ эмчид холбоотой зөвлөгөөний хүсэлт байгаа тул устгах боломжгүй.");
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.execute(`DELETE FROM schedule_slots WHERE doctor_id = ?`, [id]);
+    await conn.execute(`DELETE FROM services WHERE doctor_id = ?`, [id]);
+    await conn.execute(`DELETE FROM doctor_weekly_schedules WHERE doctor_id = ?`, [id]);
+    await conn.execute(`DELETE FROM doctor_reviews WHERE doctor_id = ?`, [id]);
+    const [result] = await conn.execute(`DELETE FROM doctors WHERE id = ?`, [id]);
+    await conn.commit();
+    if (!result.affectedRows) {
+      throw new AppError(404, "Эмч олдсонгүй.");
+    }
+    return { id, deleted: true };
+  } catch (e) {
+    await conn.rollback();
+    throw e;
+  } finally {
+    conn.release();
+  }
+}
+
+module.exports = { createDoctor, listDoctors, listFeaturedDoctors, getDoctorById, updateDoctor, deleteDoctor };

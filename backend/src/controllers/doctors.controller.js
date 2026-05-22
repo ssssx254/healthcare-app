@@ -46,4 +46,9 @@ const update = asyncHandler(async (req, res) => {
   return ok(res, row, "Шинэчлэгдлээ");
 });
 
-module.exports = { create, list, listFeatured, getOne, listReviews, createReview, update };
+const remove = asyncHandler(async (req, res) => {
+  const data = await doctorsService.deleteDoctor(req.validatedParams.id, req.user.id);
+  return ok(res, data, "Эмч устгагдлаа.");
+});
+
+module.exports = { create, list, listFeatured, getOne, listReviews, createReview, update, remove };

@@ -29,5 +29,6 @@ router.post(
 router.get("/:id", idParam, doctorsController.getOne);
 router.post("/", requireAuth, requireApprovedProvider, doctorsController.create);
 router.put("/:id", requireAuth, requireApprovedProvider, idParam, doctorsController.update);
+router.delete("/:id", requireAuth, requireApprovedProvider, idParam, doctorsController.remove);
 
 module.exports = router;
