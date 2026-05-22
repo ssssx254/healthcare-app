@@ -14,7 +14,7 @@ export default function HealthFormScreen() {
     if (!draft.symptoms.trim()) {
       setDraftHealth({ symptoms: "" });
     }
-    router.push("/(customer)/booking/confirm");
+    router.push("/(customer)/booking/share-lab-tests");
   };
 
   return (

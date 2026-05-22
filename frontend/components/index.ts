@@ -36,4 +36,5 @@ export { QuickIconMenu, type QuickIconMenuItem, type QuickIconMenuProps } from "
 export { OfflineBanner } from "./OfflineBanner";
 export { ReconnectAutoRefresh } from "./ReconnectAutoRefresh";
 export { PushNotificationBootstrap } from "./PushNotificationBootstrap";
+export { QpayQrCode, type QpayQrCodeProps } from "./QpayQrCode";
 export { ThemeProvider, useAppTheme } from "./ThemeProvider";

@@ -1,6 +1,7 @@
 const { pool } = require("../config/database");
 const { AppError } = require("../utils/appError");
 const { sqlLimitOffset } = require("../utils/paginationSql");
+const { CONSULTATION_TYPES, isConsultationType } = require("../constants/consultationTypes");
 
 function asBool(v, defaultValue = true) {
   if (v === undefined) return defaultValue;
@@ -69,10 +70,17 @@ async function assertNoOverlappingSlot({ doctorId, slotDate, startTime, endTime,
 
 async function createSlot(ownerUserId, body) {
   const { doctor_id, service_id, slot_date, start_time, end_time, is_available } = body;
+  const consultation_type =
+    body.consultation_type && isConsultationType(body.consultation_type)
+      ? body.consultation_type
+      : CONSULTATION_TYPES.PAID_VISIT;
   if (!doctor_id || !slot_date || !start_time || !end_time) {
     throw new AppError(400, "doctor_id, slot_date, start_time, end_time заавал.");
   }
   await assertDoctorOwnedByProvider(doctor_id, ownerUserId);
+  if (consultation_type === CONSULTATION_TYPES.PAID_VISIT && !service_id) {
+    throw new AppError(400, "Төлбөртэй үзлэгийн цагт үйлчилгээ сонгоно уу.");
+  }
   if (service_id) {
     const [sv] = await pool.execute(
       `SELECT id FROM services WHERE id = ? AND (clinic_id = (SELECT clinic_id FROM doctors WHERE id = ?) OR doctor_id = ?) LIMIT 1`,
@@ -95,16 +103,17 @@ async function createSlot(ownerUserId, body) {
   });
   try {
     const [result] = await pool.execute(
-      `INSERT INTO schedule_slots (doctor_id, service_id, slot_date, start_time, end_time, is_available, slot_status)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO schedule_slots (doctor_id, service_id, slot_date, start_time, end_time, is_available, slot_status, consultation_type)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         doctor_id,
-        service_id ?? null,
+        consultation_type === CONSULTATION_TYPES.FREE_CONSULTATION ? null : (service_id ?? null),
         slot_date,
         minutesToTime(startMinutes),
         minutesToTime(endMinutes),
         is_available === false ? 0 : 1,
         is_available === false ? "unavailable" : "available",
+        consultation_type,
       ],
     );
     return getSlotById(result.insertId);
@@ -366,6 +375,13 @@ async function listDoctorAvailableSlotsForCustomer(listQuery) {
   const doctor_id = listQuery.doctor_id;
   const where = [`doctor_id = ?`, `is_available = 1`, `slot_status = 'available'`];
   const params = [doctor_id];
+  if (listQuery.consultation_type) {
+    if (!isConsultationType(listQuery.consultation_type)) {
+      throw new AppError(400, "consultation_type: paid_visit, free_consultation");
+    }
+    where.push(`consultation_type = ?`);
+    params.push(listQuery.consultation_type);
+  }
   if (listQuery.service_id) {
     // service_id NULL слотууд нь эмчийн ерөнхий боломжит цаг тул үйлчилгээ сонгосон үед ч харагдана.
     where.push(`(service_id = ? OR service_id IS NULL)`);
@@ -383,7 +399,9 @@ async function listDoctorAvailableSlotsForCustomer(listQuery) {
   const [[countRow]] = await pool.execute(`SELECT COUNT(*) AS c FROM schedule_slots WHERE ${ws}`, params);
   const total = Number(countRow?.c || 0);
   const [rows] = await pool.execute(
-    `SELECT id, doctor_id, service_id, slot_date, start_time, end_time
+    `SELECT id, doctor_id, service_id,
+            DATE_FORMAT(slot_date, '%Y-%m-%d') AS slot_date,
+            start_time, end_time, consultation_type
      FROM schedule_slots WHERE ${ws}
      ORDER BY slot_date ASC, start_time ASC
      ${sqlLimitOffset(listQuery, { max: 200 })}`,

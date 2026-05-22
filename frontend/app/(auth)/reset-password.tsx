@@ -69,7 +69,7 @@ export default function ResetPasswordScreen() {
 
       {formError ? <AuthMessageBanner variant="error" message={formError} className="mb-4" /> : null}
 
-      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+      <Card className="border-2 border-app-border-strong shadow-md">
         <View className="mb-5 rounded-2xl p-4 bg-app-muted/40">
           <Input
             label="Сэргээх токен"
@@ -85,7 +85,7 @@ export default function ResetPasswordScreen() {
             placeholder="JWT токен"
             error={fieldErrors.token}
             hint="«Нууц үг мартсан»-аас ирсэн бол автоматаар бөглөгдөнө."
-            className="min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
+            className="min-h-[52px] py-4"
           />
           <Input
             label="Шинэ нууц үг"
@@ -100,7 +100,7 @@ export default function ResetPasswordScreen() {
             }}
             placeholder="4–72 тэмдэгт"
             error={fieldErrors.newPassword}
-            className="mt-4 min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
+            className="mt-4 min-h-[52px] py-4"
           />
           <Input
             label="Шинэ нууц үг (давтах)"
@@ -115,7 +115,7 @@ export default function ResetPasswordScreen() {
             }}
             placeholder="Дахин оруулна уу"
             error={fieldErrors.confirmPassword}
-            className="mt-4 min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
+            className="mt-4 min-h-[52px] py-4"
           />
         </View>
 

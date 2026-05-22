@@ -1,6 +1,13 @@
 import { Button, Card, ScreenScrollView, SectionHeader } from "@/components";
 import { useCustomerBooking } from "@/contexts/CustomerBookingContext";
-import { getClinicById, getDoctor, getService, getSlotsByDoctor } from "@/services/customerCatalog";
+import {
+  describeWhyNoSlotsForService,
+  getClinicById,
+  getDoctor,
+  getService,
+  getSlotsByDoctor,
+  localTodayIso,
+} from "@/services/customerCatalog";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -18,20 +25,38 @@ export default function SelectDayScreen() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(draft.slotId);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [emptyHint, setEmptyHint] = useState<string | null>(null);
 
   useEffect(() => {
     const doctor = draft.doctorId ?? doctorId ?? null;
+    const svcId = (draft.serviceId ?? serviceId) || undefined;
     if (!doctor) {
       setSlots([]);
       return;
     }
     let alive = true;
     setLoadError(null);
-    getSlotsByDoctor(doctor, { serviceId: (draft.serviceId ?? serviceId) || undefined })
-      .then((s) => {
+    setEmptyHint(null);
+    getSlotsByDoctor(doctor, {
+      serviceId: svcId,
+      fromDate: localTodayIso(),
+      consultationType: "paid_visit",
+    })
+      .then(async (s) => {
         if (!alive) return;
         setSlots(s);
-        if (s.length > 0) setSelectedDate(s[0].dateIso);
+        if (s.length > 0) {
+          setSelectedDate(s[0].dateIso);
+          return;
+        }
+        if (svcId) {
+          const hint = await describeWhyNoSlotsForService(
+            doctor,
+            svcId,
+            draft.serviceName ?? draft.serviceTitle ?? undefined,
+          );
+          if (alive) setEmptyHint(hint);
+        }
       })
       .catch(() => {
         if (!alive) return;
@@ -41,7 +66,7 @@ export default function SelectDayScreen() {
     return () => {
       alive = false;
     };
-  }, [draft.doctorId, draft.serviceId, doctorId, serviceId, clinicId]);
+  }, [draft.doctorId, draft.serviceId, draft.serviceName, draft.serviceTitle, doctorId, serviceId, clinicId]);
 
   useEffect(() => {
     const id = String(clinicId ?? "").trim();
@@ -84,11 +109,14 @@ export default function SelectDayScreen() {
     };
   }, [doctorId, serviceId, draft.serviceId, setDraftService]);
 
+  const todayIso = localTodayIso();
   const days = useMemo(() => {
     const set = new Set<string>();
-    for (const s of slots ?? []) set.add(s.dateIso);
+    for (const s of slots ?? []) {
+      if (s.dateIso && s.dateIso >= todayIso) set.add(s.dateIso);
+    }
     return Array.from(set).sort();
-  }, [slots]);
+  }, [slots, todayIso]);
 
   const daySlots = useMemo(() => {
     if (!selectedDate) return [];
@@ -124,7 +152,14 @@ export default function SelectDayScreen() {
           </Card>
         ) : days.length === 0 ? (
           <Card>
-            <Text className="text-sm text-app-text-secondary">Сонгох боломжтой өдөр алга байна.</Text>
+            <Text className="text-sm font-medium text-app-text">Сонгох боломжтой өдөр алга байна.</Text>
+            {emptyHint ? (
+              <Text className="mt-2 text-sm leading-6 text-app-text-secondary">{emptyHint}</Text>
+            ) : (
+              <Text className="mt-2 text-sm leading-6 text-app-text-secondary">
+                Эмчийн хуваарьт ирээдүйн цаг байхгүй эсвэл бүх цаг захиалагдсан байж болно.
+              </Text>
+            )}
           </Card>
         ) : (
           <View className="gap-3">
@@ -140,7 +175,7 @@ export default function SelectDayScreen() {
                       className={`rounded-xl border px-3 py-2 ${
                         active
                           ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                          : "border-slate-200 bg-white border-app-border bg-app-card"
+                          : "border-app-border bg-app-muted"
                       }`}
                     >
                       <Text className={`text-xs font-medium ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"}`}>
@@ -172,7 +207,7 @@ export default function SelectDayScreen() {
                         className={`min-w-[88px] rounded-xl border px-3 py-3 ${
                           active
                             ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                            : "border-slate-200 bg-white border-app-border bg-app-card"
+                            : "border-app-border bg-app-muted"
                         }`}
                       >
                         <Text className={`text-center text-sm font-semibold ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text"}`}>
@@ -193,12 +228,21 @@ export default function SelectDayScreen() {
               label="Цаг авах"
               disabled={!selectedDate || !selectedSlotId}
               onPress={() => {
-                if (!selectedDate || !selectedSlotId) return;
-                const picked = daySlots.find((s) => s.id === selectedSlotId);
-                if (!picked) return;
-                const selectedTime = picked.label.replace(picked.dateIso, "").trim() || picked.label;
-                setDraftSlot(picked.id, picked.label, picked.dateIso, selectedTime);
-                router.push("/(customer)/health-form");
+                void (async () => {
+                  if (!selectedDate || !selectedSlotId) return;
+                  const picked = daySlots.find((s) => s.id === selectedSlotId);
+                  if (!picked) return;
+                  const dId = draft.doctorId ?? doctorId;
+                  if (picked.serviceId && dId && picked.serviceId !== draft.serviceId) {
+                    const svc = await getService(dId, picked.serviceId);
+                    if (svc) {
+                      setDraftService(svc.id, svc.title, svc.kind, svc.priceMnt, svc.durationMinutes);
+                    }
+                  }
+                  const selectedTime = picked.label.replace(picked.dateIso, "").trim() || picked.label;
+                  setDraftSlot(picked.id, picked.label, picked.dateIso, selectedTime);
+                  router.push("/(customer)/health-form");
+                })();
               }}
             />
           </View>

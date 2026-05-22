@@ -63,7 +63,7 @@ export default function ForgotPasswordScreen() {
 
       {formError ? <AuthMessageBanner variant="error" message={formError} className="mb-4" /> : null}
 
-      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+      <Card className="border-2 border-app-border-strong shadow-md">
         <View className="mb-5 rounded-2xl p-4 bg-app-muted/40">
           <Input
             label="Имэйл эсвэл утас"
@@ -80,7 +80,7 @@ export default function ForgotPasswordScreen() {
             placeholder="жишээ@имэйл.mn эсвэл 99112233"
             error={fieldError}
             hint="Бүртгэлд бүртгэсэн хаяг эсвэл утасны дугаараа оруулна уу."
-            className="min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
+            className="min-h-[52px] py-4"
           />
         </View>
 

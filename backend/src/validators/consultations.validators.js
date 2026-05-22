@@ -9,6 +9,16 @@ function validateConsultationCreateBody(body) {
     doctor_id = assertPositiveIntId(body.doctor_id, "doctor_id");
   }
   const patient_message = optionalTrimmedString(body.patient_message, 2000);
+  const symptoms = optionalTrimmedString(body.symptoms, 4000);
+  const question = optionalTrimmedString(body.question, 4000);
+  const notes = optionalTrimmedString(body.notes, 4000);
+  let slot_id;
+  if (body.slot_id !== undefined && body.slot_id !== null && body.slot_id !== "") {
+    slot_id = assertPositiveIntId(body.slot_id, "slot_id");
+  }
+  if (!symptoms && !question && !patient_message) {
+    throw new AppError(400, "Биеийн байдал эсвэл асуух зүйл оруулна уу.");
+  }
   let request_type =
     typeof body.request_type === "string" && body.request_type.trim()
       ? body.request_type.trim().toLowerCase().slice(0, 64)
@@ -23,7 +33,17 @@ function validateConsultationCreateBody(body) {
   if (!is_free) {
     throw new AppError(400, "Төлбөртэй цагийн захиалгыг захиалгын endpoint ашиглана уу.");
   }
-  return { clinic_id, doctor_id, patient_message, request_type, is_free: true };
+  return {
+    clinic_id,
+    doctor_id,
+    slot_id,
+    patient_message,
+    symptoms,
+    question,
+    notes,
+    request_type,
+    is_free: true,
+  };
 }
 
 function validateConsultationUpdateBody(body) {
@@ -37,9 +57,10 @@ function validateConsultationUpdateBody(body) {
   }
   if (body.meeting_link !== undefined) out.meeting_link = body.meeting_link;
   if (body.provider_message !== undefined) out.provider_message = body.provider_message;
+  if (body.provider_notes !== undefined) out.provider_notes = body.provider_notes;
   if (body.open_chat !== undefined) out.open_chat = body.open_chat;
   if (Object.keys(out).length === 0) {
-    throw new AppError(400, "Шинэчлэх талбар оруулна уу (status, meeting_link, provider_message, open_chat).");
+    throw new AppError(400, "Шинэчлэх талбар оруулна уу (status, meeting_link, provider_notes, open_chat).");
   }
   return out;
 }

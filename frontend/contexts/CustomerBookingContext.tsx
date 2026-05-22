@@ -1,5 +1,6 @@
 import { consultationNumericId, isConsultationOrderId, toConsultationOrderId } from "@/lib/api/orderIds";
 import { bookingApi } from "@/services/api/bookingApi";
+import type { PayBookingBody } from "@/services/api/walletApi";
 import { clinicApi } from "@/services/api/clinicApi";
 import { consultationApi } from "@/services/api/consultationApi";
 import { doctorApi } from "@/services/api/doctorApi";
@@ -61,17 +62,19 @@ type CustomerBookingContextValue = {
   setDraftService: (id: string, title: string, kind: ServiceKind, priceMnt: number, durationMinutes: number) => void;
   setDraftSlot: (id: string, label: string, date?: string | null, time?: string | null) => void;
   setDraftHealth: (patch: Partial<Pick<BookingDraft, "symptoms" | "chronicIllness" | "medications" | "allergies">>) => void;
+  setSharedLabTestIds: (ids: number[]) => void;
   resetDraft: () => void;
   createFormalOrderAfterConfirm: () => Promise<CustomerOrder | null>;
-  completePayment: (orderId: string) => Promise<void>;
+  completePayment: (orderId: string, payment?: PayBookingBody) => Promise<void>;
   addFreeConsultOrder: (params: {
     clinicId: string;
     clinicName: string;
     doctorId: string;
     doctorName: string;
-    serviceId: string;
-    serviceTitle: string;
-    patientMessage?: string | null;
+    slotId: number;
+    symptoms: string;
+    question: string;
+    notes?: string | null;
   }) => Promise<CustomerOrder | null>;
   cancelOrder: (orderId: string) => Promise<void>;
 };
@@ -105,6 +108,7 @@ const emptyDraft = (): BookingDraft => ({
   medications: "",
   allergies: "",
   questionnaireCompleted: false,
+  sharedLabTestIds: [],
 });
 
 const CustomerBookingContext = createContext<CustomerBookingContextValue | null>(null);
@@ -218,9 +222,15 @@ export function CustomerBookingProvider({ children }: { children: ReactNode }) {
   const setDraftSlot = useCallback((id: string, label: string, date?: string | null, time?: string | null) => {
     const raw = label.trim();
     const parts = raw.split(" ");
-    const selectedDate = date ?? parts[0] ?? null;
+    const rawDate = date ?? parts[0] ?? null;
+    const dateMatch = rawDate != null ? String(rawDate).match(/^(\d{4}-\d{2}-\d{2})/) : null;
+    const selectedDate = dateMatch ? dateMatch[1] : rawDate;
     const selectedTime = time ?? (parts.slice(1).join(" ").trim() || null);
     setDraft((d) => ({ ...d, slotId: id, slotLabel: label, selectedDate, selectedTime, bookingId: null }));
+  }, []);
+
+  const setSharedLabTestIds = useCallback((ids: number[]) => {
+    setDraft((d) => ({ ...d, sharedLabTestIds: ids }));
   }, []);
 
   const setDraftHealth = useCallback(
@@ -274,6 +284,7 @@ export function CustomerBookingProvider({ children }: { children: ReactNode }) {
       doctor_id: Number(draft.doctorId),
       service_id: Number(draft.serviceId),
       slot_id: Number(draft.slotId),
+      lab_test_ids: draft.sharedLabTestIds.length > 0 ? draft.sharedLabTestIds : undefined,
     });
     setDraft((d) => ({ ...d, bookingId: String(created.id) }));
     void notifyBookingCreated();
@@ -293,11 +304,21 @@ export function CustomerBookingProvider({ children }: { children: ReactNode }) {
   }, [draft, buildHealthAnswers, refreshOrders]);
 
   const completePayment = useCallback(
-    async (orderId: string) => {
+    async (orderId: string, payment?: PayBookingBody) => {
       if (isConsultationOrderId(orderId)) {
         throw new Error("Үнэгүй зөвлөгөөнд төлбөр шаардлагагүй.");
       }
-      await bookingApi.markPaid(orderId);
+      const body: PayBookingBody = payment ?? {
+        booking_id: Number(orderId),
+        channel: "wallet",
+      };
+      if (body.channel === "qpay" && body.qpay_invoice_id) {
+        void notifyPaymentSucceeded();
+        await refreshOrders();
+        resetDraft();
+        return;
+      }
+      await bookingApi.markPaid(orderId, body);
       void notifyPaymentSucceeded();
       await refreshOrders();
       resetDraft();
@@ -311,14 +332,18 @@ export function CustomerBookingProvider({ children }: { children: ReactNode }) {
       clinicName: string;
       doctorId: string;
       doctorName: string;
-      serviceId: string;
-      serviceTitle: string;
-      patientMessage?: string | null;
+      slotId: number;
+      symptoms: string;
+      question: string;
+      notes?: string | null;
     }): Promise<CustomerOrder | null> => {
       const created = await consultationApi.create({
         clinic_id: Number(params.clinicId),
-        doctor_id: params.doctorId ? Number(params.doctorId) : null,
-        patient_message: params.patientMessage?.trim() || null,
+        doctor_id: Number(params.doctorId),
+        slot_id: params.slotId,
+        symptoms: params.symptoms.trim(),
+        question: params.question.trim(),
+        notes: params.notes?.trim() || null,
         request_type: "online",
         is_free: true,
       });
@@ -359,6 +384,7 @@ export function CustomerBookingProvider({ children }: { children: ReactNode }) {
       setDraftService,
       setDraftSlot,
       setDraftHealth,
+      setSharedLabTestIds,
       resetDraft,
       createFormalOrderAfterConfirm,
       completePayment,
@@ -376,6 +402,7 @@ export function CustomerBookingProvider({ children }: { children: ReactNode }) {
       setDraftService,
       setDraftSlot,
       setDraftHealth,
+      setSharedLabTestIds,
       resetDraft,
       createFormalOrderAfterConfirm,
       completePayment,

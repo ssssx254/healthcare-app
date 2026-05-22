@@ -14,7 +14,8 @@ export default function ProfileScreen() {
     label: string;
     icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
   }> = [
-    { href: "/wallet", label: "Цахим данс (хэтэвч)", icon: "wallet-outline" },
+    { href: routes.customerWallet, label: "Цахим данс (хэтэвч)", icon: "wallet-outline" },
+    { href: routes.customerPaymentMethods, label: "Төлбөрийн арга", icon: "credit-card-settings-outline" },
     { href: "/profile/personal-info", label: "Хувийн мэдээлэл", icon: "account-edit-outline" },
     { href: "/profile/change-password", label: "Нууц үг солих", icon: "lock-reset" },
     { href: "/profile/terms", label: "Үйлчилгээний нөхцөл", icon: "file-document-outline" },

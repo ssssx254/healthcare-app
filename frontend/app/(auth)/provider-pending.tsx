@@ -63,7 +63,7 @@ export default function ProviderPendingScreen() {
         className="mb-4"
       />
 
-      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+      <Card className="border-2 border-app-border-strong shadow-md">
         <Text className="text-sm leading-6 text-app-text-secondary">
           Илгээсэн мэдээллийг шинэчлэх шаардлагатай бол дэмжлэгтэй холбогдож эсвэл дахин нэвтэрч шалгана уу.
         </Text>

@@ -9,6 +9,7 @@ const {
   isLabFileType,
 } = require("../constants/labTests");
 const labTestsRepo = require("../repositories/labTests.repository");
+const bookingLabTestsRepo = require("../repositories/bookingLabTests.repository");
 
 const MAX_FILE_DATA_URL = 2_500_000;
 
@@ -56,7 +57,7 @@ function normalizeFileField(url, type, label) {
   throw new AppError(400, `${label} буруу форматтай байна.`);
 }
 
-async function assertPatientVisibleToProvider(patientUserId, providerUserId) {
+async function assertPatientHasBookingWithProvider(patientUserId, providerUserId) {
   const [rows] = await pool.execute(
     `SELECT b.id FROM bookings b
      INNER JOIN clinics c ON c.id = b.clinic_id
@@ -65,8 +66,27 @@ async function assertPatientVisibleToProvider(patientUserId, providerUserId) {
     [patientUserId, providerUserId],
   );
   if (!rows[0]) {
-    throw new AppError(403, "Энэ өвчтөний шинжилгээг харах эрхгүй.");
+    throw new AppError(403, "Энэ өвчтөний мэдээллийг харах эрхгүй.");
   }
+}
+
+async function assertProviderCanViewLabTest(labTestId, providerUserId) {
+  const row = await labTestsRepo.getById(labTestId);
+  if (!row) throw new AppError(404, "Шинжилгээ олдсонгүй.");
+
+  if (row.uploaded_by === LAB_UPLOADED_BY.CLINIC) {
+    if (row.clinic_id) {
+      await assertClinicOwnedByProvider(row.clinic_id, providerUserId);
+      await assertPatientHasBookingWithProvider(row.patient_user_id, providerUserId);
+      return row;
+    }
+  }
+
+  const shared = await bookingLabTestsRepo.isSharedWithProvider(labTestId, providerUserId);
+  if (!shared) {
+    throw new AppError(403, "Энэ шинжилгээг харах эрхгүй. Үйлчлүүлэгч эмчид хуваалаагүй байна.");
+  }
+  return row;
 }
 
 async function assertClinicOwnedByProvider(clinicId, providerUserId) {
@@ -87,10 +107,7 @@ async function getLabTestForCustomer(id, customerUserId) {
 }
 
 async function getLabTestForProvider(id, providerUserId) {
-  const row = await labTestsRepo.getById(id);
-  if (!row) throw new AppError(404, "Шинжилгээ олдсонгүй.");
-  await assertPatientVisibleToProvider(row.patient_user_id, providerUserId);
-  return row;
+  return assertProviderCanViewLabTest(id, providerUserId);
 }
 
 async function listMyLabTests(customerUserId, query) {
@@ -149,20 +166,22 @@ async function listProviderLabTests(providerUserId, query) {
     query.patient_user_id != null && query.patient_user_id !== ""
       ? assertPositiveIntId(query.patient_user_id, "patient_user_id")
       : undefined;
-  const clinic_id =
-    query.clinic_id != null && query.clinic_id !== ""
-      ? assertPositiveIntId(query.clinic_id, "clinic_id")
+  const booking_id =
+    query.booking_id != null && query.booking_id !== ""
+      ? assertPositiveIntId(query.booking_id, "booking_id")
       : undefined;
   const doctor_id =
     query.doctor_id != null && query.doctor_id !== ""
       ? assertPositiveIntId(query.doctor_id, "doctor_id")
       : undefined;
-  if (clinic_id) await assertClinicOwnedByProvider(clinic_id, providerUserId);
-  return labTestsRepo.listForProvider(providerUserId, { patient_user_id, clinic_id, doctor_id });
+  if (patient_user_id) {
+    await assertPatientHasBookingWithProvider(patient_user_id, providerUserId);
+  }
+  return labTestsRepo.listSharedForProvider(providerUserId, { patient_user_id, booking_id, doctor_id });
 }
 
 async function updateProviderLabTest(providerUserId, id, body) {
-  const existing = await getLabTestForProvider(id, providerUserId);
+  const existing = await assertProviderCanViewLabTest(id, providerUserId);
   const fields = {};
 
   if (body.result_text !== undefined) {
@@ -212,7 +231,7 @@ async function createProviderLabTest(providerUserId, body) {
   const patient_user_id = assertPositiveIntId(body.patient_user_id, "patient_user_id");
   const clinic_id = assertPositiveIntId(body.clinic_id, "clinic_id");
   await assertClinicOwnedByProvider(clinic_id, providerUserId);
-  await assertPatientVisibleToProvider(patient_user_id, providerUserId);
+  await assertPatientHasBookingWithProvider(patient_user_id, providerUserId);
 
   const title = assertTitle(body.title);
   const test_type = assertTestType(body.test_type);

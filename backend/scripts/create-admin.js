@@ -11,6 +11,7 @@
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const mysql = require("mysql2/promise");
+const { getDbConnectOptions } = require("./dbConnectOptions");
 
 const SALT_ROUNDS = 10;
 
@@ -65,13 +66,7 @@ async function main() {
 
   const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
 
-  const conn = await mysql.createConnection({
-    host: process.env.DB_HOST || "127.0.0.1",
-    port: Number(process.env.DB_PORT) || 3306,
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD ?? "",
-    database: process.env.DB_NAME || "healthcare_db",
-  });
+  const conn = await mysql.createConnection(getDbConnectOptions());
 
   try {
     const hasOnboarding = await usersHasColumn(conn, "onboarding_status");

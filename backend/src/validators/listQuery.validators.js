@@ -200,7 +200,11 @@ function validateScheduleSlotsAvailableListQuery(q) {
   }
   const from_date = optionalDateString(q.from_date, "from_date");
   const to_date = optionalDateString(q.to_date, "to_date");
-  return { page, pageSize, offset, doctor_id, service_id, from_date, to_date };
+  let consultation_type;
+  if (q.consultation_type !== undefined && q.consultation_type !== null && String(q.consultation_type).trim() !== "") {
+    consultation_type = String(q.consultation_type).trim();
+  }
+  return { page, pageSize, offset, doctor_id, service_id, from_date, to_date, consultation_type };
 }
 
 function validateNotificationsListQuery(q) {

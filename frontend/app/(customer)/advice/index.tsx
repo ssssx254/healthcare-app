@@ -56,7 +56,7 @@ export default function AdviceListScreen() {
                   className={`rounded-full border px-3 py-2 ${
                     active
                       ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                      : "border-slate-200 bg-white border-app-border bg-app-card"
+                      : "border-app-border bg-app-muted"
                   }`}
                 >
                   <Text className={`text-xs font-medium ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"}`}>{c}</Text>
@@ -73,7 +73,11 @@ export default function AdviceListScreen() {
 
         <View className="gap-3">
           {filtered.map((article) => (
-            <Link key={article.id} href={{ pathname: "/advice/[articleId]", params: { articleId: article.id } }} asChild>
+            <Link
+              key={article.id}
+              href={{ pathname: "/(customer)/advice/[articleId]", params: { articleId: article.id } }}
+              asChild
+            >
               <Pressable className="active:opacity-95">
                 <Card padded={false} className="overflow-hidden">
                   <AppImage

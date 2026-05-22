@@ -24,7 +24,7 @@ const listForProvider = asyncHandler(async (req, res) => {
 
 const createForProvider = asyncHandler(async (req, res) => {
   const row = await labTestsService.createProviderLabTest(req.user.id, req.body);
-  return created(res, row, "Шинжилгээний хариу бүртгэгдлээ");
+  return created(res, row, "Шинжилгээний хариу илгээгдлээ");
 });
 
 const getForProvider = asyncHandler(async (req, res) => {
@@ -34,7 +34,11 @@ const getForProvider = asyncHandler(async (req, res) => {
 
 const updateForProvider = asyncHandler(async (req, res) => {
   const row = await labTestsService.updateProviderLabTest(req.user.id, req.validatedParams.id, req.body);
-  return ok(res, row, "Шинэчлэгдлээ");
+  const st = req.body?.status;
+  let message = "Хадгалагдлаа";
+  if (st === "reviewed") message = "Шалгасан боллоо";
+  else if (st === "completed") message = "Шинжилгээний хариу илгээгдлээ";
+  return ok(res, row, message);
 });
 
 module.exports = {

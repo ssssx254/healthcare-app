@@ -4,10 +4,14 @@ import { Platform } from "react-native";
 /**
  * Backend API суурь хаяг — зөвхөн `getApiBaseUrl()` ашиглана (`lib/api/client.ts`).
  *
- * Production (Firebase / `expo export`):
- *   EXPO_PUBLIC_API_URL=https://healthcare-app-8bwy.onrender.com/api
- *   EXPO_PUBLIC_APP_ENV=production
- *   (`.env.production` — `npm run export:web` NODE_ENV=production-тай уншина)
+ * Дараалал (Expo Go `.env` болон static export ижил):
+ *   1. `EXPO_PUBLIC_API_URL` (.env)
+ *   2. `extra.apiUrl` (app.config build-time)
+ *   3. `EXPO_PUBLIC_APP_ENV=production` + хоосон URL → `PRODUCTION_API_URL_FALLBACK` (__DEV__ Expo Go)
+ *
+ * Expo Go (default): `.env` → `development` + локал backend (`npm start` in backend).
+ * Web deploy: зөвхөн `.env.production` → Render (`npm run deploy:web`).
+ * Expo + production API турших: `npm run start:cloud`.
  */
 
 export const API_SERVER_PORT = 4000;
@@ -128,16 +132,20 @@ function resolveConfiguredApiUrl(): string {
 
 /**
  * Бүх REST дуудлагын суурь URL (`…/api`).
+ * `EXPO_PUBLIC_API_URL` тохируулсан бол LAN/localhost fallback ашиглахгүй.
  */
 export function getApiBaseUrl(): string {
+  const appEnv = resolveApiEnvironment();
+
   const configured = resolveConfiguredApiUrl();
   if (configured) {
     return configured;
   }
 
-  const appEnv = resolveApiEnvironment();
-
   if (appEnv === "production") {
+    if (__DEV__ && isValidApiBaseUrl(PRODUCTION_API_URL_FALLBACK)) {
+      return normalizeBase(PRODUCTION_API_URL_FALLBACK);
+    }
     productionMisconfiguredError();
   }
 

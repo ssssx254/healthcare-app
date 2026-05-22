@@ -54,7 +54,14 @@ function isImageUploadPayload(json: unknown): boolean {
 function shouldBlockWhenOffline(method: string, path: string, json: unknown): boolean {
   if (method === "GET") return false;
   if (path === "/bookings" && method === "POST") return true; // booking creation
-  if (path.includes("/payment") || path.startsWith("/wallet") || path.includes("pay-booking")) return true; // payments
+  if (
+    path.includes("/payment") ||
+    path.startsWith("/wallet") ||
+    path.startsWith("/payment-methods") ||
+    path.includes("pay-booking")
+  ) {
+    return true; // payments
+  }
   if (/^\/chat\/conversations\/[^/]+\/messages$/.test(path) && method === "POST") return true; // chat send
   if (isImageUploadPayload(json)) return true; // image upload
   if (path.startsWith("/lab-tests") && method === "POST") return true;

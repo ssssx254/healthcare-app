@@ -1,12 +1,15 @@
 const express = require("express");
 const walletController = require("../controllers/wallet.controller");
+const paymentMethodsController = require("../controllers/paymentMethods.controller");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { validateBody, validateQuery } = require("../middleware/validate");
+const { validateCreatePaymentMethodBody } = require("../validators/paymentMethods.validators");
 const { validateWalletTransactionsQuery } = require("../validators/listQuery.validators");
 const {
   validatePayBookingBody,
   validateQpayInvoiceBody,
   validateQpayConfirmBody,
+  validateQpayBookingInvoiceBody,
 } = require("../validators/wallet.validators");
 
 const router = express.Router();
@@ -34,14 +37,35 @@ router.get(
   validateQuery(validateWalletTransactionsQuery),
   walletController.transactions,
 );
-router.get("/payment-methods", requireAuth, requireRole("customer"), walletController.paymentMethodsList);
-router.post("/payment-methods", requireAuth, requireRole("customer"), walletController.paymentMethodsCreate);
+/** Хуучин зам — шинэ `payment_methods` API-тай ижил (compat). */
+router.get("/payment-methods", requireAuth, requireRole("customer"), paymentMethodsController.list);
+router.post(
+  "/payment-methods",
+  requireAuth,
+  requireRole("customer"),
+  validateBody(validateCreatePaymentMethodBody),
+  paymentMethodsController.create,
+);
 router.post(
   "/pay-booking",
   requireAuth,
   requireRole("customer"),
   validateBody(validatePayBookingBody),
   walletController.payBooking,
+);
+router.post(
+  "/qpay/booking-invoice",
+  requireAuth,
+  requireRole("customer"),
+  validateBody(validateQpayBookingInvoiceBody),
+  walletController.qpayBookingInvoice,
+);
+router.post(
+  "/qpay/booking-confirm",
+  requireAuth,
+  requireRole("customer"),
+  validateBody(validateQpayConfirmBody),
+  walletController.qpayBookingConfirm,
 );
 
 module.exports = router;

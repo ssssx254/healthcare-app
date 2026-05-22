@@ -1,5 +1,6 @@
 import { Button, Card, Input, ScreenScrollView, SectionHeader } from "@/components";
 import { LabAttachmentPickerField } from "@/components/LabAttachmentPickerField";
+import { labTestSuccessMessage } from "@/constants/labTestStatus";
 import { labTestsApi } from "@/services/api/labTestsApi";
 import type { PickedLabFile } from "@/lib/labFilePick";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
@@ -56,7 +57,7 @@ export default function ProviderAddLabTestScreen() {
         result_file_url: resultFile?.dataUrl ?? null,
         result_file_type: resultFile?.fileType ?? null,
       });
-      Alert.alert("Амжилттай", "Шинжилгээний хариу бүртгэгдлээ.");
+      Alert.alert("Амжилттай", labTestSuccessMessage.providerResultSent);
       router.back();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Хадгалахад алдаа гарлаа.";

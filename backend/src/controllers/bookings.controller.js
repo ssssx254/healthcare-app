@@ -30,14 +30,20 @@ const getOne = asyncHandler(async (req, res) => {
   return ok(res, row);
 });
 
+const listSharedLabTests = asyncHandler(async (req, res) => {
+  const data = await bookingsService.listBookingSharedLabTests(req.validatedParams.id, req.user);
+  return ok(res, data);
+});
+
 const updateStatus = asyncHandler(async (req, res) => {
   const row = await bookingsService.updateBookingStatus(req.validatedParams.id, req.user, req.body);
   return ok(res, row, "Захиалга шинэчлэгдлээ");
 });
 
 const markPaid = asyncHandler(async (req, res) => {
-  const row = await bookingsService.markBookingPaid(req.validatedParams.id, req.user);
-  return ok(res, row, "Төлбөр бүртгэгдлээ");
+  const row = await bookingsService.markBookingPaid(req.validatedParams.id, req.user, req.body);
+  const data = row?.booking ?? row;
+  return ok(res, data, "Төлбөр бүртгэгдлээ");
 });
 
 const cancel = asyncHandler(async (req, res) => {
@@ -45,4 +51,14 @@ const cancel = asyncHandler(async (req, res) => {
   return ok(res, row, "Захиалга цуцлагдлаа");
 });
 
-module.exports = { create, list, listCustomer, listProvider, getOne, updateStatus, cancel, markPaid };
+module.exports = {
+  create,
+  list,
+  listCustomer,
+  listProvider,
+  getOne,
+  listSharedLabTests,
+  updateStatus,
+  cancel,
+  markPaid,
+};

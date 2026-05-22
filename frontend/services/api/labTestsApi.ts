@@ -85,11 +85,13 @@ export const labTestsApi = {
     patient_user_id?: number;
     clinic_id?: number;
     doctor_id?: number;
+    booking_id?: number;
   }): Promise<LabTestsListResponse> {
     const q = new URLSearchParams();
     if (params?.patient_user_id) q.set("patient_user_id", String(params.patient_user_id));
     if (params?.clinic_id) q.set("clinic_id", String(params.clinic_id));
     if (params?.doctor_id) q.set("doctor_id", String(params.doctor_id));
+    if (params?.booking_id) q.set("booking_id", String(params.booking_id));
     const suffix = q.toString() ? `?${q.toString()}` : "";
     return apiRequest<LabTestsListResponse>(`/lab-tests${suffix}`, { method: "GET" });
   },

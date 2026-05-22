@@ -44,7 +44,7 @@ export default function LoginScreen() {
     setFormError(null);
     try {
       setLoading(true);
-      const user = await signIn({ email: normalized, password });
+      const user = await signIn({ email: normalized, password: password.trim() });
       if (user.role === "customer") {
         router.replace(routes.customerHome);
       } else if (user.role === "provider") {
@@ -81,7 +81,7 @@ export default function LoginScreen() {
 
       {formError ? <AuthMessageBanner variant="error" message={formError} className="mb-5" /> : null}
 
-      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+      <Card className="border-2 border-app-border-strong shadow-md">
         <Text className="mb-5 text-xs font-bold uppercase tracking-wider text-app-text-muted">
           Нэвтрэх мэдээлэл
         </Text>
@@ -103,7 +103,7 @@ export default function LoginScreen() {
             placeholder="нэр@имэйл.mn"
             error={errors.email}
             hint="Бүртгэлтэй имэйл хаягаа оруулна уу."
-            className="min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
+            className="min-h-[52px] py-4"
           />
           <Input
             label="Нууц үг"
@@ -119,7 +119,7 @@ export default function LoginScreen() {
             placeholder="Нууц үгээ оруулна уу"
             error={errors.password}
             hint="Түлхүүр үгээ нууцлан хадгална уу."
-            className="min-h-[52px] border-slate-200 bg-white py-4 border-app-border-strong bg-app-card"
+            className="min-h-[52px] py-4"
           />
         </View>
 
@@ -148,7 +148,7 @@ export default function LoginScreen() {
 
         <Button label="Нэвтрэх" loading={loading} onPress={onLogin} className="min-h-[54px] shadow-md" />
 
-        <View className="mt-8 border-t border-slate-200 pt-6 border-app-border">
+        <View className="mt-8 border-t border-app-border pt-6">
           <Link href={routes.register} asChild>
             <Pressable
               accessibilityRole="link"

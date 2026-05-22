@@ -24,6 +24,7 @@ export default function AddSlotScreen() {
   const [dateIso, setDateIso] = useState(localTodayIso());
   const doctorServices = services.filter((s) => s.doctorId === doctorId && s.isActive !== false);
   const [serviceId, setServiceId] = useState("");
+  const [slotKind, setSlotKind] = useState<"paid_visit" | "free_consultation">("paid_visit");
 
   useEffect(() => {
     if (doctorServices.length === 0) {
@@ -42,7 +43,7 @@ export default function AddSlotScreen() {
     const e: Record<string, string> = {};
     setFormError(null);
     if (!doctorId) e.doc = "Эмч сонгоно уу.";
-    if (!serviceId) e.service = "Үйлчилгээ сонгоно уу.";
+    if (slotKind === "paid_visit" && !serviceId) e.service = "Үйлчилгээ сонгоно уу.";
     const dateErr = validateDateIsoMn(dateIso);
     if (dateErr) e.date = dateErr;
     if (!label.trim()) e.label = "Цагийн хүрээ оруулна уу (жишээ: 10:00 – 11:00).";
@@ -63,10 +64,11 @@ export default function AddSlotScreen() {
       try {
         await addSlot({
           doctorId,
-          serviceId,
+          serviceId: slotKind === "paid_visit" ? serviceId : null,
           dateIso: dateIso.trim(),
           startTime: range.start,
           endTime: range.end,
+          consultationType: slotKind,
         });
         router.replace(routes.providerSchedule);
       } catch (err) {
@@ -95,6 +97,24 @@ export default function AddSlotScreen() {
             <Text className="text-sm font-medium text-red-800 dark:text-red-200">{formError}</Text>
           </Card>
         ) : null}
+        <Card className="mb-3">
+          <ProviderFormSection title="Цагийн төрөл" description="Үнэгүй зөвлөгөө эсвэл төлбөртэй үзлэг.">
+            <View className="flex-row gap-2">
+              <Button
+                label="Төлбөртэй үзлэг"
+                variant={slotKind === "paid_visit" ? "primary" : "outline"}
+                className="flex-1"
+                onPress={() => setSlotKind("paid_visit")}
+              />
+              <Button
+                label="Үнэгүй зөвлөгөө"
+                variant={slotKind === "free_consultation" ? "primary" : "outline"}
+                className="flex-1"
+                onPress={() => setSlotKind("free_consultation")}
+              />
+            </View>
+          </ProviderFormSection>
+        </Card>
         <Card>
           <ProviderFormSection
             title="Эмч"
@@ -118,6 +138,8 @@ export default function AddSlotScreen() {
               </View>
             )}
             {errors.doc ? <Text className="mb-2 text-xs text-red-600 dark:text-red-400">{errors.doc}</Text> : null}
+            {slotKind === "paid_visit" ? (
+            <>
             <Text className="mb-2 text-sm font-medium text-app-text">Үйлчилгээ</Text>
             {doctorServices.length === 0 ? (
               <Text className="mb-2 text-xs text-amber-700 dark:text-amber-300">Энэ эмчид идэвхтэй үйлчилгээ алга. Эхлээд үйлчилгээ нэмнэ үү.</Text>
@@ -135,6 +157,12 @@ export default function AddSlotScreen() {
               </View>
             )}
             {errors.service ? <Text className="mb-2 text-xs text-red-600 dark:text-red-400">{errors.service}</Text> : null}
+            </>
+            ) : (
+              <Text className="mb-2 text-xs text-app-text-muted">
+                Үнэгүй зөвлөгөөний цаг — үйлчлүүлэгч энэ цагийг сонгож хүсэлт илгээнэ.
+              </Text>
+            )}
           </ProviderFormSection>
         </Card>
         <Card className="mt-3">

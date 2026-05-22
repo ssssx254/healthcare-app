@@ -1,4 +1,5 @@
 import { AuthMessageBanner, Button, Card, FormScrollView, SectionHeader } from "@/components";
+import { getPaymentStatusLabel } from "@/constants/paymentStatus";
 import { formatMnt } from "@/lib/formatMnt";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link, Stack, useLocalSearchParams, router } from "expo-router";
@@ -15,25 +16,32 @@ export default function PaymentResultScreen() {
     method?: string;
   }>();
   const ok = status === "success";
+  const pending = status === "pending";
   const amt = amount ? Number(amount) : NaN;
 
-  const title = ok
-    ? kind === "topup"
-      ? "Цэнэглэлт амжилттай"
-      : "Төлбөр амжилттай"
-    : kind === "topup"
-      ? "Цэнэглэлт амжилтгүй"
-      : "Төлбөр амжилтгүй";
-
-  const subtitle = ok
-    ? channel === "qpay"
-      ? "КьюПэй-ийн жишээ урсгалаар данс шинэчлэгдлээ."
+  const title = pending
+    ? "Төлбөр хүлээгдэж буй"
+    : ok
+      ? kind === "topup"
+        ? "Цэнэглэлт амжилттай"
+        : "Төлбөр амжилттай"
       : kind === "topup"
-        ? "Таны цахим дансны үлдэгдэл шинэчлэгдсэн."
-        : "Захиалгын төлбөр бүртгэгдлээ."
-    : typeof message === "string" && message.trim()
-      ? message.trim()
-      : "Дахин оролдож эсвэл хэтэвчээ шалгана уу.";
+        ? "Цэнэглэлт амжилтгүй"
+        : "Төлбөр амжилтгүй";
+
+  const subtitle = pending
+    ? getPaymentStatusLabel("pending") + " — банкны апп-аар төлбөрөө дуусгаад баталгаажуулна уу."
+    : ok
+      ? channel === "qpay"
+        ? "КьюПэй-ийн жишээ урсгалаар төлбөр баталгаажлаа."
+        : channel === "saved_card"
+          ? "Хадгалсан картаар төлбөр баталгаажлаа (жишээ)."
+          : kind === "topup"
+            ? "Таны цахим дансны үлдэгдэл шинэчлэгдсэн."
+            : "Захиалгын төлбөр бүртгэгдлээ."
+      : typeof message === "string" && message.trim()
+        ? message.trim()
+        : getPaymentStatusLabel("failed") + " — дахин оролдоно уу.";
 
   return (
     <>
@@ -47,12 +55,18 @@ export default function PaymentResultScreen() {
       <FormScrollView className="flex-1 px-5 pt-6 bg-app-bg" contentContainerStyle={{ paddingBottom: 40 }}>
         <View className="mb-4 items-center">
           <View
-            className={`h-20 w-20 items-center justify-center rounded-3xl ${ok ? "bg-emerald-100 dark:bg-emerald-900/40" : "bg-red-100 dark:bg-red-900/30"}`}
+            className={`h-20 w-20 items-center justify-center rounded-3xl ${
+              ok
+                ? "bg-emerald-100 dark:bg-emerald-900/40"
+                : pending
+                  ? "bg-amber-100 dark:bg-amber-900/30"
+                  : "bg-red-100 dark:bg-red-900/30"
+            }`}
           >
             <MaterialCommunityIcons
-              name={ok ? "check-decagram" : "alert-circle-outline"}
+              name={ok ? "check-decagram" : pending ? "clock-outline" : "alert-circle-outline"}
               size={48}
-              color={ok ? "#059669" : "#dc2626"}
+              color={ok ? "#059669" : pending ? "#d97706" : "#dc2626"}
             />
           </View>
         </View>

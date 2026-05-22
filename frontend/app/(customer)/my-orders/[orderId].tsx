@@ -7,7 +7,7 @@ import { bookingApi } from "@/services/api/bookingApi";
 import { doctorReviewApi } from "@/services/api/doctorReviewApi";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { Linking, Text, View } from "react-native";
 
 function statusTone(s: OrderUiStatus): "brand" | "neutral" | "success" | "warning" {
   if (s === "confirmed" || s === "completed" || s === "free_consult") return "success";
@@ -119,10 +119,60 @@ export default function OrderDetailScreen() {
               </Text>
             </Card>
 
-            {order.healthSummary ? (
+            {order.kind === "free_online" && (order.symptoms || order.question || order.consultNotes) ? (
+              <Card className="mb-4">
+                <Text className="text-sm font-semibold text-app-text">Хүсэлтийн мэдээлэл</Text>
+                {order.symptoms ? (
+                  <>
+                    <Text className="mt-3 text-xs font-medium text-app-text-muted">Биеийн байдал</Text>
+                    <Text className="mt-1 text-sm leading-6 text-app-text-secondary">{order.symptoms}</Text>
+                  </>
+                ) : null}
+                {order.question ? (
+                  <>
+                    <Text className="mt-3 text-xs font-medium text-app-text-muted">Асуух зүйл</Text>
+                    <Text className="mt-1 text-sm leading-6 text-app-text-secondary">{order.question}</Text>
+                  </>
+                ) : null}
+                {order.consultNotes ? (
+                  <>
+                    <Text className="mt-3 text-xs font-medium text-app-text-muted">Нэмэлт тайлбар</Text>
+                    <Text className="mt-1 text-sm leading-6 text-app-text-secondary">{order.consultNotes}</Text>
+                  </>
+                ) : null}
+              </Card>
+            ) : order.healthSummary ? (
               <Card className="mb-4">
                 <Text className="text-sm font-semibold text-app-text">Анкетын товч</Text>
                 <Text className="mt-2 text-sm leading-6 text-app-text-secondary">{order.healthSummary}</Text>
+              </Card>
+            ) : null}
+
+            {order.kind === "free_online" && order.customerStatus === "confirmed" ? (
+              <Card className="mb-4 border border-emerald-200 dark:border-emerald-900/50">
+                <Text className="text-sm font-semibold text-app-text">Онлайн уулзалт</Text>
+                {order.meetingLink ? (
+                  <>
+                    <Text className="mt-2 text-xs leading-5 text-app-text-muted">
+                      Эмч зөвшөөрсний дараа уулзалтын холбоос харагдана.
+                    </Text>
+                    <Button
+                      label="Google Meet рүү орох"
+                      className="mt-4"
+                      onPress={() => void Linking.openURL(order.meetingLink!)}
+                    />
+                  </>
+                ) : (
+                  <Text className="mt-2 text-sm text-app-text-secondary">
+                    Эмч зөвшөөрсний дараа уулзалтын холбоос харагдана.
+                  </Text>
+                )}
+                {order.providerNotes ? (
+                  <>
+                    <Text className="mt-4 text-xs font-medium text-app-text-muted">Эмчийн нэмэлт тэмдэглэл</Text>
+                    <Text className="mt-1 text-sm leading-6 text-app-text-secondary">{order.providerNotes}</Text>
+                  </>
+                ) : null}
               </Card>
             ) : null}
 

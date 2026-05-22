@@ -10,6 +10,7 @@ const router = express.Router();
 
 const idParam = validateParams(validateIdParam("id"));
 
+router.get("/free-availability", consultationsController.listFreeAvailability);
 router.post(
   "/free",
   requireAuth,

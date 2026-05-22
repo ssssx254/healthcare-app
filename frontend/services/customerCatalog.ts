@@ -1,4 +1,5 @@
 import { clinicApi } from "@/services/api/clinicApi";
+import { clinicCategoryApi } from "@/services/api/clinicCategoryApi";
 import { doctorApi } from "@/services/api/doctorApi";
 import { scheduleApi } from "@/services/api/scheduleApi";
 import { serviceApi } from "@/services/api/serviceApi";
@@ -71,6 +72,14 @@ export async function getService(doctorId: string, serviceId: string): Promise<M
 }
 
 export async function getProviderServiceCategories(): Promise<string[]> {
+  try {
+    const names = await clinicCategoryApi.listPublic();
+    if (names.length > 0) {
+      return names.sort((a, b) => a.localeCompare(b, "mn"));
+    }
+  } catch {
+    /* fallback to services only */
+  }
   const rows = await serviceApi.listAll();
   const names = Array.from(
     new Set(
@@ -83,31 +92,90 @@ export async function getProviderServiceCategories(): Promise<string[]> {
   return names.sort((a, b) => a.localeCompare(b, "mn"));
 }
 
+export function localTodayIso(): string {
+  const n = new Date();
+  const y = n.getFullYear();
+  const m = `${n.getMonth() + 1}`.padStart(2, "0");
+  const d = `${n.getDate()}`.padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export async function getSlotsByDoctor(
   doctorId: string,
-  opts?: { serviceId?: string; fromDate?: string; toDate?: string },
+  opts?: {
+    serviceId?: string;
+    fromDate?: string;
+    toDate?: string;
+    consultationType?: "paid_visit" | "free_consultation";
+  },
 ): Promise<MockTimeSlot[]> {
-  const rows = await scheduleApi.listAvailableSlotsForCustomer({
+  const serviceIdNum = opts?.serviceId ? Number(opts.serviceId) : null;
+  const fromDate = opts?.fromDate ?? localTodayIso();
+
+  const slotMatchesSelectedService = (row: { service_id?: number | null }) => {
+    if (serviceIdNum == null || Number.isNaN(serviceIdNum)) return true;
+    if (row.service_id == null) return true;
+    return Number(row.service_id) === serviceIdNum;
+  };
+
+  const baseParams = {
     doctor_id: doctorId,
-    service_id: opts?.serviceId,
-    from_date: opts?.fromDate,
+    from_date: fromDate,
     to_date: opts?.toDate,
     page_size: 400,
-  });
-  // Зарим provider слот service_id-гүй (NULL) байдлаар хадгалагдсан байдаг.
-  // Тухайн service_id-тай хүсэлт хоосон бол ерөнхий (doctor-level) боломжит слотуудыг дахин авна.
+    consultation_type: opts?.consultationType,
+  };
+
+  const rows = (
+    await scheduleApi.listAvailableSlotsForCustomer({
+      ...baseParams,
+      service_id: opts?.serviceId,
+    })
+  ).filter(slotMatchesSelectedService);
+
+  // Зарим provider слот service_id-гүй (NULL) байдаг — зөвхөн тэдгээрийг fallback-аар нэмнэ.
   const fallbackRows =
     rows.length === 0 && opts?.serviceId
-      ? await scheduleApi.listAvailableSlotsForCustomer({
-          doctor_id: doctorId,
-          from_date: opts?.fromDate,
-          to_date: opts?.toDate,
-          page_size: 400,
-        })
+      ? (
+          await scheduleApi.listAvailableSlotsForCustomer({
+            ...baseParams,
+          })
+        ).filter(slotMatchesSelectedService)
       : rows;
-  // `/schedule-slots/available` нь backend дээрээ зөвхөн боломжит слотуудыг буцаадаг
-  // (is_available=1, slot_status='available'), тиймээс энд дахин шүүх шаардлагагүй.
+
   return fallbackRows.map(mapSlotRow);
+}
+
+/** Сонгосон үйлчилгээнд цаг байхгүй үед ойлгомжтой тайлбар (өөр үйлчилгээнд цагтай эсэх). */
+export async function describeWhyNoSlotsForService(
+  doctorId: string,
+  serviceId: string,
+  serviceTitle?: string,
+): Promise<string | null> {
+  const today = localTodayIso();
+  const forService = await getSlotsByDoctor(doctorId, {
+    serviceId,
+    fromDate: today,
+    consultationType: "paid_visit",
+  });
+  if (forService.length > 0) return null;
+
+  const allPaid = await getSlotsByDoctor(doctorId, {
+    fromDate: today,
+    consultationType: "paid_visit",
+  });
+  if (allPaid.length === 0) {
+    return (
+      "Энэ эмчид ирээдүйн төлбөртэй цаг бүртгэгдээгүй байна. Үйлчилгээ үзүүлэгч талаас «Хуваарь → Боломжит цаг нэмэх» " +
+      "дээр яг энэ үйлчилгээг сонгож цаг нэмнэ үү."
+    );
+  }
+
+  const title = serviceTitle?.trim() || "сонгосон үйлчилгээ";
+  return (
+    `Эмчид өөр үйлчилгээнд холбогдсон цаг байгаа ч «${title}»-д тохирох цаг алга. ` +
+    "Цаг нэмэхдээ provider талд ижил үйлчилгээг сонгосон эсэхээ шалгана уу."
+  );
 }
 
 /** Нүүр «Онцлох эмч нар» — дундаж үнэлгээ >= 4.5 (API). */

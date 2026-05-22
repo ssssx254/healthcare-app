@@ -1,6 +1,6 @@
 import { Button, Card, ScreenScrollView, SectionHeader } from "@/components";
 import { useCustomerBooking } from "@/contexts/CustomerBookingContext";
-import { getSlotsByDoctor } from "@/services/customerCatalog";
+import { getService, getSlotsByDoctor, localTodayIso } from "@/services/customerCatalog";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -26,7 +26,7 @@ function getTimePeriodLabel(hour: number): "Өглөө" | "Үдээс хойш" 
 
 export default function SelectSlotScreen() {
   const { date, doctorId, serviceId } = useLocalSearchParams<{ date?: string; doctorId?: string; serviceId?: string }>();
-  const { draft, setDraftSlot } = useCustomerBooking();
+  const { draft, setDraftSlot, setDraftService } = useCustomerBooking();
   const [slots, setSlots] = useState<MockTimeSlot[] | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(draft.slotId);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -39,7 +39,11 @@ export default function SelectSlotScreen() {
     }
     let alive = true;
     setLoadError(null);
-    getSlotsByDoctor(doctor, { serviceId: (draft.serviceId ?? serviceId) || undefined })
+    getSlotsByDoctor(doctor, {
+      serviceId: (draft.serviceId ?? serviceId) || undefined,
+      fromDate: localTodayIso(),
+      consultationType: "paid_visit",
+    })
       .then((s) => {
         if (alive) setSlots(s);
       })
@@ -126,7 +130,7 @@ export default function SelectSlotScreen() {
                           className={`min-w-[92px] rounded-xl border px-3 py-2 ${
                             selected
                               ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                              : "border-slate-200 bg-white border-app-border bg-app-card"
+                              : "border-app-border bg-app-muted"
                           }`}
                         >
                           <Text className={`text-sm font-semibold ${selected ? "text-brand-700 dark:text-brand-300" : "text-app-text"}`}>
@@ -147,11 +151,20 @@ export default function SelectSlotScreen() {
               className="mt-2"
               disabled={!selectedSlotId}
               onPress={() => {
-                const picked = daySlots.find((s) => s.id === selectedSlotId);
-                if (!picked) return;
-                const selectedTime = picked.label.replace(picked.dateIso, "").trim() || picked.label;
-                setDraftSlot(picked.id, picked.label, picked.dateIso, selectedTime);
-                router.push("/(customer)/health-form");
+                void (async () => {
+                  const picked = daySlots.find((s) => s.id === selectedSlotId);
+                  if (!picked) return;
+                  const dId = draft.doctorId ?? doctorId;
+                  if (picked.serviceId && dId && picked.serviceId !== draft.serviceId) {
+                    const svc = await getService(dId, picked.serviceId);
+                    if (svc) {
+                      setDraftService(svc.id, svc.title, svc.kind, svc.priceMnt, svc.durationMinutes);
+                    }
+                  }
+                  const selectedTime = picked.label.replace(picked.dateIso, "").trim() || picked.label;
+                  setDraftSlot(picked.id, picked.label, picked.dateIso, selectedTime);
+                  router.push("/(customer)/health-form");
+                })();
               }}
             />
           </View>

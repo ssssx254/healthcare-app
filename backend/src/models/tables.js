@@ -11,6 +11,7 @@ const tables = {
   bookings: "bookings",
   wallets: "wallets",
   userPaymentMethods: "user_payment_methods",
+  paymentMethods: "payment_methods",
   walletTransactions: "wallet_transactions",
   contentReports: "content_reports",
   platformFeaturedItems: "platform_featured_items",
@@ -26,6 +27,7 @@ const tables = {
   reviews: "reviews",
   doctorReviews: "doctor_reviews",
   labTests: "lab_tests",
+  bookingLabTests: "booking_lab_tests",
 };
 
 module.exports = { tables };

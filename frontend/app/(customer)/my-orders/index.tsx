@@ -152,7 +152,7 @@ function TabButton({ label, active, onPress }: { label: string; active: boolean;
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-1 rounded-xl border px-3 py-2 ${active ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900/50" : "border-slate-200 bg-white border-app-border bg-app-card"}`}
+      className={`flex-1 rounded-xl border px-3 py-2 ${active ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900/50" : "border-app-border bg-app-muted"}`}
     >
       <Text className={`text-center text-xs font-semibold ${active ? "text-brand-700 dark:text-brand-300" : "text-app-text-secondary"}`}>
         {label}

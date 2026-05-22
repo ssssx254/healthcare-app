@@ -132,7 +132,7 @@ export default function DoctorsHubScreen() {
                   className={`rounded-full border px-3 py-2 ${
                     active
                       ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                      : "border-slate-200 bg-white border-app-border bg-app-card"
+                      : "border-app-border bg-app-muted"
                   }`}
                 >
                   <Text

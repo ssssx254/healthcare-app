@@ -8,22 +8,43 @@ import {
   validateDescriptionMn,
   validatePhoneMn,
 } from "@/lib/providerFormValidators";
-import { router, Stack } from "expo-router";
-import { useState } from "react";
-import { Text, View } from "react-native";
+import { router, Stack, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
+import { BackHandler, Text, View } from "react-native";
 
 const DESC_MAX = 2000;
 
 export default function ClinicRegisterScreen() {
   const { clinic, registerClinic } = useProviderWorkspace();
-  const [name, setName] = useState(clinic.name);
-  const [city, setCity] = useState(clinic.city);
-  const [address, setAddress] = useState(clinic.address);
-  const [phone, setPhone] = useState(clinic.phone);
-  const [description, setDescription] = useState(clinic.description);
+  const draftRef = useRef({
+    name: clinic.name,
+    city: clinic.city,
+    address: clinic.address,
+    phone: clinic.phone,
+    description: clinic.description,
+  });
+  const [name, setName] = useState(draftRef.current.name);
+  const [city, setCity] = useState(draftRef.current.city);
+  const [address, setAddress] = useState(draftRef.current.address);
+  const [phone, setPhone] = useState(draftRef.current.phone);
+  const [description, setDescription] = useState(draftRef.current.description);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const goBackSafe = useCallback(() => {
+    router.replace(routes.providerDashboard);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+        goBackSafe();
+        return true;
+      });
+      return () => sub.remove();
+    }, [goBackSafe]),
+  );
 
   const onSubmit = () => {
     const e: Record<string, string> = {};
@@ -150,7 +171,7 @@ export default function ClinicRegisterScreen() {
         <Text className="mt-3 text-center text-xs leading-5 text-app-text-muted">
           Илгээсний дараа админ баталгаажуулалт хийгдэх хүртэл зарим үйлдэл хязгаарлагдмал байж болно.
         </Text>
-        <Button label="Буцах" variant="ghost" className="mt-2" onPress={() => router.back()} />
+        <Button label="Буцах" variant="ghost" className="mt-2" onPress={goBackSafe} />
       </FormScrollView>
     </>
   );

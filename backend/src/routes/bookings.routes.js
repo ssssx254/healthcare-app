@@ -40,6 +40,7 @@ router.get(
   bookingsController.listProvider,
 );
 router.get("/", requireAuth, validateQuery(validateBookingsListQuery), bookingsController.list);
+router.get("/:id/lab-tests", requireAuth, idParam, bookingsController.listSharedLabTests);
 router.get("/:id", requireAuth, idParam, bookingsController.getOne);
 router.post(
   "/",

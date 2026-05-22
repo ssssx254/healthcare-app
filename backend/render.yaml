@@ -8,7 +8,8 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install
-    startCommand: npm start
+    # Production MySQL (DATABASE_URL) дээр lab_tests гэх мэт шинэ хүснэгтүүдийг idempotent migration-аар үүсгэнэ
+    startCommand: npm run db:migrate:deploy && npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV

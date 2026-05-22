@@ -1,5 +1,6 @@
 import { Button, Card, Input, ScreenScrollView, SectionHeader } from "@/components";
 import { LabAttachmentPickerField } from "@/components/LabAttachmentPickerField";
+import { labTestSuccessMessage } from "@/constants/labTestStatus";
 import { labTestsApi } from "@/services/api/labTestsApi";
 import type { PickedLabFile } from "@/lib/labFilePick";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
@@ -42,6 +43,7 @@ export default function AddCustomerLabTestScreen() {
         attachment_url: attachment?.dataUrl ?? null,
         attachment_type: attachment?.fileType ?? null,
       });
+      Alert.alert("Амжилттай", labTestSuccessMessage.customerSaved);
       router.replace(`/(customer)/lab-tests/${row.id}` as never);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Хадгалахад алдаа гарлаа.";

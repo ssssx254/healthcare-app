@@ -8,7 +8,7 @@ import {
   ScreenScrollView,
   SectionHeader,
 } from "@/components";
-import { labTestStatusLabel, labTestStatusTone } from "@/constants/labTestStatus";
+import { getLabTestStatusLabel, labTestStatusTone } from "@/constants/labTestStatus";
 import { providerBookingStatusLabel, type ProviderBookingStatus } from "@/constants/providerBookingStatus";
 import { listProviderPatientNotesByPatient } from "@/data/healthcare/providerNotesStore";
 import { useProviderWorkspace } from "@/contexts/ProviderWorkspaceContext";
@@ -94,7 +94,10 @@ export default function ProviderPatientDetailScreen() {
         ) : null}
 
         <Card className="mb-3">
-          <Text className="text-sm font-semibold text-app-text">Шинжилгээ</Text>
+          <Text className="text-sm font-semibold text-app-text">Хуваалцсан шинжилгээ</Text>
+          <Text className="mt-1 text-xs text-app-text-muted">
+            Зөвхөн үйлчлүүлэгч захиалгад сонгож хуваалсан эсвэл эмнэлэгийн хариу.
+          </Text>
           {!byUserId ? (
             <Text className="mt-2 text-xs text-app-text-muted">Шинжилгээний API-д хэрэглэгчийн ID шаардлагатай.</Text>
           ) : null}
@@ -119,8 +122,8 @@ export default function ProviderPatientDetailScreen() {
             <View className="mt-2">
               <EmptyState
                 icon="flask-outline"
-                title="Шинжилгээ алга"
-                description="Өвчтөн шинжилгээ нэмээгүй эсвэл хариу ороогүй байна."
+              title="Хуваалцсан шинжилгээ алга"
+              description="Өвчтөн эмчид шинжилгээ хуваалаагүй байна. Захиалга үүсэхэд «Шинжилгээ хуваалцах» алхмаар сонгоно."
               />
             </View>
           ) : null}
@@ -137,7 +140,10 @@ export default function ProviderPatientDetailScreen() {
                       <Text className="flex-1 text-sm font-medium text-app-text" numberOfLines={1}>
                         {lt.title}
                       </Text>
-                      <Badge label={labTestStatusLabel[lt.status]} tone={labTestStatusTone(lt.status)} />
+                      <Badge
+                        label={getLabTestStatusLabel(lt.status, lt.uploaded_by)}
+                        tone={labTestStatusTone(lt.status, lt.uploaded_by)}
+                      />
                     </View>
                     <Text className="mt-1 text-xs text-app-text-muted">
                       {lt.test_type} · {lt.test_date}

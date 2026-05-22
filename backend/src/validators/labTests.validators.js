@@ -20,6 +20,9 @@ function validateProviderListQuery(query) {
   if (query.doctor_id != null && query.doctor_id !== "") {
     out.doctor_id = assertPositiveIntId(query.doctor_id, "doctor_id");
   }
+  if (query.booking_id != null && query.booking_id !== "") {
+    out.booking_id = assertPositiveIntId(query.booking_id, "booking_id");
+  }
   return out;
 }
 

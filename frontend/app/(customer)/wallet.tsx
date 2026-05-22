@@ -108,6 +108,21 @@ export default function CustomerWalletScreen() {
         </Card>
 
         <View className="mb-3 flex-row items-center justify-between">
+          <Text className="text-base font-bold text-app-text">Төлбөрийн арга</Text>
+          <MaterialCommunityIcons name="credit-card-settings-outline" size={22} color="#64748b" />
+        </View>
+        <Card className="mb-5 border border-app-border">
+          <Text className="text-sm text-app-text-secondary">
+            КьюПэй, банкны карт, хадгалсан карт — бүтэн дугаар хадгалахгүй.
+          </Text>
+          <Link href="/(customer)/payment-methods" asChild>
+            <Pressable className="mt-4 min-h-[44px] items-center justify-center rounded-2xl border-2 border-brand-600 active:opacity-90 dark:border-brand-400">
+              <Text className="text-sm font-bold text-brand-700 dark:text-brand-300">Удирдах</Text>
+            </Pressable>
+          </Link>
+        </Card>
+
+        <View className="mb-3 flex-row items-center justify-between">
           <Text className="text-base font-bold text-app-text">Гүйлгээний түүх</Text>
           <MaterialCommunityIcons name="history" size={22} color="#64748b" />
         </View>

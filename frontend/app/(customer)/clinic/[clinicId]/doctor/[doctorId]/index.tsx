@@ -9,6 +9,7 @@ import {
   ScreenScrollView,
   StarRating,
 } from "@/components";
+import { adviceArticles } from "@/data/healthcare/adviceArticles";
 import { routes } from "@/constants/appRoutes";
 import { orderStatusLabel } from "@/constants/orderStatus";
 import { useCustomerBooking } from "@/contexts/CustomerBookingContext";
@@ -19,8 +20,8 @@ import { doctorReviewApi, type DoctorReviewRow, type DoctorReviewViewer } from "
 import { getClinicById, getDoctor, getServicesByDoctor } from "@/services/customerCatalog";
 import { cn } from "@/utils/cn";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type { MockClinicDetail, MockDoctor, MockService } from "@/types/customer";
 
@@ -40,6 +41,7 @@ function formatReviewDate(iso: string): string {
 }
 
 export default function DoctorDetailScreen() {
+  const navigation = useNavigation();
   const { clinicId, doctorId, reviewBookingId } = useLocalSearchParams<{
     clinicId: string;
     doctorId: string;
@@ -133,13 +135,6 @@ export default function DoctorDetailScreen() {
     }
   }, [reviewBookingId, viewer?.can_submit]);
 
-  const minPriceMnt = useMemo(() => {
-    if (!services?.length) return null;
-    const paid = services.filter((s) => s.kind === "formal" && s.priceMnt > 0);
-    if (!paid.length) return null;
-    return Math.min(...paid.map((s) => s.priceMnt));
-  }, [services]);
-
   const displayRating = reviewSummary?.average_rating ?? doctor?.averageRating ?? null;
   const displayCount = reviewSummary?.review_count ?? doctor?.reviewCount ?? 0;
   const reviewBookingIdNum = reviewBookingId ? Number(reviewBookingId) : viewer?.booking_id ?? null;
@@ -160,10 +155,12 @@ export default function DoctorDetailScreen() {
 
   const firstFormalService = services?.find((s) => s.kind === "formal");
 
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: doctor?.name ?? "Эмч" });
+  }, [navigation, doctor?.name]);
+
   return (
-    <>
-      <Stack.Screen options={{ title: doctor?.name ?? "Эмч" }} />
-      <ScreenScrollView
+    <ScreenScrollView
         className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       >
@@ -186,49 +183,50 @@ export default function DoctorDetailScreen() {
           </Card>
         ) : (
           <>
-            <Card className="mb-4 items-center border-0 bg-app-card py-6 shadow-md">
-              <AppImage
-                source={{ uri: resolveDoctorAvatarUri(doctor, 160) }}
-                fallbackIcon="doctor"
-                className="h-28 w-28 rounded-full border-4 border-app-border bg-app-muted"
-              />
-              <Text className="mt-4 text-center text-xl font-bold text-app-text">{doctor.name}</Text>
-              <Text className="mt-1 text-center text-sm font-medium text-brand-600 dark:text-brand-400">
-                {doctor.specialty}
-              </Text>
-              {doctor.title ? (
-                <Text className="mt-0.5 text-center text-xs text-app-text-muted">{doctor.title}</Text>
-              ) : null}
-              <Text className="mt-2 text-center text-xs text-app-text-muted">
-                {doctor.experienceYears != null ? `${doctor.experienceYears} жилийн туршлага` : "Туршлага бүртгэгдээгүй"}
-              </Text>
-              <View className="mt-3 flex-row items-center gap-2">
-                <StarRating value={displayRating ?? 0} size={18} />
-                <Text className="text-sm font-semibold text-amber-700 dark:text-amber-300">
-                  {displayRating != null ? formatDoctorRatingLabel({ averageRating: displayRating, reviewCount: displayCount }) : "Шинэ"}
-                </Text>
-                <Text className="text-xs text-app-text-muted">({formatDoctorRatingCount({ reviewCount: displayCount })})</Text>
-              </View>
-              {minPriceMnt != null ? (
-                <Text className="mt-2 text-base font-bold text-app-text">{minPriceMnt.toLocaleString("mn-MN")} ₮</Text>
-              ) : null}
-              <Button
-                label={chatLoading ? "Түр хүлээнэ үү…" : "Онлайн зөвлөгөө авах"}
-                className="mt-5 w-full max-w-xs"
-                disabled={chatLoading}
-                onPress={() => void openChat()}
-              />
-              {chatError ? <Text className="mt-2 text-xs text-red-600 dark:text-red-400">{chatError}</Text> : null}
-              {firstFormalService ? (
-                <Button
-                  label="Цаг захиалах"
-                  variant="outline"
-                  className="mt-2 w-full max-w-xs"
-                  onPress={() =>
-                    router.push(`/clinic/${clinicId}/doctor/${doctorId}/service/${firstFormalService.id}`)
-                  }
+            <Card className="mb-4 border-0 bg-app-card py-6 shadow-md">
+              <View className="items-center">
+                <AppImage
+                  source={{ uri: resolveDoctorAvatarUri(doctor, 160) }}
+                  fallbackIcon="doctor"
+                  className="h-28 w-28 rounded-full border-4 border-app-border bg-app-muted"
                 />
-              ) : null}
+                <Text className="mt-4 text-center text-xl font-bold text-app-text">{doctor.name}</Text>
+                <Text className="mt-1 text-center text-sm font-medium text-brand-600 dark:text-brand-400">
+                  {doctor.specialty}
+                </Text>
+                {doctor.title ? (
+                  <Text className="mt-0.5 text-center text-xs text-app-text-muted">{doctor.title}</Text>
+                ) : null}
+                <Text className="mt-2 text-center text-xs text-app-text-muted">
+                  {doctor.experienceYears != null ? `${doctor.experienceYears} жилийн туршлага` : "Туршлага бүртгэгдээгүй"}
+                </Text>
+                <View className="mt-3 flex-row items-center gap-2">
+                  <StarRating value={displayRating ?? 0} size={18} />
+                  <Text className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                    {displayRating != null ? formatDoctorRatingLabel({ averageRating: displayRating, reviewCount: displayCount }) : "Шинэ"}
+                  </Text>
+                  <Text className="text-xs text-app-text-muted">({formatDoctorRatingCount({ reviewCount: displayCount })})</Text>
+                </View>
+              </View>
+              <View className="mt-5 w-full gap-2">
+                <Button
+                  label={chatLoading ? "Түр хүлээнэ үү…" : "Онлайн зөвлөгөө авах"}
+                  className="w-full"
+                  disabled={chatLoading}
+                  onPress={() => void openChat()}
+                />
+                {chatError ? <Text className="text-xs text-red-600 dark:text-red-400">{chatError}</Text> : null}
+                {firstFormalService ? (
+                  <Button
+                    label="Цаг захиалах"
+                    variant="outline"
+                    className="w-full"
+                    onPress={() =>
+                      router.push(`/clinic/${clinicId}/doctor/${doctorId}/service/${firstFormalService.id}`)
+                    }
+                  />
+                ) : null}
+              </View>
             </Card>
 
             <View className="mb-4 flex-row rounded-2xl border border-app-border bg-app-muted p-1">
@@ -401,8 +399,8 @@ export default function DoctorDetailScreen() {
                     <Button
                       label="Зөвлөгөөний хэсэг нээх"
                       variant="outline"
-                      className="mt-4"
-                      onPress={() => router.push("/(customer)/advice/index")}
+                      className="mt-4 w-full"
+                      onPress={() => router.push(routes.customerAdvice)}
                     />
                   </View>
                 </View>
@@ -411,6 +409,5 @@ export default function DoctorDetailScreen() {
           </>
         )}
       </ScreenScrollView>
-    </>
   );
 }

@@ -1,12 +1,51 @@
 import { AppImage, Button, Card, EmptyState, ErrorState, ListSkeleton, ScreenScrollView, SectionHeader } from "@/components";
 import { routes } from "@/constants/appRoutes";
 import { useProviderWorkspace } from "@/contexts/ProviderWorkspaceContext";
+import { removeDoctorPhotoOverride } from "@/data/healthcare/doctorPhotoOverridesStore";
+import { ApiError } from "@/lib/api/client";
 import { resolveDoctorAvatarUri } from "@/lib/doctorAvatar";
+import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { Link, Stack, router } from "expo-router";
-import { Text, View } from "react-native";
+import { useState } from "react";
+import { Alert, Text, View } from "react-native";
 
 export default function DoctorsListScreen() {
-  const { doctors, services, slots, workspaceLoading, workspaceError, refreshWorkspace } = useProviderWorkspace();
+  const { doctors, services, slots, workspaceLoading, workspaceError, refreshWorkspace, removeDoctor } =
+    useProviderWorkspace();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const confirmRemoveDoctor = (doctorId: string, doctorName: string) => {
+    const serviceCount = services.filter((s) => s.doctorId === doctorId).length;
+    const slotCount = slots.filter((s) => s.doctorId === doctorId).length;
+    Alert.alert(
+      "Эмч устгах уу?",
+      `${doctorName} эмчийн бүртгэл, үйлчилгээ (${serviceCount}), цагийн слот (${slotCount}) устгагдана. Үргэлжлүүлэх үү?`,
+      [
+        { text: "Болих", style: "cancel" },
+        {
+          text: "Устгах",
+          style: "destructive",
+          onPress: () => {
+            void (async () => {
+              setActionError(null);
+              setDeletingId(doctorId);
+              try {
+                await removeDoctor(doctorId);
+                await removeDoctorPhotoOverride(doctorId);
+              } catch (e) {
+                const msg =
+                  e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Эмч устгахад алдаа гарлаа.";
+                setActionError(toFriendlyErrorMn(msg));
+              } finally {
+                setDeletingId(null);
+              }
+            })();
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <>
@@ -19,6 +58,12 @@ export default function DoctorsListScreen() {
         <Link href={routes.providerDoctorRegister} asChild>
           <Button label="Шинэ эмч нэмэх" className="mb-4" />
         </Link>
+
+        {actionError ? (
+          <Card className="mb-4 border border-rose-200 bg-rose-50 dark:border-rose-900/50 dark:bg-rose-950/40">
+            <Text className="text-sm text-rose-800 dark:text-rose-200">{actionError}</Text>
+          </Card>
+        ) : null}
 
         {workspaceError ? (
           <ErrorState
@@ -65,9 +110,19 @@ export default function DoctorsListScreen() {
                       Үйлчилгээ: {services.filter((s) => s.doctorId === d.id).length} · Слот:{" "}
                       {slots.filter((s) => s.doctorId === d.id).length}
                     </Text>
-                    <Link href={`/doctor/${d.id}/edit`} asChild>
-                      <Button label="Эмчийн мэдээлэл засах" variant="outline" className="mt-3" />
-                    </Link>
+                    <View className="mt-3 flex-row gap-2">
+                      <Link href={`/doctor/${d.id}/edit`} asChild>
+                        <Button label="Засах" variant="outline" className="flex-1" />
+                      </Link>
+                      <Button
+                        label="Устгах"
+                        variant="secondary"
+                        className="flex-1"
+                        loading={deletingId === d.id}
+                        disabled={deletingId != null && deletingId !== d.id}
+                        onPress={() => confirmRemoveDoctor(d.id, d.name)}
+                      />
+                    </View>
                   </View>
                 </View>
               </Card>

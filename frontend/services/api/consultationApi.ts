@@ -7,14 +7,42 @@ export type ConsultationRow = {
   patient_user_id: number;
   clinic_id: number;
   doctor_id?: number | null;
+  slot_id?: number | null;
   request_type: string;
+  consultation_type?: string;
   is_free: number | boolean;
   status: "pending" | "accepted" | "closed" | "cancelled" | string;
   meeting_link?: string | null;
   patient_message?: string | null;
+  symptoms?: string | null;
+  question?: string | null;
+  notes?: string | null;
   provider_message?: string | null;
+  provider_notes?: string | null;
   chat_opened_at?: string | null;
   created_at?: string;
+  slot_date?: string | null;
+  slot_start_time?: string | null;
+  slot_end_time?: string | null;
+  doctor_name?: string | null;
+  clinic_name?: string | null;
+};
+
+export type FreeConsultSlotOption = {
+  id: number;
+  slot_date: string;
+  start_time: string;
+  end_time: string;
+  label: string;
+};
+
+export type FreeConsultDoctorAvailability = {
+  doctor_id: number;
+  doctor_name: string;
+  specialty?: string | null;
+  clinic_id: number;
+  clinic_name: string;
+  slots: FreeConsultSlotOption[];
 };
 
 export type ConsultationListParams = {
@@ -30,6 +58,13 @@ export type ConsultationListParams = {
 };
 
 export const consultationApi = {
+  listFreeAvailability(params?: { from_date?: string; to_date?: string }): Promise<{ items: FreeConsultDoctorAvailability[] }> {
+    return apiRequest<{ items: FreeConsultDoctorAvailability[] }>(
+      withQuery("/consultations/free-availability", params ?? {}),
+      { method: "GET" },
+    );
+  },
+
   listPaged(params?: ConsultationListParams): Promise<ApiPaginatedData<ConsultationRow>> {
     return apiRequestPaginated<ConsultationRow>(withQuery("/consultations", params ?? {}));
   },
@@ -75,6 +110,10 @@ export const consultationApi = {
   create(body: {
     clinic_id: number;
     doctor_id?: number | null;
+    slot_id?: number | null;
+    symptoms?: string | null;
+    question?: string | null;
+    notes?: string | null;
     patient_message?: string | null;
     request_type?: string;
     is_free?: boolean;
@@ -88,6 +127,7 @@ export const consultationApi = {
       status?: string;
       meeting_link?: string | null;
       provider_message?: string | null;
+      provider_notes?: string | null;
       open_chat?: boolean;
     },
   ): Promise<ConsultationRow> {

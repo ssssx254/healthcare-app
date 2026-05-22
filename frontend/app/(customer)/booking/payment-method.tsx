@@ -5,7 +5,7 @@ import type { ComponentProps } from "react";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
-type PaymentMethod = "most_money" | "qpay" | "bank_card" | "wallet";
+type PaymentMethod = "wallet" | "qpay" | "bank_card" | "saved_card";
 
 const METHODS: Array<{
   id: PaymentMethod;
@@ -18,7 +18,7 @@ const METHODS: Array<{
   {
     id: "wallet",
     label: "Цахим данс",
-    subtitle: "Аппын хэтэвчээс шууд суутгах",
+    subtitle: "Хэтэвчийн үлдэгдлээс шууд суутгах",
     icon: "wallet-outline",
     accent: "bg-emerald-50 dark:bg-emerald-950/40",
     iconColor: "#059669",
@@ -32,26 +32,41 @@ const METHODS: Array<{
     iconColor: "#7c3aed",
   },
   {
-    id: "most_money",
-    label: "Мост мани",
-    subtitle: "Данс холбох төлбөрийн апп (жишээ)",
-    icon: "cellphone-link",
-    accent: "bg-sky-50 dark:bg-sky-950/40",
-    iconColor: "#0284c7",
-  },
-  {
     id: "bank_card",
     label: "Банкны карт",
-    subtitle: "Виза, Мастер карт (жишээ)",
-    icon: "credit-card-outline",
+    subtitle: "Шинэ карт хадгалах (сүүлийн 4 орон)",
+    icon: "credit-card-plus-outline",
     accent: "bg-amber-50 dark:bg-amber-950/40",
     iconColor: "#d97706",
+  },
+  {
+    id: "saved_card",
+    label: "Хадгалсан карт",
+    subtitle: "Өмнө хадгалсан Visa/Mastercard",
+    icon: "credit-card-outline",
+    accent: "bg-sky-50 dark:bg-sky-950/40",
+    iconColor: "#0284c7",
   },
 ];
 
 export default function PaymentMethodScreen() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const [selected, setSelected] = useState<PaymentMethod>("wallet");
+
+  const onContinue = () => {
+    if (selected === "qpay") {
+      router.push({ pathname: "/booking/qpay-booking", params: { orderId } });
+      return;
+    }
+    if (selected === "bank_card") {
+      router.push({ pathname: "/(customer)/payment-methods/add-card", params: { returnTo: "booking", orderId } });
+      return;
+    }
+    router.push({
+      pathname: "/booking/account-info",
+      params: { orderId, method: selected },
+    });
+  };
 
   return (
     <>
@@ -93,16 +108,7 @@ export default function PaymentMethodScreen() {
           })}
         </View>
 
-        <Button
-          label="Үргэлжлүүлэх"
-          className="mt-8 shadow-md"
-          onPress={() =>
-            router.push({
-              pathname: "/booking/account-info",
-              params: { orderId, method: selected },
-            })
-          }
-        />
+        <Button label="Үргэлжлүүлэх" className="mt-8 shadow-md" onPress={onContinue} />
       </FormScrollView>
     </>
   );

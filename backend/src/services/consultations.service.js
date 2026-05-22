@@ -3,6 +3,7 @@ const { sqlLimitOffset } = require("../utils/paginationSql");
 const { AppError } = require("../utils/appError");
 const { assertPositiveIntId, assertOptionalMeetingUrl, optionalTrimmedString } = require("../utils/validation");
 const { CONSULTATION_REQUEST_STATUSES, isConsultationRequestStatus } = require("../constants/consultationRequests");
+const { CONSULTATION_TYPES } = require("../constants/consultationTypes");
 const { BOOKING_BUSINESS_RULES } = require("../constants/bookings");
 
 async function assertConsultationClinicOwner(consultationId, ownerUserId, conn = pool) {
@@ -18,8 +19,27 @@ async function assertConsultationClinicOwner(consultationId, ownerUserId, conn =
 }
 
 async function getConsultationRow(id, conn = pool) {
-  const [rows] = await conn.execute(`SELECT * FROM consultation_requests WHERE id = ? LIMIT 1`, [id]);
+  const [rows] = await conn.execute(
+    `SELECT cr.*,
+            s.slot_date, s.start_time AS slot_start_time, s.end_time AS slot_end_time,
+            d.full_name AS doctor_name, d.specialty AS doctor_specialty,
+            c.clinic_name
+     FROM consultation_requests cr
+     LEFT JOIN schedule_slots s ON s.id = cr.slot_id
+     LEFT JOIN doctors d ON d.id = cr.doctor_id
+     LEFT JOIN clinics c ON c.id = cr.clinic_id
+     WHERE cr.id = ? LIMIT 1`,
+    [id],
+  );
   return rows[0] || null;
+}
+
+async function releaseConsultationSlot(conn, slotId) {
+  if (!slotId) return;
+  await conn.execute(
+    `UPDATE schedule_slots SET is_available = 1, slot_status = 'available' WHERE id = ? AND slot_status = 'booked'`,
+    [slotId],
+  );
 }
 
 function assertFreeOnlineConsultationBody(body) {
@@ -43,37 +63,151 @@ function assertFreeOnlineConsultationBody(body) {
   return { requestType };
 }
 
+function formatTimeHm(t) {
+  const raw = String(t || "").trim();
+  const m = raw.match(/^(\d{2}):(\d{2})/);
+  return m ? `${m[1]}:${m[2]}` : raw.slice(0, 5);
+}
+
+/**
+ * Үнэгүй зөвлөгөөний боломжит эмч + цагууд.
+ */
+async function listFreeConsultationAvailability(listQuery = {}) {
+  const from =
+    listQuery.from_date && String(listQuery.from_date).trim()
+      ? String(listQuery.from_date).trim()
+      : new Date().toISOString().slice(0, 10);
+  const params = [from];
+  let dateToSql = "";
+  if (listQuery.to_date && String(listQuery.to_date).trim()) {
+    dateToSql = " AND s.slot_date <= ?";
+    params.push(String(listQuery.to_date).trim());
+  }
+  const [rows] = await pool.execute(
+    `SELECT s.id AS slot_id, s.slot_date, s.start_time, s.end_time,
+            d.id AS doctor_id, d.full_name AS doctor_name, d.specialty,
+            c.id AS clinic_id, c.clinic_name
+     FROM schedule_slots s
+     INNER JOIN doctors d ON d.id = s.doctor_id
+     INNER JOIN clinics c ON c.id = d.clinic_id
+     WHERE s.consultation_type = ?
+       AND s.is_available = 1 AND s.slot_status = 'available'
+       AND s.slot_date >= ?${dateToSql}
+     ORDER BY s.slot_date ASC, s.start_time ASC, d.full_name ASC
+     LIMIT 500`,
+    [CONSULTATION_TYPES.FREE_CONSULTATION, ...params],
+  );
+  const byDoctor = new Map();
+  for (const r of rows) {
+    if (!byDoctor.has(r.doctor_id)) {
+      byDoctor.set(r.doctor_id, {
+        doctor_id: r.doctor_id,
+        doctor_name: r.doctor_name,
+        specialty: r.doctor_specialty ?? null,
+        clinic_id: r.clinic_id,
+        clinic_name: r.clinic_name,
+        slots: [],
+      });
+    }
+    byDoctor.get(r.doctor_id).slots.push({
+      id: r.slot_id,
+      slot_date: r.slot_date,
+      start_time: formatTimeHm(r.start_time),
+      end_time: formatTimeHm(r.end_time),
+      label: `${r.slot_date} ${formatTimeHm(r.start_time)} – ${formatTimeHm(r.end_time)}`,
+    });
+  }
+  return { items: [...byDoctor.values()] };
+}
+
 /**
  * Үнэгүй онлайн зөвлөгөө: төлбөргүй, consultation_requests мөр үүсгэнэ.
- * Төлбөртэй цаг — bookings урсгал.
  */
 async function createConsultation(patientUserId, body) {
   const { requestType } = assertFreeOnlineConsultationBody(body);
-  const { clinic_id, doctor_id } = body;
-  const clinicId = assertPositiveIntId(clinic_id, "clinic_id");
-  const patientMessage = optionalTrimmedString(body.patient_message, 2000);
+  const clinicId = assertPositiveIntId(body.clinic_id, "clinic_id");
+  const symptoms = optionalTrimmedString(body.symptoms, 4000);
+  const question = optionalTrimmedString(body.question, 4000);
+  const notes = optionalTrimmedString(body.notes, 4000);
+  const patientMessage =
+    optionalTrimmedString(body.patient_message, 2000) ||
+    [symptoms, question, notes].filter(Boolean).join("\n\n").trim() ||
+    null;
 
   let doctorIdVal = null;
-  if (doctor_id !== undefined && doctor_id !== null && doctor_id !== "") {
-    doctorIdVal = assertPositiveIntId(doctor_id, "doctor_id");
-    const [d] = await pool.execute(`SELECT id FROM doctors WHERE id = ? AND clinic_id = ? LIMIT 1`, [
-      doctorIdVal,
-      clinicId,
-    ]);
-    if (!d[0]) {
-      throw new AppError(400, "Эмч энэ эмнэлэгт бүртгэлгүй байна.");
-    }
+  if (body.doctor_id !== undefined && body.doctor_id !== null && body.doctor_id !== "") {
+    doctorIdVal = assertPositiveIntId(body.doctor_id, "doctor_id");
   }
 
-  const [result] = await pool.execute(
-    `INSERT INTO consultation_requests (
-      patient_user_id, clinic_id, doctor_id, request_type, is_free, status, meeting_link, patient_message
-    ) VALUES (?, ?, ?, ?, 1, ?, NULL, ?)`,
-    [patientUserId, clinicId, doctorIdVal, requestType, CONSULTATION_REQUEST_STATUSES.PENDING, patientMessage],
-  );
-  const created = await getConsultationByIdForUser(result.insertId, { id: patientUserId, role: "customer" });
-  void require("./notificationTriggers.service").onConsultationCreated(created);
-  return created;
+  let slotIdVal = null;
+  if (body.slot_id !== undefined && body.slot_id !== null && body.slot_id !== "") {
+    slotIdVal = assertPositiveIntId(body.slot_id, "slot_id");
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    if (slotIdVal) {
+      const [slotRows] = await conn.execute(
+        `SELECT s.*, d.clinic_id AS doctor_clinic_id
+         FROM schedule_slots s
+         INNER JOIN doctors d ON d.id = s.doctor_id
+         WHERE s.id = ? FOR UPDATE`,
+        [slotIdVal],
+      );
+      const slot = slotRows[0];
+      if (!slot) throw new AppError(404, "Сонгосон цаг олдсонгүй.");
+      if (slot.consultation_type !== CONSULTATION_TYPES.FREE_CONSULTATION) {
+        throw new AppError(400, "Энэ цаг үнэгүй зөвлөгөөнд зориулагдаагүй.");
+      }
+      if (Number(slot.is_available) !== 1 || slot.slot_status !== "available") {
+        throw new AppError(409, "Сонгосон цаг аль хэдийн захиалагдсан байна.");
+      }
+      if (Number(slot.doctor_clinic_id) !== clinicId) {
+        throw new AppError(400, "Эмч энэ эмнэлэгт харьяалагдахгүй байна.");
+      }
+      doctorIdVal = Number(slot.doctor_id);
+      await conn.execute(`UPDATE schedule_slots SET is_available = 0, slot_status = 'booked' WHERE id = ?`, [
+        slotIdVal,
+      ]);
+    } else if (doctorIdVal) {
+      const [d] = await conn.execute(`SELECT id FROM doctors WHERE id = ? AND clinic_id = ? LIMIT 1`, [
+        doctorIdVal,
+        clinicId,
+      ]);
+      if (!d[0]) throw new AppError(400, "Эмч энэ эмнэлэгт бүртгэлгүй байна.");
+    }
+
+    const [result] = await conn.execute(
+      `INSERT INTO consultation_requests (
+        patient_user_id, clinic_id, doctor_id, slot_id, request_type, consultation_type,
+        is_free, status, meeting_link, patient_message, symptoms, question, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, NULL, ?, ?, ?, ?)`,
+      [
+        patientUserId,
+        clinicId,
+        doctorIdVal,
+        slotIdVal,
+        requestType,
+        CONSULTATION_TYPES.FREE_CONSULTATION,
+        CONSULTATION_REQUEST_STATUSES.PENDING,
+        patientMessage,
+        symptoms,
+        question,
+        notes,
+      ],
+    );
+    await conn.commit();
+    const created = await getConsultationByIdForUser(result.insertId, { id: patientUserId, role: "customer" });
+    void require("./notificationTriggers.service").onConsultationCreated(created);
+    return created;
+  } catch (e) {
+    await conn.rollback();
+    throw e;
+  } finally {
+    conn.release();
+  }
 }
 
 async function getConsultationByIdForUser(consultationId, user) {
@@ -133,7 +267,13 @@ async function listCustomerConsultations(patientUserId, listQuery) {
   const total = Number(countRow?.c || 0);
   const dir = listQuery.sortDir === "ASC" ? "ASC" : "DESC";
   const [rows] = await pool.execute(
-    `SELECT cr.* FROM consultation_requests cr WHERE ${ws} ORDER BY cr.created_at ${dir}${sqlLimitOffset(listQuery)}`,
+    `SELECT cr.*, s.slot_date, s.start_time AS slot_start_time, s.end_time AS slot_end_time,
+            d.full_name AS doctor_name, c.clinic_name
+     FROM consultation_requests cr
+     LEFT JOIN schedule_slots s ON s.id = cr.slot_id
+     LEFT JOIN doctors d ON d.id = cr.doctor_id
+     LEFT JOIN clinics c ON c.id = cr.clinic_id
+     WHERE ${ws} ORDER BY cr.created_at ${dir}${sqlLimitOffset(listQuery)}`,
     params,
   );
   return { items: rows, total };
@@ -154,9 +294,12 @@ async function listProviderConsultations(providerUserId, listQuery) {
   const total = Number(countRow?.c || 0);
   const dir = listQuery.sortDir === "ASC" ? "ASC" : "DESC";
   const [rows] = await pool.execute(
-    `SELECT cr.*
+    `SELECT cr.*, s.slot_date, s.start_time AS slot_start_time, s.end_time AS slot_end_time,
+            d.full_name AS doctor_name, c.clinic_name
      FROM consultation_requests cr
      INNER JOIN clinics c ON c.id = cr.clinic_id
+     LEFT JOIN schedule_slots s ON s.id = cr.slot_id
+     LEFT JOIN doctors d ON d.id = cr.doctor_id
      WHERE ${ws}
      ORDER BY cr.created_at ${dir}
      ${sqlLimitOffset(listQuery)}`,
@@ -196,21 +339,22 @@ function assertProviderConsultationStatusTransition(current, next) {
 }
 
 /**
- * Provider: хүлээн авах, хаах, татгалзах, meeting link, хариу текст, чат нээх.
+ * Provider: хүлээн авах, татгалзах, дуусгах, meeting link, эмчийн тэмдэглэл.
  */
 async function updateConsultation(consultationId, user, body) {
   if (user.role !== "provider") {
     throw new AppError(403, "Зөвлөгөөний хүсэлтийг зөвхөн эмнэлэг шинэчилнэ.");
   }
   const cid = assertPositiveIntId(consultationId, "Хүсэлтийн дугаар");
-  const { status, meeting_link, provider_message, open_chat } = body;
+  const { status, meeting_link, provider_message, provider_notes, open_chat } = body;
   if (
     status === undefined &&
     meeting_link === undefined &&
     provider_message === undefined &&
+    provider_notes === undefined &&
     open_chat === undefined
   ) {
-    throw new AppError(400, "Шинэчлэх талбар оруулна уу (status, meeting_link, provider_message, open_chat).");
+    throw new AppError(400, "Шинэчлэх талбар оруулна уу.");
   }
   await assertConsultationClinicOwner(cid, user.id);
   const row = await getConsultationRow(cid);
@@ -228,8 +372,7 @@ async function updateConsultation(consultationId, user, body) {
     if ([CONSULTATION_REQUEST_STATUSES.CLOSED, CONSULTATION_REQUEST_STATUSES.CANCELLED].includes(row.status)) {
       throw new AppError(400, "Энэ төлөвт уулзалтын холбоос өөрчлөхгүй.");
     }
-    const url =
-      meeting_link === null || meeting_link === "" ? null : assertOptionalMeetingUrl(meeting_link);
+    const url = meeting_link === null || meeting_link === "" ? null : assertOptionalMeetingUrl(meeting_link);
     fields.push("meeting_link = ?");
     values.push(url);
   }
@@ -237,9 +380,15 @@ async function updateConsultation(consultationId, user, body) {
     if ([CONSULTATION_REQUEST_STATUSES.CLOSED, CONSULTATION_REQUEST_STATUSES.CANCELLED].includes(row.status)) {
       throw new AppError(400, "Энэ төлөвт хариу бичих боломжгүй.");
     }
-    const msg = optionalTrimmedString(provider_message, 4000);
     fields.push("provider_message = ?");
-    values.push(msg);
+    values.push(optionalTrimmedString(provider_message, 4000));
+  }
+  if (provider_notes !== undefined) {
+    if ([CONSULTATION_REQUEST_STATUSES.CLOSED, CONSULTATION_REQUEST_STATUSES.CANCELLED].includes(row.status)) {
+      throw new AppError(400, "Энэ төлөвт тэмдэглэл бичих боломжгүй.");
+    }
+    fields.push("provider_notes = ?");
+    values.push(optionalTrimmedString(provider_notes, 4000));
   }
   if (open_chat === true || open_chat === 1 || open_chat === "1" || open_chat === "true") {
     const effectiveStatus = status !== undefined ? status : row.status;
@@ -255,6 +404,9 @@ async function updateConsultation(consultationId, user, body) {
   values.push(cid);
   await pool.execute(`UPDATE consultation_requests SET ${fields.join(", ")} WHERE id = ?`, values);
   const fresh = await getConsultationRow(cid);
+  if (status === CONSULTATION_REQUEST_STATUSES.CANCELLED) {
+    await releaseConsultationSlot(pool, fresh.slot_id);
+  }
   if (status !== undefined && status === CONSULTATION_REQUEST_STATUSES.ACCEPTED) {
     void require("./notificationTriggers.service").onConsultationAccepted(fresh);
   }
@@ -275,6 +427,7 @@ async function cancelConsultation(consultationId, user) {
       CONSULTATION_REQUEST_STATUSES.CANCELLED,
       cid,
     ]);
+    await releaseConsultationSlot(pool, row.slot_id);
     return getConsultationByIdForUser(cid, user);
   }
 
@@ -287,6 +440,7 @@ async function cancelConsultation(consultationId, user) {
       CONSULTATION_REQUEST_STATUSES.CANCELLED,
       cid,
     ]);
+    await releaseConsultationSlot(pool, row.slot_id);
     return getConsultationByIdForUser(cid, user);
   }
 
@@ -299,6 +453,7 @@ module.exports = {
   listConsultations,
   listCustomerConsultations,
   listProviderConsultations,
+  listFreeConsultationAvailability,
   updateConsultation,
   cancelConsultation,
 };

@@ -1,4 +1,5 @@
 import { Badge, Button, Card, FormScrollView, Input, ScreenScrollView, SectionHeader } from "@/components";
+import { SharedLabTestsCard } from "@/components/SharedLabTestsCard";
 import { orderStatusLabel } from "@/constants/orderStatus";
 import { providerBookingStatusLabel } from "@/constants/providerBookingStatus";
 import { useProviderWorkspace } from "@/contexts/ProviderWorkspaceContext";
@@ -26,6 +27,7 @@ export default function ProviderOrderDetailScreen() {
   const [diagnosis, setDiagnosis] = useState("");
   const [advice, setAdvice] = useState("");
   const [treatment, setTreatment] = useState("");
+  const [providerNotes, setProviderNotes] = useState("");
 
   useEffect(() => {
     if (booking) setLink(booking.meetingLink ?? "");
@@ -44,8 +46,17 @@ export default function ProviderOrderDetailScreen() {
       try {
         if (isConsultationOrderId(id)) {
           const row = await consultationApi.getById(consultationNumericId(id));
-          const combined = [row.patient_message, row.provider_message].filter(Boolean).join("\n\n").trim();
-          if (alive) setRemoteHealth(combined || null);
+          const combined = [
+            row.symptoms ? `Биеийн байдал: ${row.symptoms}` : null,
+            row.question ? `Асуух зүйл: ${row.question}` : null,
+            row.notes ? `Нэмэлт: ${row.notes}` : null,
+          ]
+            .filter(Boolean)
+            .join("\n\n");
+          if (alive) {
+            setRemoteHealth(combined || row.patient_message || null);
+            setProviderNotes(row.provider_notes ?? row.provider_message ?? "");
+          }
           return;
         }
         const detail = await bookingApi.getById(id);
@@ -148,9 +159,38 @@ export default function ProviderOrderDetailScreen() {
           </Card>
         )}
 
+        {bookingId && !isConsultationOrderId(bookingId) ? (
+          <SharedLabTestsCard
+            bookingId={bookingId}
+            title="Үйлчлүүлэгчийн хуваалцсан шинжилгээ"
+            emptyText="Энэ захиалгад үйлчлүүлэгч шинжилгээ хуваалаагүй. Зөвхөн сонгосон тохиолдолд энд харагдана."
+          />
+        ) : null}
+
+        {booking.kind === "free_online" && (booking.symptoms || booking.question || booking.consultNotes) ? (
+          <Card className="mb-3">
+            <Text className="text-sm font-semibold text-app-text">Үнэгүй зөвлөгөөний хүсэлт</Text>
+            {booking.symptoms ? (
+              <Text className="mt-2 text-sm text-app-text-secondary">Биеийн байдал: {booking.symptoms}</Text>
+            ) : null}
+            {booking.question ? (
+              <Text className="mt-2 text-sm text-app-text-secondary">Асуух зүйл: {booking.question}</Text>
+            ) : null}
+            {booking.consultNotes ? (
+              <Text className="mt-2 text-sm text-app-text-secondary">Нэмэлт: {booking.consultNotes}</Text>
+            ) : null}
+          </Card>
+        ) : null}
+
         <Card className="mb-3">
-          <Text className="text-sm font-semibold text-app-text">Онлайн уулзалтын холбоос илгээх</Text>
-          <Text className="mt-1 text-xs text-app-text-muted">Видео уулзалтын холбоосыг (жишээ нь Meet, Zoom) энд хадгална.</Text>
+          <Text className="text-sm font-semibold text-app-text">
+            {booking.kind === "free_online" ? "Google Meet холбоос" : "Онлайн уулзалтын холбоос илгээх"}
+          </Text>
+          <Text className="mt-1 text-xs text-app-text-muted">
+            {booking.kind === "free_online"
+              ? "Зөвшөөрсний дараа үйлчлүүлэгчид холбоос харагдана."
+              : "Видео уулзалтын холбоосыг (жишээ нь Meet, Zoom) энд хадгална."}
+          </Text>
           <Input
             label="Холбоос"
             value={link}
@@ -195,6 +235,41 @@ export default function ProviderOrderDetailScreen() {
           onPress={() => router.push({ pathname: routes.providerChat, params: { patient: booking.patientName } })}
         />
 
+        {booking.kind === "free_online" ? (
+          <Card className="mb-3">
+            <Text className="text-sm font-semibold text-app-text">Эмчийн нэмэлт тэмдэглэл</Text>
+            <Input
+              label="Тэмдэглэл"
+              value={providerNotes}
+              onChangeText={setProviderNotes}
+              placeholder="Уулзалтын өмнө/дараах тэмдэглэл…"
+              multiline
+            />
+            <Button
+              label="Тэмдэглэл хадгалах"
+              variant="secondary"
+              className="mt-2"
+              loading={actionLoading}
+              onPress={() => {
+                if (!isConsultationOrderId(booking.id)) return;
+                void (async () => {
+                  setFormError(null);
+                  setActionLoading(true);
+                  try {
+                    await consultationApi.update(consultationNumericId(booking.id), {
+                      provider_notes: providerNotes.trim() || null,
+                    });
+                  } catch (e) {
+                    setFormError(e instanceof Error ? e.message : "Хадгалахад алдаа гарлаа.");
+                  } finally {
+                    setActionLoading(false);
+                  }
+                })();
+              }}
+            />
+          </Card>
+        ) : null}
+
         <Card className="mb-3">
           <Text className="text-sm font-semibold text-app-text">Эмчийн тэмдэглэл</Text>
           <Text className="mt-1 text-xs text-app-text-muted">
@@ -232,7 +307,7 @@ export default function ProviderOrderDetailScreen() {
         {canDecide ? (
           <View className="gap-2">
             <Button
-              label="Батлах"
+              label={booking.kind === "free_online" ? "Зөвшөөрөх" : "Батлах"}
               loading={actionLoading}
               onPress={() => {
                 void (async () => {

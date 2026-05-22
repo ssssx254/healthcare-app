@@ -1,11 +1,11 @@
-import { AuthMessageBanner, Button, Card, FormScrollView, Input, SectionHeader } from "@/components";
+import { AuthMessageBanner, Button, Card, FormScrollView, Input, QpayQrCode, SectionHeader } from "@/components";
 import { formatMnt } from "@/lib/formatMnt";
 import { ApiError } from "@/lib/api/client";
 import { walletApi, type QpayInvoiceResponse } from "@/services/api/walletApi";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 export default function QpayWalletTopupScreen() {
   const { amount: amountParam, orderId, method, source } = useLocalSearchParams<{
@@ -107,12 +107,7 @@ export default function QpayWalletTopupScreen() {
             <Text className="mt-1 text-sm text-app-text">
               {new Date(invoice.expires_at).toLocaleString("mn-MN", { dateStyle: "medium", timeStyle: "short" })}
             </Text>
-            <Text className="mt-4 text-xs font-semibold text-app-text-secondary">QR болон өгөгдөл (жишээ)</Text>
-            <ScrollView horizontal className="mt-2 max-h-28 rounded-xl bg-slate-900 p-3" showsHorizontalScrollIndicator>
-              <Text className="font-mono text-xs text-emerald-300" selectable>
-                {invoice.qr_payload}
-              </Text>
-            </ScrollView>
+            <QpayQrCode value={invoice.qr_payload} className="mt-4" />
             <Text className="mt-3 text-xs leading-5 text-app-text-muted">{invoice.polling_hint_mn}</Text>
             <Button label="Төлбөр төлөгдсөн гэж батлах" loading={confirming} onPress={confirmPaid} className="mt-5 shadow-md" />
             <Button

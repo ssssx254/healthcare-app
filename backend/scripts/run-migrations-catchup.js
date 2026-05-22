@@ -18,6 +18,9 @@ const files = [
   "009_safe_chat_core_tables.sql",
   "010_doctor_reviews.sql",
   "011_lab_tests.sql",
+  "012_booking_lab_tests.sql",
+  "013_payment_methods.sql",
+  "014_free_consultation_flow.sql",
 ];
 
 for (const f of files) {

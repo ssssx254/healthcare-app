@@ -6,6 +6,13 @@ import { router, Stack } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
 
+function formatBookingDate(value: string): string {
+  const iso = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  const d = iso ? new Date(`${iso[1]}T12:00:00`) : new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("mn-MN", { year: "numeric", month: "long", day: "numeric", weekday: "short" });
+}
+
 export default function ConfirmBookingScreen() {
   const { draft, createFormalOrderAfterConfirm } = useCustomerBooking();
   const [loading, setLoading] = useState(false);
@@ -33,7 +40,7 @@ export default function ConfirmBookingScreen() {
   const questionnaireMissing = QUESTIONNAIRE_REQUIRED && !questionnaireDone;
   const missing = missingBookingCore || questionnaireMissing;
 
-  const slotDate = draft.selectedDate ?? "—";
+  const slotDate = draft.selectedDate ? formatBookingDate(draft.selectedDate) : "—";
   const slotTime = draft.selectedTime ?? "—";
 
   const onConfirm = async () => {
@@ -86,6 +93,14 @@ export default function ConfirmBookingScreen() {
               <Row label="Цаг" value={slotTime} />
               <Row label="Хугацаа" value={(draft.duration ?? draft.durationMinutes) != null ? `${draft.duration ?? draft.durationMinutes} минут` : "—"} />
               <Row label="Үнэ" value={`${(draft.price ?? draft.priceMnt)?.toString() ?? "0"} ₮`} />
+              <Row
+                label="Шинжилгээ хуваалцах"
+                value={
+                  draft.sharedLabTestIds.length > 0
+                    ? `${draft.sharedLabTestIds.length} шинжилгээ сонгосон`
+                    : "Хуваалаагүй (хувийн)"
+                }
+              />
               <View className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
                 <Text className="text-sm text-app-text-secondary">Төлөв</Text>
                 <Text className="mt-1 text-sm font-medium text-amber-700 dark:text-amber-300">

@@ -26,6 +26,9 @@ export function toFriendlyErrorMn(message: string): string {
   if (lower.includes("403") || lower.includes("forbidden")) {
     return "Энэ үйлдлийг хийх эрх байхгүй байна.";
   }
+  if (lower.includes("зам олдсонгүй")) {
+    return "Серверийн API зам олдсонгүй. Backend (Render) дээр шинэ код deploy хийсний дараа дахин оролдоно уу.";
+  }
   if (lower.includes("404") || lower.includes("not found")) {
     return "Хүссэн мэдээлэл олдсонгүй.";
   }

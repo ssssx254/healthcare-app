@@ -6,10 +6,12 @@ const { validateServicesListQuery } = require("../validators/listQuery.validator
 const { validateIdParam } = require("../validators/params.validators");
 
 const router = express.Router();
+const clinicCategoriesController = require("../controllers/clinicCategories.controller");
 
 const idParam = validateParams(validateIdParam("id"));
 
 router.get("/", validateQuery(validateServicesListQuery), servicesController.list);
+router.get("/categories/public", clinicCategoriesController.listPublic);
 router.get("/:id", idParam, servicesController.getOne);
 router.post("/", requireAuth, requireApprovedProvider, servicesController.create);
 router.put("/:id", requireAuth, requireApprovedProvider, idParam, servicesController.update);

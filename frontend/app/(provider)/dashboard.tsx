@@ -13,6 +13,7 @@ import {
 } from "@/components";
 import { routes } from "@/constants/appRoutes";
 import { providerBookingStatusLabel } from "@/constants/providerBookingStatus";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useChatSync } from "@/hooks/useChatSync";
 import { useProviderWorkspace } from "@/contexts/ProviderWorkspaceContext";
@@ -22,6 +23,7 @@ import { useCallback, useMemo, type ComponentProps } from "react";
 import { Pressable, Text, View } from "react-native";
 
 export default function ProviderDashboardScreen() {
+  const { palette } = useAppTheme();
   const { signOut, user } = useAuth();
   const isApproved = user?.approvalStatus === "approved";
   const approvalLabel = isApproved ? "Баталгаажсан" : user?.approvalStatus === "rejected" ? "Татгалзсан" : "Хүлээгдэж байна";
@@ -245,13 +247,13 @@ export default function ProviderDashboardScreen() {
                 }}
                 className={`min-h-[96px] min-w-[48%] flex-1 rounded-2xl border px-3 py-3.5 ${
                   isApproved
-                    ? "border-slate-200/80 bg-slate-50/80 active:opacity-90 border-app-border bg-app-muted/70"
-                    : "border-slate-200 bg-slate-100/70 opacity-60 border-app-border bg-app-card/40"
+                    ? "border-app-border bg-app-muted active:opacity-90"
+                    : "border-app-border bg-app-card/40 opacity-60"
                 }`}
               >
                   <View className="flex-row items-start gap-3">
                     <View className="h-10 w-10 items-center justify-center rounded-xl bg-brand-100 dark:bg-brand-900/40">
-                      <MaterialCommunityIcons name={action.icon} size={22} color="#2563eb" />
+                      <MaterialCommunityIcons name={action.icon} size={22} color={palette.brand} />
                     </View>
                     <View className="min-w-0 flex-1 pt-0.5">
                       <Text className="text-[15px] font-semibold text-app-text" numberOfLines={2}>

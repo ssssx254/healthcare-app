@@ -17,9 +17,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/lib/api/client";
 import { providerOnboardingApi } from "@/services/api/providerOnboardingApi";
 import { cn } from "@/utils/cn";
-import { Link, router } from "expo-router";
-import { useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Link, router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { Alert, BackHandler, Pressable, Text, View } from "react-native";
 
 function emailValid(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -221,6 +221,19 @@ export default function RegisterScreen() {
     ? "Үйлчилгээ үзүүлэгчээр бүртгүүлж, эмнэлгийн мэдээллээ алхам алхмаар бөглөнө үү."
     : "Үйлчлүүлэгчээр бүртгүүлж, зөвлөгөө болон цаг товлох боломжтой.";
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!isProviderFlow || providerStep <= 1) return;
+      const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+        setProviderStep((prev) => Math.max(prev - 1, 1));
+        setErrors({});
+        setFormError(null);
+        return true;
+      });
+      return () => sub.remove();
+    }, [isProviderFlow, providerStep]),
+  );
+
   return (
     <AppContainer centerContent className="flex-1">
       <FormScrollView
@@ -257,7 +270,7 @@ export default function RegisterScreen() {
               "min-h-[88px] flex-1 items-center justify-center rounded-2xl border-2 px-3 py-3",
               signupRole === "customer"
                 ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                : "border-slate-200 bg-white border-app-border-strong bg-app-card",
+                : "border-app-border-strong bg-app-card",
             )}
             onPress={() => {
               setSignupRole("customer");
@@ -290,7 +303,7 @@ export default function RegisterScreen() {
               "min-h-[88px] flex-1 items-center justify-center rounded-2xl border-2 px-3 py-3",
               signupRole === "provider"
                 ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                : "border-slate-200 bg-white border-app-border-strong bg-app-card",
+                : "border-app-border-strong bg-app-card",
             )}
             onPress={() => {
               setSignupRole("provider");
@@ -321,9 +334,9 @@ export default function RegisterScreen() {
         </View>
       </Card>
 
-      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+      <Card className="border-2 border-app-border-strong shadow-md">
         {isProviderFlow ? (
-          <View className="mb-5 border-b border-slate-200 pb-4 border-app-border">
+          <View className="mb-5 border-b border-app-border pb-4">
             <Text className="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
               Алхам {providerStep} / 5
             </Text>
@@ -422,7 +435,7 @@ export default function RegisterScreen() {
                     "rounded-2xl border-2 px-3 py-2.5",
                     clinicType === type
                       ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                      : "border-slate-200 bg-white border-app-border-strong bg-app-card",
+                      : "border-app-border-strong bg-app-card",
                   )}
                   onPress={() => setClinicType(type)}
                 >
@@ -507,7 +520,7 @@ export default function RegisterScreen() {
                   "rounded-2xl border-2 px-4 py-3",
                   hasOnlineConsult
                     ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                    : "border-slate-200 bg-white border-app-border-strong bg-app-card",
+                    : "border-app-border-strong bg-app-card",
                 )}
                 onPress={() => setHasOnlineConsult((prev) => !prev)}
               >
@@ -518,7 +531,7 @@ export default function RegisterScreen() {
                   "rounded-2xl border-2 px-4 py-3",
                   hasAmbulatoryCare
                     ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                    : "border-slate-200 bg-white border-app-border-strong bg-app-card",
+                    : "border-app-border-strong bg-app-card",
                 )}
                 onPress={() => setHasAmbulatoryCare((prev) => !prev)}
               >
@@ -551,7 +564,7 @@ export default function RegisterScreen() {
           </View>
         )}
 
-        <View className="mt-2 gap-2 border-t border-slate-200 pt-5 border-app-border">
+        <View className="mt-2 gap-2 border-t border-app-border pt-5">
           {isProviderFlow && providerStep > 1 ? (
             <Button
               label="Өмнөх алхам"

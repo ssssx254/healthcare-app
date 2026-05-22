@@ -43,7 +43,7 @@ export default function AppointmentsScreen() {
             className={`min-h-[48px] flex-1 items-center justify-center rounded-xl border px-2 py-2.5 ${
               activeTab === "online"
                 ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                : "border-slate-200 bg-white border-app-border bg-app-card"
+                : "border-app-border bg-app-muted"
             }`}
           >
             <Text
@@ -60,7 +60,7 @@ export default function AppointmentsScreen() {
             className={`min-h-[48px] flex-1 items-center justify-center rounded-xl border px-2 py-2.5 ${
               activeTab === "ambulatory"
                 ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900"
-                : "border-slate-200 bg-white border-app-border bg-app-card"
+                : "border-app-border bg-app-muted"
             }`}
           >
             <Text

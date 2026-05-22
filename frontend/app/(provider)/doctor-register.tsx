@@ -247,6 +247,7 @@ export default function DoctorRegisterScreen() {
           .filter(Boolean);
         const duration = Number(durationMinutes) || 30;
         const price = Math.max(0, Number(priceMnt) || 0);
+        let ambulatoryServiceId: string | undefined;
         for (const titleItem of svcTitles) {
           if (onlineEnabled) {
             await addService(
@@ -265,7 +266,7 @@ export default function DoctorRegisterScreen() {
             );
           }
           if (ambulatoryEnabled) {
-            await addService(
+            const createdId = await addService(
               {
                 doctorId: doctor.id,
                 categoryId: categories[0]?.id,
@@ -279,9 +280,15 @@ export default function DoctorRegisterScreen() {
               },
               { deferRefresh: true },
             );
+            if (createdId) ambulatoryServiceId = createdId;
           }
         }
         await refreshWorkspace();
+
+        const slotKind: "paid_visit" | "free_consultation" = ambulatoryEnabled ? "paid_visit" : "free_consultation";
+        if (slotKind === "paid_visit" && !ambulatoryServiceId) {
+          throw new Error("Амбулаторийн үйлчилгээ үүсээгүй байна. 3-р алхам дахин шалгана уу.");
+        }
 
         const generatedSlots = buildSlotsForNext14Days();
         for (const slot of generatedSlots) {
@@ -291,6 +298,8 @@ export default function DoctorRegisterScreen() {
               dateIso: slot.dateIso,
               startTime: slot.startTime,
               endTime: slot.endTime,
+              consultationType: slotKind,
+              serviceId: slotKind === "paid_visit" ? ambulatoryServiceId : null,
             },
             { deferRefresh: true },
           );
@@ -583,7 +592,7 @@ export default function DoctorRegisterScreen() {
         {step > 1 ? (
           <Button label="Өмнөх" variant="ghost" className="mt-4" onPress={() => setStep((prev) => Math.max(1, prev - 1))} />
         ) : null}
-        <Button label={step === 4 ? "Эмч onboarding хадгалах" : "Дараах"} className="mt-2" loading={loading} onPress={onSave} />
+        <Button label={step === 4 ? "Эмчийн мэдээлэл хадгалах" : "Дараах"} className="mt-2" loading={loading} onPress={onSave} />
         <Button label="Буцах" variant="ghost" className="mt-2" onPress={() => router.back()} />
       </FormScrollView>
     </>

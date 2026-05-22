@@ -1,5 +1,6 @@
 import { apiRequest, apiRequestPaginated } from "@/lib/api/client";
 import { withQuery } from "@/lib/api/query";
+import type { PaymentAttemptStatus } from "@/constants/paymentStatus";
 import type { ApiPaginatedData } from "@/types/api/envelope";
 
 export type WalletBalance = { user_id: number; balance: number; currency: string };
@@ -24,6 +25,15 @@ export type WalletTxListParams = {
   transaction_type?: string;
 };
 
+export type PaymentChannel = "wallet" | "qpay" | "saved_card";
+
+export type PayBookingBody = {
+  booking_id: number;
+  channel?: PaymentChannel;
+  payment_method_id?: number;
+  qpay_invoice_id?: string;
+};
+
 /** Backend `POST /wallet/qpay/invoice` (жишээ QPay). */
 export type QpayInvoiceResponse = {
   invoice_id: string;
@@ -33,6 +43,8 @@ export type QpayInvoiceResponse = {
   deep_link_mock: string;
   expires_at: string;
   polling_hint_mn: string;
+  payment_status?: PaymentAttemptStatus;
+  booking_id?: number;
 };
 
 export const walletApi = {
@@ -40,7 +52,12 @@ export const walletApi = {
     return apiRequest<WalletBalance>("/wallet/balance", { method: "GET" });
   },
 
-  topUp(body: { amount: number; mock_gateway?: string; payment_method_id?: number | null; note?: string | null }): Promise<{
+  topUp(body: {
+    amount: number;
+    mock_gateway?: string;
+    payment_method_id?: number | null;
+    note?: string | null;
+  }): Promise<{
     wallet: { balance: number; currency: string };
     transaction: WalletTransactionRow;
   }> {
@@ -58,19 +75,22 @@ export const walletApi = {
     return apiRequest("/wallet/qpay/confirm", { method: "POST", json: body });
   },
 
+  qpayBookingInvoice(body: { booking_id: number }): Promise<QpayInvoiceResponse> {
+    return apiRequest("/wallet/qpay/booking-invoice", { method: "POST", json: body });
+  },
+
+  qpayBookingConfirm(body: { invoice_id: string }): Promise<{
+    booking: Record<string, unknown>;
+    payment_status: PaymentAttemptStatus;
+  }> {
+    return apiRequest("/wallet/qpay/booking-confirm", { method: "POST", json: body });
+  },
+
   transactionsPaged(params?: WalletTxListParams): Promise<ApiPaginatedData<WalletTransactionRow>> {
     return apiRequestPaginated<WalletTransactionRow>(withQuery("/wallet/transactions", params ?? {}));
   },
 
-  listPaymentMethods(): Promise<unknown[]> {
-    return apiRequest<unknown[]>("/wallet/payment-methods", { method: "GET" });
-  },
-
-  createPaymentMethod(body: Record<string, unknown>): Promise<Record<string, unknown>> {
-    return apiRequest("/wallet/payment-methods", { method: "POST", json: body });
-  },
-
-  payBooking(booking_id: number): Promise<unknown> {
-    return apiRequest("/wallet/pay-booking", { method: "POST", json: { booking_id } });
+  payBooking(body: PayBookingBody): Promise<Record<string, unknown>> {
+    return apiRequest("/wallet/pay-booking", { method: "POST", json: body });
   },
 };

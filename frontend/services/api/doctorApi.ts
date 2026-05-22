@@ -87,4 +87,8 @@ export const doctorApi = {
   ): Promise<DoctorRow> {
     return apiRequest<DoctorRow>(`/doctors/${id}`, { method: "PUT", json: body });
   },
+
+  remove(id: string | number): Promise<{ id: number; deleted: boolean }> {
+    return apiRequest<{ id: number; deleted: boolean }>(`/doctors/${id}`, { method: "DELETE" });
+  },
 };

@@ -9,7 +9,9 @@ export default function CategoriesScreen() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
 
-  const onAdd = () => {
+  const [saving, setSaving] = useState(false);
+
+  const onAdd = async () => {
     if (!name.trim()) {
       setError("Ангиллын нэр оруулна уу.");
       return;
@@ -19,8 +21,15 @@ export default function CategoriesScreen() {
       return;
     }
     setError("");
-    addCategory(name.trim());
-    setName("");
+    try {
+      setSaving(true);
+      await addCategory(name.trim());
+      setName("");
+    } catch {
+      setError("Ангилал хадгалахад алдаа гарлаа. Дахин оролдоно уу.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -33,7 +42,7 @@ export default function CategoriesScreen() {
         <SectionHeader title="Ангилал удирдах" subtitle="Үйлчилгээг ангилж бүлэглэнэ." />
         <Card className="mb-4">
           <Input label="Шинэ ангилал" value={name} onChangeText={setName} placeholder="Жишээ: оношлогоо" error={error} />
-          <Button label="Нэмэх" className="mt-3" onPress={onAdd} />
+          <Button label="Нэмэх" className="mt-3" loading={saving} onPress={() => void onAdd()} />
         </Card>
         {categories.length === 0 ? (
           <Card>
@@ -41,8 +50,8 @@ export default function CategoriesScreen() {
           </Card>
         ) : (
           <View className="gap-2">
-            {categories.map((c) => (
-              <Card key={c.id}>
+            {categories.map((c, index) => (
+              <Card key={`${c.id}-${index}`}>
                 <View className="gap-3">
                   <View className="min-w-0">
                     <Text className="text-xs text-app-text-muted">Ангиллын нэр</Text>

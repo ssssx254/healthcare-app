@@ -104,7 +104,7 @@ export default function ServiceDetailScreen() {
                 }
               />
             ) : (
-              <Button label="Үнэгүй онлайн зөвлөгөө рүү" onPress={() => router.push("/(customer)/free-consult")} />
+              <Button label="Үнэгүй зөвлөгөө рүү" onPress={() => router.push("/(customer)/free-consult")} />
             )}
             <Button
               label="Буцах"

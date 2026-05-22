@@ -29,8 +29,19 @@ const paymentMethodsCreate = asyncHandler(async (req, res) => {
 });
 
 const payBooking = asyncHandler(async (req, res) => {
-  const row = await walletService.payBookingFromWallet(req.user.id, req.body.booking_id);
+  const result = await walletService.payBooking(req.user, req.body);
+  const row = result?.booking ?? result;
   return ok(res, row, "Төлбөр амжилттай төлөгдлөө");
+});
+
+const qpayBookingInvoice = asyncHandler(async (req, res) => {
+  const data = await walletService.createQpayBookingInvoice(req.user, req.body);
+  return ok(res, data, "QPay нэхэмжлэл үүслээ (жишээ).");
+});
+
+const qpayBookingConfirm = asyncHandler(async (req, res) => {
+  const data = await walletService.confirmQpayBookingPayment(req.user, req.body);
+  return ok(res, data, "QPay төлбөр баталгаажлаа.");
 });
 
 const qpayInvoice = asyncHandler(async (req, res) => {
@@ -52,4 +63,6 @@ module.exports = {
   payBooking,
   qpayInvoice,
   qpayConfirm,
+  qpayBookingInvoice,
+  qpayBookingConfirm,
 };

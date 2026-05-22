@@ -1,4 +1,4 @@
-import { AppImage, Button, Card, EmptyState, ErrorState, LoadingState, ScreenScrollView } from "@/components";
+import { AppImage, Card, EmptyState, ErrorState, LoadingState, ScreenScrollView } from "@/components";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { routes } from "@/constants/appRoutes";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,9 +7,42 @@ import { resolveDoctorAvatarUri } from "@/lib/doctorAvatar";
 import { getClinicList, getProviderServiceCategories, getSpotlightDoctors } from "@/services/customerCatalog";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link, router, Tabs } from "expo-router";
+import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type { MockClinicDetail, MockDoctor } from "@/types/customer";
+
+type VisitCardProps = {
+  href: string;
+  title: string;
+  subtitle: string;
+  icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
+  iconColor: string;
+  accent: string;
+};
+
+function VisitTypeCard({ href, title, subtitle, icon, iconColor, accent }: VisitCardProps) {
+  return (
+    <Link href={href as never} asChild>
+      <Pressable className="flex-row items-center justify-between gap-3 rounded-2xl border px-4 py-4 shadow-sm active:opacity-95 border-app-border bg-app-card">
+        <View className="flex-row items-center gap-3 min-w-0 flex-1">
+          <View className={`h-12 w-12 items-center justify-center rounded-xl ${accent}`}>
+            <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-sm font-bold text-app-text" numberOfLines={2}>
+              {title}
+            </Text>
+            <Text className="mt-1 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
+              {subtitle}
+            </Text>
+          </View>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={22} color="#94a3b8" />
+      </Pressable>
+    </Link>
+  );
+}
 
 export default function CustomerHomeScreen() {
   const { user } = useAuth();
@@ -116,34 +149,6 @@ export default function CustomerHomeScreen() {
 
         <View className="mb-6">
           <View className="mb-3 flex-row items-center justify-between gap-3">
-            <Text className="min-w-0 flex-1 text-base font-semibold text-app-text" numberOfLines={1}>
-              Зөвлөгөө
-            </Text>
-            <Link href={routes.customerAdvice} asChild>
-              <Pressable className="shrink-0">
-                <Text className="text-xs font-medium text-brand-700 dark:text-brand-300">Бүгдийг харах</Text>
-              </Pressable>
-            </Link>
-          </View>
-          <View>
-            <Link href={routes.customerFreeConsult} asChild>
-              <Pressable className="rounded-2xl p-4 shadow-sm border-app-border bg-app-card">
-                <View className="h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40">
-                  <MaterialCommunityIcons name="video-outline" size={20} color="#2563eb" />
-                </View>
-                <Text className="mt-3 text-sm font-semibold text-app-text" numberOfLines={2}>
-                  Онлайн зөвлөгөө
-                </Text>
-                <Text className="mt-1 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
-                  Шуурхай зөвлөгөө авах
-                </Text>
-              </Pressable>
-            </Link>
-          </View>
-        </View>
-
-        <View className="mb-6">
-          <View className="mb-3 flex-row items-center justify-between gap-3">
             <Text className="min-w-0 flex-1 text-base font-semibold text-app-text" numberOfLines={2}>
               Үзлэгийн төрөл
             </Text>
@@ -153,36 +158,24 @@ export default function CustomerHomeScreen() {
               </Pressable>
             </Link>
           </View>
-          <Card className="mb-3">
-            <Link href={routes.customerAppointments} asChild>
-              <Pressable className="flex-row items-center justify-between gap-3">
-                <View className="min-w-0 flex-1">
-                  <Text className="text-sm font-semibold text-app-text" numberOfLines={2}>
-                    Төлбөртэй үзлэг
-                  </Text>
-                  <Text className="mt-1 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
-                    Эмнэлэг дээр цаг товлож үзүүлэх
-                  </Text>
-                </View>
-                <MaterialCommunityIcons name="chevron-right" size={22} color="#64748b" />
-              </Pressable>
-            </Link>
-          </Card>
-          <Card>
-            <Link href={routes.customerFreeConsult} asChild>
-              <Pressable className="flex-row items-center justify-between gap-3">
-                <View className="min-w-0 flex-1">
-                  <Text className="text-sm font-semibold text-app-text" numberOfLines={2}>
-                    Үнэгүй зөвлөгөө
-                  </Text>
-                  <Text className="mt-1 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
-                    Анхан шатны онлайн зөвлөгөө
-                  </Text>
-                </View>
-                <MaterialCommunityIcons name="chevron-right" size={22} color="#64748b" />
-              </Pressable>
-            </Link>
-          </Card>
+          <View className="gap-3">
+            <VisitTypeCard
+              href={routes.customerClinics}
+              title="Төлбөртэй үзлэг"
+              subtitle="Эмнэлэг дээр цаг товлож үзүүлэх"
+              icon="calendar-check-outline"
+              iconColor="#2563eb"
+              accent="bg-brand-100 dark:bg-brand-900/40"
+            />
+            <VisitTypeCard
+              href={routes.customerFreeConsult}
+              title="Үнэгүй зөвлөгөө"
+              subtitle="Онлайн — эмч сонгож цаг захиалах"
+              icon="video-outline"
+              iconColor="#059669"
+              accent="bg-emerald-50 dark:bg-emerald-950/40"
+            />
+          </View>
           <Card className="mt-3">
             <Text className="text-sm font-semibold text-app-text">Үйлчилгээний ангиллууд</Text>
             {serviceCategories === null ? (

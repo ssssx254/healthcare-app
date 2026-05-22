@@ -12,6 +12,11 @@ const createFree = asyncHandler(async (req, res) => {
   return created(res, row, "Үнэгүй зөвлөгөөний хүсэлт илгээгдлээ");
 });
 
+const listFreeAvailability = asyncHandler(async (req, res) => {
+  const data = await consultationsService.listFreeConsultationAvailability(req.query);
+  return ok(res, data);
+});
+
 const list = asyncHandler(async (req, res) => {
   const q = req.validatedQuery;
   const { items, total } = await consultationsService.listConsultations(req.user, q);
@@ -48,6 +53,7 @@ const cancel = asyncHandler(async (req, res) => {
 module.exports = {
   create,
   createFree,
+  listFreeAvailability,
   list,
   listCustomer,
   listProvider,

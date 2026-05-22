@@ -9,15 +9,23 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { consultationNumericId, isConsultationOrderId } from "@/lib/api/orderIds";
 import { getNetworkSnapshot } from "@/lib/network/networkRuntime";
+import { subscribeReconnectRefresh } from "@/lib/network/reconnectRefresh";
 import { notifyBookingCancelled, notifyBookingConfirmed } from "@/lib/notifications/eventNotifications";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { bookingApi, providerUiStatusToApiStatus } from "@/services/api/bookingApi";
 import { clinicApi } from "@/services/api/clinicApi";
+import { clinicCategoryApi } from "@/services/api/clinicCategoryApi";
 import { consultationApi } from "@/services/api/consultationApi";
 import { doctorApi } from "@/services/api/doctorApi";
 import { scheduleApi } from "@/services/api/scheduleApi";
 import { serviceApi } from "@/services/api/serviceApi";
 import { mergeDoctorPhotoIntoDoctor, mergeDoctorPhotosIntoDoctors } from "@/data/healthcare/doctorPhotoOverridesStore";
+import { categoryIdFromName, dedupeCategoryIds } from "@/lib/categoryId";
+import {
+  loadProviderCategories,
+  mergeProviderCategories,
+  saveProviderCategories,
+} from "@/lib/providerCategoryStorage";
 import { providerServiceToCreateBody, providerServiceToFullUpdateBody } from "@/lib/providerServicePayload";
 import { mapBookingRowsToCustomerOrders } from "@/services/bookingTransforms";
 import { mapConsultationToProviderBooking } from "@/services/consultationOrderMapping";
@@ -52,17 +60,25 @@ type ProviderWorkspaceValue = {
   doctors: ProviderDoctor[];
   addDoctor: (d: Omit<ProviderDoctor, "id">) => Promise<ProviderDoctor>;
   updateDoctor: (id: string, patch: Partial<ProviderDoctor>) => Promise<void>;
+  removeDoctor: (id: string) => Promise<void>;
   categories: ProviderCategory[];
-  addCategory: (name: string) => void;
-  removeCategory: (id: string) => void;
+  addCategory: (name: string) => Promise<void>;
+  removeCategory: (id: string) => Promise<void>;
   services: ProviderService[];
-  addService: (s: Omit<ProviderService, "id">, opts?: { deferRefresh?: boolean }) => Promise<void>;
+  addService: (s: Omit<ProviderService, "id">, opts?: { deferRefresh?: boolean }) => Promise<string | undefined>;
   updateService: (id: string, patch: Partial<ProviderService>) => Promise<void>;
   removeService: (id: string) => Promise<void>;
   upsertDoctorManagement: (config: DoctorManagementConfig) => void;
   slots: ProviderSlot[];
   addSlot: (
-    slot: { doctorId: string; dateIso: string; startTime: string; endTime: string; serviceId?: string | null },
+    slot: {
+      doctorId: string;
+      dateIso: string;
+      startTime: string;
+      endTime: string;
+      serviceId?: string | null;
+      consultationType?: "paid_visit" | "free_consultation";
+    },
     opts?: { deferRefresh?: boolean },
   ) => Promise<void>;
   blockSlot: (id: string) => Promise<void>;
@@ -90,10 +106,6 @@ const emptyClinic = (): ProviderClinicProfile => ({
 });
 
 const defaultCategories = (): ProviderCategory[] => [{ id: "cat-general", name: "Ерөнхий" }];
-
-function categoryIdFromName(name: string): string {
-  return `cat-${name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "").slice(0, 32)}`;
-}
 
 const dayToWeekIndex: Record<WeeklyDayKey, number> = {
   sun: 0,
@@ -166,14 +178,30 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
       setDoctors(await mergeDoctorPhotosIntoDoctors(mappedDoctors));
       const mappedServices = serviceRows.map(mapServiceRow);
       setServices(mappedServices);
-      const derivedCategories = Array.from(
-        new Set(
-          mappedServices
-            .map((s) => s.categoryName?.trim())
-            .filter((v): v is string => Boolean(v)),
-        ),
-      ).map((name) => ({ id: categoryIdFromName(name), name }));
-      setCategories(derivedCategories.length > 0 ? derivedCategories : defaultCategories());
+      const derivedCategories = dedupeCategoryIds(
+        Array.from(
+          new Set(
+            mappedServices
+              .map((s) => s.categoryName?.trim())
+              .filter((v): v is string => Boolean(v)),
+          ),
+        ).map((name) => ({ id: categoryIdFromName(name), name })),
+      );
+      let apiCategories: ProviderCategory[] = [];
+      try {
+        const rows = await clinicCategoryApi.listForClinic(cid);
+        apiCategories = rows.map((r) => ({ id: String(r.id), name: r.name.trim() }));
+      } catch {
+        /* offline / migration pending */
+      }
+      const persistedCategories = await loadProviderCategories(cid);
+      const mergedCategories = mergeProviderCategories(
+        mergeProviderCategories(persistedCategories, apiCategories),
+        derivedCategories,
+      );
+      const finalCategories = mergedCategories.length > 0 ? mergedCategories : defaultCategories();
+      setCategories(finalCategories);
+      await saveProviderCategories(cid, finalCategories);
 
       const slotLists = await Promise.all(
         doctorRows.map((d) => scheduleApi.listAllSlotsForDoctor(d.id).catch(() => [])),
@@ -219,6 +247,12 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
 
   useEffect(() => {
     void refreshWorkspace();
+  }, [refreshWorkspace]);
+
+  useEffect(() => {
+    return subscribeReconnectRefresh(() => {
+      void refreshWorkspace();
+    });
   }, [refreshWorkspace]);
 
   const setClinic = useCallback((patch: Partial<ProviderClinicProfile>) => {
@@ -362,18 +396,79 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
     [refreshWorkspace],
   );
 
-  const addCategory = useCallback((name: string) => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    setCategories((c) => {
-      if (c.some((x) => x.name.trim().toLowerCase() === trimmed.toLowerCase())) return c;
-      return [...c, { id: categoryIdFromName(trimmed), name: trimmed }];
-    });
-  }, []);
+  const removeDoctor = useCallback(
+    async (id: string) => {
+      if (!getNetworkSnapshot().isOnline) {
+        throw new Error("Интернет холболтгүй үед эмч устгах боломжгүй. Холболтоо шалгаад дахин оролдоно уу.");
+      }
+      if (!/^\d+$/.test(String(id))) {
+        setDoctors((list) => list.filter((x) => x.id !== id));
+        setServices((list) => list.filter((s) => s.doctorId !== id));
+        setSlots((list) => list.filter((s) => s.doctorId !== id));
+        setClinicState((prev) => ({ ...prev, doctorsCount: Math.max(0, prev.doctorsCount - 1) }));
+        return;
+      }
+      await doctorApi.remove(id);
+      setDoctors((list) => list.filter((x) => x.id !== id));
+      setServices((list) => list.filter((s) => s.doctorId !== id));
+      setSlots((list) => list.filter((s) => s.doctorId !== id));
+      setClinicState((prev) => ({ ...prev, doctorsCount: Math.max(0, prev.doctorsCount - 1) }));
+    },
+    [],
+  );
 
-  const removeCategory = useCallback((id: string) => {
-    setCategories((c) => c.filter((x) => x.id !== id));
-  }, []);
+  const addCategory = useCallback(
+    async (name: string) => {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      if (clinic.id && /^\d+$/.test(clinic.id)) {
+        try {
+          const row = await clinicCategoryApi.create(clinic.id, trimmed);
+          setCategories((c) => {
+            if (c.some((x) => x.name.trim().toLowerCase() === trimmed.toLowerCase())) return c;
+            const next = [...c, { id: String(row.id), name: row.name.trim() }];
+            void saveProviderCategories(clinic.id, next);
+            return next;
+          });
+          return;
+        } catch {
+          /* local fallback */
+        }
+      }
+      setCategories((c) => {
+        if (c.some((x) => x.name.trim().toLowerCase() === trimmed.toLowerCase())) return c;
+        const baseId = categoryIdFromName(trimmed);
+        let id = baseId;
+        let n = 0;
+        while (c.some((x) => x.id === id)) {
+          n += 1;
+          id = `${baseId}-${n}`;
+        }
+        const next = [...c, { id, name: trimmed }];
+        if (clinic.id) void saveProviderCategories(clinic.id, next);
+        return next;
+      });
+    },
+    [clinic.id],
+  );
+
+  const removeCategory = useCallback(
+    async (id: string) => {
+      if (clinic.id && /^\d+$/.test(clinic.id) && /^\d+$/.test(id)) {
+        try {
+          await clinicCategoryApi.remove(clinic.id, id);
+        } catch {
+          /* continue local remove */
+        }
+      }
+      setCategories((c) => {
+        const next = c.filter((x) => x.id !== id);
+        if (clinic.id) void saveProviderCategories(clinic.id, next);
+        return next;
+      });
+    },
+    [clinic.id],
+  );
 
   const upsertDoctorManagement = useCallback(
     (config: DoctorManagementConfig) => {
@@ -386,10 +481,12 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
   const addService = useCallback(
     async (s: Omit<ProviderService, "id">, opts?: { deferRefresh?: boolean }) => {
       if (!clinic.id) throw new Error("Эмнэлэг олдсонгүй.");
-      await serviceApi.create(providerServiceToCreateBody(clinic.id, categories, s));
-      if (opts?.deferRefresh) return;
+      const created = await serviceApi.create(providerServiceToCreateBody(clinic.id, categories, s));
+      const createdId = created?.id != null ? String(created.id) : undefined;
+      if (opts?.deferRefresh) return createdId;
       await refreshWorkspace();
       await runAfterServiceMutation(s.doctorId);
+      return createdId;
     },
     [clinic.id, categories, refreshWorkspace, runAfterServiceMutation],
   );
@@ -427,7 +524,14 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
 
   const addSlot = useCallback(
     async (
-      slot: { doctorId: string; dateIso: string; startTime: string; endTime: string; serviceId?: string | null },
+      slot: {
+        doctorId: string;
+        dateIso: string;
+        startTime: string;
+        endTime: string;
+        serviceId?: string | null;
+        consultationType?: "paid_visit" | "free_consultation";
+      },
       opts?: { deferRefresh?: boolean },
     ) => {
       if (!getNetworkSnapshot().isOnline) {
@@ -443,19 +547,25 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
       if (!Number.isFinite(startM) || !Number.isFinite(endM) || endM <= startM) {
         throw new Error("Эхлэх/дуусах цаг буруу байна. HH:mm хэлбэрээр зөв оруулна уу.");
       }
+      const consultationType = slot.consultationType ?? "paid_visit";
       const explicitServiceId =
         slot.serviceId != null && slot.serviceId !== "" && /^\d+$/.test(String(slot.serviceId))
           ? Number(slot.serviceId)
           : null;
       const doctorServices = services.filter((s) => s.doctorId === slot.doctorId && /^\d+$/.test(s.id));
       const fallbackService =
-        doctorServices.find((s) => s.kind === "formal") ??
-        doctorServices.find((s) => s.isAmbulatory) ??
+        doctorServices.find((s) => s.kind === "formal" || s.isAmbulatory) ??
+        doctorServices.find((s) => !s.isOnline && s.kind !== "free_online") ??
         doctorServices[0] ??
         null;
-      const linkedServiceId = explicitServiceId ?? (fallbackService ? Number(fallbackService.id) : null);
-      if (!linkedServiceId) {
-        throw new Error("Слот үүсгэхийн тулд энэ эмчид холбогдсон үйлчилгээ сонгоно уу.");
+      const linkedServiceId =
+        consultationType === "free_consultation"
+          ? null
+          : explicitServiceId ?? (fallbackService ? Number(fallbackService.id) : null);
+      if (consultationType === "paid_visit" && !linkedServiceId) {
+        throw new Error(
+          "Төлбөртэй үзлэгийн цагт үйлчилгээ холбогдоогүй байна. Эхлээд амбулаторийн үйлчилгээ үүсгээд дахин оролдоно уу.",
+        );
       }
       const overlapExists = slots.some((s) => {
         if (s.doctorId !== slot.doctorId || s.dateIso !== slot.dateIso) return false;
@@ -475,6 +585,7 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
         start_time: normalizeSlotHms(slot.startTime),
         end_time: normalizeSlotHms(slot.endTime),
         is_available: true,
+        consultation_type: consultationType,
       });
       if (!opts?.deferRefresh) await refreshWorkspace();
     },
@@ -561,6 +672,7 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
       doctors,
       addDoctor,
       updateDoctor,
+      removeDoctor,
       categories,
       addCategory,
       removeCategory,
@@ -592,6 +704,7 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
       doctors,
       addDoctor,
       updateDoctor,
+      removeDoctor,
       categories,
       addCategory,
       removeCategory,

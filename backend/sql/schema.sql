@@ -17,6 +17,7 @@ DROP TABLE IF EXISTS `chat_conversations`;
 DROP TABLE IF EXISTS `notifications`;
 DROP TABLE IF EXISTS `questionnaires`;
 DROP TABLE IF EXISTS `consultation_requests`;
+DROP TABLE IF EXISTS `booking_lab_tests`;
 DROP TABLE IF EXISTS `lab_tests`;
 DROP TABLE IF EXISTS `lab_test_results`;
 DROP TABLE IF EXISTS `prescriptions`;
@@ -30,6 +31,7 @@ DROP TABLE IF EXISTS `doctors`;
 DROP TABLE IF EXISTS `platform_featured_items`;
 DROP TABLE IF EXISTS `clinics`;
 DROP TABLE IF EXISTS `provider_onboarding_submissions`;
+DROP TABLE IF EXISTS `payment_methods`;
 DROP TABLE IF EXISTS `user_payment_methods`;
 DROP TABLE IF EXISTS `wallets`;
 DROP TABLE IF EXISTS `content_reports`;
@@ -113,6 +115,27 @@ CREATE TABLE `user_payment_methods` (
   PRIMARY KEY (`id`),
   KEY `idx_pay_methods_user` (`user_id`),
   CONSTRAINT `fk_pay_methods_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- payment_methods (хадгалсан карт — зөвхөн аюулгүй метадата)
+-- ---------------------------------------------------------------------------
+CREATE TABLE `payment_methods` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `card_brand` ENUM('visa','mastercard') NOT NULL,
+  `card_last4` CHAR(4) NOT NULL,
+  `card_holder_name` VARCHAR(191) NOT NULL,
+  `expiry_month` TINYINT UNSIGNED NOT NULL,
+  `expiry_year` SMALLINT UNSIGNED NOT NULL,
+  `is_default` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_payment_methods_user` (`user_id`),
+  KEY `idx_payment_methods_default` (`user_id`, `is_default`),
+  CONSTRAINT `fk_payment_methods_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -281,6 +304,7 @@ CREATE TABLE `schedule_slots` (
   `end_time` TIME NOT NULL,
   `is_available` TINYINT(1) NOT NULL DEFAULT 1,
   `slot_status` ENUM('available', 'booked', 'blocked', 'unavailable') NOT NULL DEFAULT 'available',
+  `consultation_type` ENUM('paid_visit','free_consultation') NOT NULL DEFAULT 'paid_visit',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_slots_doctor_start` (`doctor_id`, `slot_date`, `start_time`),
   KEY `idx_slots_doctor_date` (`doctor_id`, `slot_date`),
@@ -498,6 +522,24 @@ CREATE TABLE `lab_tests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
+-- booking_lab_tests (захиалгад хуваалцсан шинжилгээ)
+-- ---------------------------------------------------------------------------
+CREATE TABLE `booking_lab_tests` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `booking_id` BIGINT UNSIGNED NOT NULL,
+  `lab_test_id` BIGINT UNSIGNED NOT NULL,
+  `shared_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_booking_lab_test` (`booking_id`, `lab_test_id`),
+  KEY `idx_blt_booking` (`booking_id`),
+  KEY `idx_blt_lab_test` (`lab_test_id`),
+  CONSTRAINT `fk_blt_booking` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_blt_lab_test` FOREIGN KEY (`lab_test_id`) REFERENCES `lab_tests` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
 -- consultation_requests
 -- ---------------------------------------------------------------------------
 CREATE TABLE `consultation_requests` (
@@ -505,12 +547,18 @@ CREATE TABLE `consultation_requests` (
   `patient_user_id` BIGINT UNSIGNED NOT NULL,
   `clinic_id` BIGINT UNSIGNED NOT NULL,
   `doctor_id` BIGINT UNSIGNED NULL DEFAULT NULL,
+  `slot_id` BIGINT UNSIGNED NULL DEFAULT NULL,
   `request_type` VARCHAR(64) NOT NULL DEFAULT 'online',
+  `consultation_type` VARCHAR(32) NOT NULL DEFAULT 'free_consultation',
   `is_free` TINYINT(1) NOT NULL DEFAULT 1,
   `status` ENUM('pending', 'accepted', 'closed', 'cancelled') NOT NULL DEFAULT 'pending',
   `meeting_link` VARCHAR(1024) NULL DEFAULT NULL,
   `patient_message` TEXT NULL,
+  `symptoms` TEXT NULL,
+  `question` TEXT NULL,
+  `notes` TEXT NULL,
   `provider_message` TEXT NULL,
+  `provider_notes` TEXT NULL,
   `chat_opened_at` TIMESTAMP NULL DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -524,6 +572,8 @@ CREATE TABLE `consultation_requests` (
   CONSTRAINT `fk_consult_clinic` FOREIGN KEY (`clinic_id`) REFERENCES `clinics` (`id`)
     ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `fk_consult_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_consult_slot` FOREIGN KEY (`slot_id`) REFERENCES `schedule_slots` (`id`)
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

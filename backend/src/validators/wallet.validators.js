@@ -1,5 +1,6 @@
 const { AppError } = require("../utils/appError");
 const { assertPositiveIntId } = require("../utils/validation");
+const { isPaymentChannel } = require("../constants/paymentMethods");
 
 function toMoney(n) {
   const x = Number(n);
@@ -23,6 +24,25 @@ function validatePayBookingBody(body) {
   if (booking_id === undefined || booking_id === null || booking_id === "") {
     throw new AppError(400, "booking_id оруулна уу.");
   }
+  const channel = body.channel != null && body.channel !== "" ? String(body.channel).trim() : "wallet";
+  if (!isPaymentChannel(channel)) {
+    throw new AppError(400, "channel: wallet, qpay, saved_card байна.");
+  }
+  const out = {
+    booking_id: assertPositiveIntId(booking_id, "booking_id"),
+    channel,
+  };
+  if (body.payment_method_id != null && body.payment_method_id !== "") {
+    out.payment_method_id = assertPositiveIntId(body.payment_method_id, "payment_method_id");
+  }
+  if (body.qpay_invoice_id != null && String(body.qpay_invoice_id).trim() !== "") {
+    out.qpay_invoice_id = String(body.qpay_invoice_id).trim();
+  }
+  return out;
+}
+
+function validateQpayBookingInvoiceBody(body) {
+  const booking_id = body.booking_id ?? body.bookingId;
   return { booking_id: assertPositiveIntId(booking_id, "booking_id") };
 }
 
@@ -38,4 +58,9 @@ function validateQpayConfirmBody(body) {
   return { invoice_id: String(invoice_id).trim() };
 }
 
-module.exports = { validatePayBookingBody, validateQpayInvoiceBody, validateQpayConfirmBody };
+module.exports = {
+  validatePayBookingBody,
+  validateQpayInvoiceBody,
+  validateQpayConfirmBody,
+  validateQpayBookingInvoiceBody,
+};

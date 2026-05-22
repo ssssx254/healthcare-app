@@ -80,7 +80,7 @@ async function listWalletTransactions(userId, { transaction_type, pageSize, offs
 
 async function findBookingPaymentTx(userId, bookingId, conn = pool) {
   const [rows] = await conn.execute(
-    `SELECT id FROM wallet_transactions
+    `SELECT id, metadata FROM wallet_transactions
      WHERE user_id = ? AND transaction_type = 'booking_payment' AND reference_type = 'booking' AND reference_id = ?
      LIMIT 1`,
     [userId, bookingId],

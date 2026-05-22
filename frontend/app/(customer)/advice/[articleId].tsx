@@ -2,12 +2,18 @@ import { AppImage, Button, Card, Input, ScreenScrollView } from "@/components";
 import { adviceArticles } from "@/data/healthcare/adviceArticles";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Share, Text, View, Pressable } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLayoutEffect, useMemo, useState } from "react";
 
 export default function AdviceDetailScreen() {
+  const navigation = useNavigation();
   const { articleId } = useLocalSearchParams<{ articleId: string }>();
   const article = useMemo(() => adviceArticles.find((a) => a.id === articleId), [articleId]);
+  const screenTitle = article ? "Зөвлөгөөний нийтлэл" : "Нийтлэл";
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: screenTitle });
+  }, [navigation, screenTitle]);
   const [liked, setLiked] = useState(false);
   const [comment, setComment] = useState("");
   const [localLikes, setLocalLikes] = useState(article?.likeCount ?? 0);
@@ -16,14 +22,11 @@ export default function AdviceDetailScreen() {
 
   if (!article) {
     return (
-      <>
-        <Stack.Screen options={{ title: "Нийтлэл" }} />
-        <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
-          <Card>
-            <Text className="text-sm text-app-text-secondary">Нийтлэл олдсонгүй.</Text>
-          </Card>
-        </ScreenScrollView>
-      </>
+      <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+        <Card>
+          <Text className="text-sm text-app-text-secondary">Нийтлэл олдсонгүй.</Text>
+        </Card>
+      </ScreenScrollView>
     );
   }
 
@@ -50,8 +53,6 @@ export default function AdviceDetailScreen() {
   };
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Зөвлөгөөний нийтлэл" }} />
       <ScreenScrollView className="flex-1 bg-app-bg" contentContainerStyle={{ paddingBottom: 28 }}>
         <AppImage
           source={{ uri: article.imageUrl }}
@@ -89,7 +90,7 @@ export default function AdviceDetailScreen() {
               <Pressable
                 onPress={onToggleLike}
                 className={`flex-1 flex-row items-center justify-center rounded-xl border px-3 py-2.5 ${
-                  liked ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-slate-200 bg-white border-app-border bg-app-card"
+                  liked ? "border-brand-600 bg-brand-50 dark:border-brand-400 dark:bg-brand-900" : "border-app-border bg-app-muted"
                 }`}
               >
                 <MaterialCommunityIcons name={liked ? "thumb-up" : "thumb-up-outline"} size={16} color={liked ? "#2563eb" : "#64748b"} />
@@ -133,7 +134,6 @@ export default function AdviceDetailScreen() {
           </Card>
         </View>
       </ScreenScrollView>
-    </>
   );
 }
 

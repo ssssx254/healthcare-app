@@ -1,6 +1,7 @@
 import type { ScheduleSlotRow } from "@/services/api/scheduleApi";
 import type { ClinicRow } from "@/services/api/clinicApi";
 import type { DoctorRow } from "@/services/api/doctorApi";
+import { categoryIdFromName } from "@/lib/categoryId";
 import type { ServiceRow } from "@/services/api/serviceApi";
 import type { MockClinicDetail, MockDoctor, MockService, MockTimeSlot } from "@/types/customer";
 import type { ServiceKind } from "@/types/healthcare";
@@ -64,7 +65,7 @@ export function mapServiceRow(row: ServiceRow): MockService {
   return {
     id: String(row.id),
     doctorId,
-    categoryId: row.category ? `cat-${row.category.replace(/\s+/g, "-").slice(0, 24)}` : undefined,
+    categoryId: row.category?.trim() ? categoryIdFromName(row.category) : undefined,
     categoryName: row.category?.trim() || undefined,
     title: row.service_name,
     durationMinutes: row.duration_minutes,
@@ -77,10 +78,27 @@ export function mapServiceRow(row: ServiceRow): MockService {
   };
 }
 
+/** MySQL DATE / ISO string → `YYYY-MM-DD` (UI шүүлт, захиалгад ашиглана). */
+export function normalizeSlotDateIso(raw: unknown): string {
+  if (raw == null || raw === "") return "";
+  if (typeof raw === "string") {
+    const m = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (m) return m[1];
+  }
+  if (raw instanceof Date && !Number.isNaN(raw.getTime())) {
+    const iso = raw.toISOString().slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+  }
+  const s = String(raw);
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : s.slice(0, 10);
+}
+
 export function mapSlotRow(row: ScheduleSlotRow): MockTimeSlot {
   const start = String(row.start_time).slice(0, 5);
   const end = String(row.end_time).slice(0, 5);
-  const label = `${row.slot_date} ${start} – ${end}`;
+  const dateIso = normalizeSlotDateIso(row.slot_date);
+  const label = `${dateIso} ${start} – ${end}`;
   const toMinutes = (hm: string) => {
     const [h, m] = hm.split(":").map(Number);
     if (!Number.isFinite(h) || !Number.isFinite(m)) return 0;
@@ -90,7 +108,7 @@ export function mapSlotRow(row: ScheduleSlotRow): MockTimeSlot {
     id: String(row.id),
     doctorId: String(row.doctor_id),
     serviceId: row.service_id != null ? String(row.service_id) : null,
-    dateIso: row.slot_date,
+    dateIso,
     startTime: start,
     endTime: end,
     durationMinutes: Math.max(0, toMinutes(end) - toMinutes(start)),

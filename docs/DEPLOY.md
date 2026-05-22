@@ -125,13 +125,33 @@ npm run deploy:web
 
 ---
 
-## 4. Локал хөгжүүлэлт (production биш)
+## 4. Локал хөгжүүлэлт vs Web (хоёр орчин)
 
-| Орчин | `frontend/.env` |
-|--------|------------------|
-| PC + Expo web/iOS sim | `EXPO_PUBLIC_API_URL=http://localhost:4000/api` |
-| Android emulator | `EXPO_PUBLIC_API_URL=http://10.0.2.2:4000/api` |
-| Expo Go утас | `EXPO_PUBLIC_API_URL=http://<PC-LAN-IP>:4000/api` |
+| Орчин | Frontend | Backend / DB |
+|--------|----------|----------------|
+| **Expo Go** (`npm start`) | `frontend/.env` → `EXPO_PUBLIC_APP_ENV=development` | Локал MySQL + `cd backend && npm run dev` |
+| **Web** (`npm run deploy:web`) | `frontend/.env.production` → Render URL | Render → Aiven |
+
+Expo Go (локал):
+
+```powershell
+# 1) Backend
+cd backend
+# backend/.env → локал MySQL (DB_HOST=127.0.0.1)
+npm run dev
+
+# 2) Frontend — frontend/.env (development), ipconfig → REACT_NATIVE_PACKAGER_HOSTNAME
+cd ../frontend
+npm start
+```
+
+Production API-аар Expo турших: `npm run start:cloud` (`.env` өөрчлөхгүй).
+
+| Тохиолдол | `EXPO_PUBLIC_API_URL` |
+|-----------|------------------------|
+| PC + Expo web/iOS sim | `http://localhost:4000/api` |
+| Android emulator | `http://10.0.2.2:4000/api` |
+| Expo Go утас | `http://<PC-LAN-IP>:4000/api` эсвүй хоосон (Metro host-оос автоматаар) |
 
 Backend:
 

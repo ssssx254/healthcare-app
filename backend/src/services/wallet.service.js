@@ -4,10 +4,14 @@ const { AppError } = require("../utils/appError");
 const { assertPositiveIntId } = require("../utils/validation");
 const { ROLES } = require("../constants/roles");
 const walletRepo = require("../repositories/wallet.repository");
+const paymentMethodsRepo = require("../repositories/paymentMethods.repository");
 const { WALLET_TX_TYPES, REFERENCE_TYPES, MOCK_GATEWAYS } = require("../constants/wallet");
+const { PAYMENT_CHANNELS, PAYMENT_ATTEMPT_STATUS } = require("../constants/paymentMethods");
 
 /** invoice_id -> { userId, amount, expiresAt } — жинхэнэ QPay биш, жишээ урсгал. */
 const pendingQpayInvoices = new Map();
+/** booking invoice_id -> { userId, bookingId, amount, expiresAt } */
+const pendingQpayBookingInvoices = new Map();
 
 function toMoney(n) {
   const x = Number(n);
@@ -36,11 +40,22 @@ async function topUpWallet(user, body) {
     throw new AppError(400, "Нэг удаагийн дүн хэт их байна.");
   }
 
-  const gatewayRef = `${MOCK_GATEWAYS.INSTANT_TOPUP}:${crypto.randomUUID()}`;
+  if (body.payment_method_id) {
+    const pm = await paymentMethodsRepo.getByIdForUser(body.payment_method_id, user.id);
+    if (!pm) throw new AppError(404, "Хадгалсан карт олдсонгүй.");
+    body.mock_gateway = "saved_card";
+    body.note = body.note ?? `Карт ${pm.card_brand} •••• ${pm.card_last4}`;
+  }
+
+  const gatewayRef =
+    body.mock_gateway === "saved_card"
+      ? `${MOCK_GATEWAYS.SAVED_CARD}:${crypto.randomUUID()}`
+      : `${MOCK_GATEWAYS.INSTANT_TOPUP}:${crypto.randomUUID()}`;
   const meta = {
     mock_gateway: body.mock_gateway || "instant",
     payment_method_id: body.payment_method_id ?? null,
     note: body.note ?? null,
+    payment_status: PAYMENT_ATTEMPT_STATUS.PAID,
   };
 
   const conn = await pool.getConnection();
@@ -74,42 +89,75 @@ async function topUpWallet(user, body) {
 /**
  * Захиалгын төлбөрийг дансаас хасаж, гүйлгээний түүх бүртгэнэ.
  */
-async function payBookingFromWallet(customerUserId, bookingId) {
+async function loadBookingForPayment(conn, customerUserId, bookingId) {
   const bid = assertPositiveIntId(bookingId, "booking_id");
+  const [bRows] = await conn.execute(`SELECT * FROM bookings WHERE id = ? FOR UPDATE`, [bid]);
+  const booking = bRows[0];
+  if (!booking) throw new AppError(404, "Захиалга олдсонгүй.");
+  if (Number(booking.patient_user_id) !== customerUserId) {
+    throw new AppError(403, "Энэ захиалгын төлбөрийг төлөх эрхгүй.");
+  }
+  if (Number(booking.payment_required) !== 1) {
+    throw new AppError(400, "Энэ захиалгад төлбөр шаардлагагүй.");
+  }
+  if (booking.status === "cancelled") {
+    throw new AppError(400, "Цуцлагдсан захиалгад төлбөр төлөхгүй.");
+  }
+  const total = Number(booking.total_amount);
+  if (!(total > 0)) throw new AppError(400, "Төлбөрийн дүн буруу байна.");
+  return { booking, bid, total };
+}
 
+async function markBookingPaidMock(conn, customerUserId, booking, bid, total, channelMeta) {
+  if (booking.payment_status === "paid") {
+    return booking;
+  }
+  const alreadyPaidTx = await walletRepo.findBookingPaymentTx(customerUserId, bid, conn);
+  if (alreadyPaidTx) {
+    await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bid]);
+    const [synced] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
+    return synced[0];
+  }
+  await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bid]);
+  const wallet = await walletRepo.lockWalletForUpdate(conn, customerUserId);
+  const prev = Number(wallet.balance);
+  await walletRepo.insertWalletTransaction(conn, {
+    user_id: customerUserId,
+    direction: "debit",
+    amount: total,
+    balance_after: prev,
+    transaction_type: WALLET_TX_TYPES.BOOKING_PAYMENT,
+    reference_type: REFERENCE_TYPES.BOOKING,
+    reference_id: bid,
+    gateway_ref: `${channelMeta.gateway}:${crypto.randomUUID()}`,
+    metadata: {
+      booking_id: bid,
+      clinic_id: booking.clinic_id,
+      channel: channelMeta.channel,
+      payment_status: PAYMENT_ATTEMPT_STATUS.PAID,
+      payment_method_id: channelMeta.payment_method_id ?? null,
+    },
+  });
+  const [out] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
+  return out[0];
+}
+
+async function payBookingFromWallet(customerUserId, bookingId) {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    const [bRows] = await conn.execute(`SELECT * FROM bookings WHERE id = ? FOR UPDATE`, [bid]);
-    const booking = bRows[0];
-    if (!booking) {
-      throw new AppError(404, "Захиалга олдсонгүй.");
-    }
-    if (Number(booking.patient_user_id) !== customerUserId) {
-      throw new AppError(403, "Энэ захиалгын төлбөрийг төлөх эрхгүй.");
-    }
-    if (Number(booking.payment_required) !== 1) {
-      throw new AppError(400, "Энэ захиалгад төлбөр шаардлагагүй.");
-    }
-    if (booking.status === "cancelled") {
-      throw new AppError(400, "Цуцлагдсан захиалгад төлбөр төлөхгүй.");
-    }
+    const { booking, bid, total } = await loadBookingForPayment(conn, customerUserId, bookingId);
     if (booking.payment_status === "paid") {
       await conn.commit();
       return booking;
     }
     const alreadyPaidTx = await walletRepo.findBookingPaymentTx(customerUserId, bid, conn);
     if (alreadyPaidTx) {
-      await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ? AND payment_status <> 'paid'`, [bid]);
+      await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bid]);
       const [synced] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
       await conn.commit();
       return synced[0];
     }
-    const total = Number(booking.total_amount);
-    if (!(total > 0)) {
-      throw new AppError(400, "Төлбөрийн дүн буруу байна.");
-    }
-
     const wallet = await walletRepo.lockWalletForUpdate(conn, customerUserId);
     const bal = Number(wallet.balance);
     if (bal < total) {
@@ -126,7 +174,7 @@ async function payBookingFromWallet(customerUserId, bookingId) {
       reference_type: REFERENCE_TYPES.BOOKING,
       reference_id: bid,
       gateway_ref: `${MOCK_GATEWAYS.WALLET_DEBIT}:${crypto.randomUUID()}`,
-      metadata: { booking_id: bid, clinic_id: booking.clinic_id },
+      metadata: { booking_id: bid, clinic_id: booking.clinic_id, channel: PAYMENT_CHANNELS.WALLET },
     });
     await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bid]);
     const [out] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
@@ -138,6 +186,115 @@ async function payBookingFromWallet(customerUserId, bookingId) {
   } finally {
     conn.release();
   }
+}
+
+async function payBookingWithSavedCard(user, bookingId, paymentMethodId) {
+  assertCustomer(user);
+  const pm = await paymentMethodsRepo.getByIdForUser(paymentMethodId, user.id);
+  if (!pm) throw new AppError(404, "Хадгалсан карт олдсонгүй.");
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const { booking, bid, total } = await loadBookingForPayment(conn, user.id, bookingId);
+    const paid = await markBookingPaidMock(conn, user.id, booking, bid, total, {
+      channel: PAYMENT_CHANNELS.SAVED_CARD,
+      gateway: MOCK_GATEWAYS.SAVED_CARD,
+      payment_method_id: pm.id,
+    });
+    await conn.commit();
+    return {
+      booking: paid,
+      payment_status: PAYMENT_ATTEMPT_STATUS.PAID,
+      card: { brand: pm.card_brand, last4: pm.card_last4 },
+    };
+  } catch (e) {
+    await conn.rollback();
+    throw e;
+  } finally {
+    conn.release();
+  }
+}
+
+async function createQpayBookingInvoice(user, body) {
+  assertCustomer(user);
+  const bid = assertPositiveIntId(body.booking_id, "booking_id");
+  const conn = await pool.getConnection();
+  let total;
+  try {
+    ({ total } = await loadBookingForPayment(conn, user.id, bid));
+  } finally {
+    conn.release();
+  }
+  const invoiceId = `${MOCK_GATEWAYS.QPAY_BOOKING}:${crypto.randomUUID()}`;
+  const ttlMs = 15 * 60 * 1000;
+  const expiresAt = Date.now() + ttlMs;
+  pendingQpayBookingInvoices.set(invoiceId, { userId: user.id, bookingId: bid, amount: total, expiresAt });
+  const qrPayload = `QPAY|MONGOL|BOOKING:${bid}|INV:${invoiceId}|AMT:${total}|CUR:MNT|MOCK:1`;
+  return {
+    invoice_id: invoiceId,
+    booking_id: bid,
+    amount_mnt: total,
+    currency: "MNT",
+    qr_payload: qrPayload,
+    deep_link_mock: `medeasy://pay/qpay-booking?invoice=${encodeURIComponent(invoiceId)}`,
+    expires_at: new Date(expiresAt).toISOString(),
+    polling_hint_mn: "Банкны апп-аар төлсний дараа «Төлбөр төлөгдсөн» дарна уу.",
+    payment_status: PAYMENT_ATTEMPT_STATUS.PENDING,
+  };
+}
+
+async function confirmQpayBookingPayment(user, body) {
+  assertCustomer(user);
+  const invoiceId = String(body.invoice_id || body.qpay_invoice_id || "").trim();
+  if (!invoiceId) throw new AppError(400, "Нэхэмжлэлийн дугаар оруулна уу.");
+  const pending = pendingQpayBookingInvoices.get(invoiceId);
+  if (!pending) {
+    throw new AppError(404, "Нэхэмжлэл олдсонгүй эсвэл хугацаа дууссан байна.");
+  }
+  if (pending.userId !== user.id) throw new AppError(403, "Энэ нэхэмжлэл таны бүртгэлд харьяалагдахгүй.");
+  if (Date.now() > pending.expiresAt) {
+    pendingQpayBookingInvoices.delete(invoiceId);
+    throw new AppError(400, "QPay нэхэмжлэлийн хугацаа дууссан.");
+  }
+  pendingQpayBookingInvoices.delete(invoiceId);
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const { booking, bid, total } = await loadBookingForPayment(conn, user.id, pending.bookingId);
+    const paid = await markBookingPaidMock(conn, user.id, booking, bid, total, {
+      channel: PAYMENT_CHANNELS.QPAY,
+      gateway: MOCK_GATEWAYS.QPAY_BOOKING,
+    });
+    await conn.commit();
+    return { booking: paid, payment_status: PAYMENT_ATTEMPT_STATUS.PAID };
+  } catch (e) {
+    await conn.rollback();
+    throw e;
+  } finally {
+    conn.release();
+  }
+}
+
+async function payBooking(user, body) {
+  const channel = body.channel || PAYMENT_CHANNELS.WALLET;
+  if (channel === PAYMENT_CHANNELS.WALLET) {
+    return payBookingFromWallet(user.id, body.booking_id);
+  }
+  if (channel === PAYMENT_CHANNELS.SAVED_CARD) {
+    if (!body.payment_method_id) {
+      throw new AppError(400, "Хадгалсан карт сонгоно уу.");
+    }
+    return payBookingWithSavedCard(user, body.booking_id, body.payment_method_id);
+  }
+  if (channel === PAYMENT_CHANNELS.QPAY) {
+    if (!body.qpay_invoice_id) {
+      throw new AppError(400, "QPay нэхэмжлэл баталгаажуулаагүй байна.");
+    }
+    return confirmQpayBookingPayment(user, { invoice_id: body.qpay_invoice_id });
+  }
+  throw new AppError(400, "Төлбөрийн суваг буруу байна.");
 }
 
 /**
@@ -153,6 +310,17 @@ async function refundBookingToWalletIfPaid(bookingSnapshot, conn = null) {
   }
 
   const run = async (c) => {
+    const payTx = await walletRepo.findBookingPaymentTx(patientId, bid, c);
+    if (payTx?.metadata) {
+      try {
+        const meta = typeof payTx.metadata === "string" ? JSON.parse(payTx.metadata) : payTx.metadata;
+        if (meta?.channel && meta.channel !== PAYMENT_CHANNELS.WALLET) {
+          return null;
+        }
+      } catch {
+        /* ignore parse */
+      }
+    }
     const dup = await walletRepo.findBookingRefundTx(patientId, bid, c);
     if (dup) return null;
     const wallet = await walletRepo.lockWalletForUpdate(c, patientId);
@@ -282,11 +450,15 @@ async function confirmQpayTopUpInvoice(user, body) {
 module.exports = {
   getWalletBalance,
   topUpWallet,
+  payBooking,
   payBookingFromWallet,
+  payBookingWithSavedCard,
   refundBookingToWalletIfPaid,
   listMyTransactions,
   addMockPaymentMethod,
   listMyPaymentMethods,
   createQpayTopUpInvoice,
   confirmQpayTopUpInvoice,
+  createQpayBookingInvoice,
+  confirmQpayBookingPayment,
 };

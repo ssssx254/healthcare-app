@@ -58,7 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(
     async ({ email, password }: { email: string; password: string }) => {
-      const res = await loginUser({ identifier: email.trim().toLowerCase(), password });
+      const res = await loginUser({
+        identifier: email.trim().toLowerCase(),
+        password: password.trim(),
+      });
       setAuthToken(res.token);
       const nextUser = mapBackendUser(res.user);
       setUser(nextUser);

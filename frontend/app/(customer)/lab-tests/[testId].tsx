@@ -1,6 +1,10 @@
 import { Badge, Button, Card, ErrorState, LoadingState, ScreenScrollView, SectionHeader } from "@/components";
 import { AppImage } from "@/components/AppImage";
-import { labTestStatusLabel, labTestStatusTone } from "@/constants/labTestStatus";
+import {
+  getLabTestSourceLabel,
+  getLabTestStatusLabel,
+  labTestStatusTone,
+} from "@/constants/labTestStatus";
 import { labTestsApi, type LabTestRow } from "@/services/api/labTestsApi";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
@@ -98,10 +102,14 @@ export default function CustomerLabTestDetailScreen() {
           <Card>
             <View className="flex-row items-center justify-between gap-2">
               <Text className="flex-1 text-base font-semibold text-app-text">{row.title}</Text>
-              <Badge label={labTestStatusLabel[row.status]} tone={labTestStatusTone(row.status)} />
+              <Badge
+                label={getLabTestStatusLabel(row.status, row.uploaded_by)}
+                tone={labTestStatusTone(row.status, row.uploaded_by)}
+              />
             </View>
             <Text className="mt-2 text-xs text-app-text-muted">
-              {row.test_type} · {row.test_date}
+              {getLabTestSourceLabel(row.uploaded_by)}
+              {row.test_type ? ` · ${row.test_type}` : ""} · {row.test_date}
               {row.clinic_name ? ` · ${row.clinic_name}` : ""}
             </Text>
             {row.description ? (

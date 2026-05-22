@@ -8,7 +8,11 @@ import {
   ScreenScrollView,
   SectionHeader,
 } from "@/components";
-import { labTestStatusLabel, labTestStatusTone } from "@/constants/labTestStatus";
+import {
+  getLabTestSourceLabel,
+  getLabTestStatusLabel,
+  labTestStatusTone,
+} from "@/constants/labTestStatus";
 import { labTestsApi, type LabTestRow } from "@/services/api/labTestsApi";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
@@ -26,10 +30,14 @@ function LabTestListItem({ item, onPress }: { item: LabTestRow; onPress: () => v
           <Text className="flex-1 text-sm font-semibold text-app-text" numberOfLines={2}>
             {item.title}
           </Text>
-          <Badge label={labTestStatusLabel[item.status]} tone={labTestStatusTone(item.status)} />
+          <Badge
+            label={getLabTestStatusLabel(item.status, item.uploaded_by)}
+            tone={labTestStatusTone(item.status, item.uploaded_by)}
+          />
         </View>
         <Text className="mt-1 text-xs text-app-text-muted">
-          {item.test_type} · {item.test_date}
+          {getLabTestSourceLabel(item.uploaded_by)}
+          {item.test_type ? ` · ${item.test_type}` : ""} · {item.test_date}
           {item.clinic_name ? ` · ${item.clinic_name}` : ""}
         </Text>
       </View>

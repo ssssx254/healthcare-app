@@ -1,3 +1,4 @@
+import { useAppTheme } from "@/components/ThemeProvider";
 import { cn } from "@/utils/cn";
 import { Platform, Text, TextInput, View, type TextInputProps } from "react-native";
 
@@ -21,8 +22,10 @@ export function Input({
   autoComplete,
   importantForAutofill,
   scrollEnabled,
+  style,
   ...rest
 }: InputProps) {
+  const { palette } = useAppTheme();
   const alignVertical =
     textAlignVertical ?? (multiline ? "top" : Platform.OS === "android" ? "center" : undefined);
   const multilineScroll = multiline ? (scrollEnabled ?? true) : scrollEnabled;
@@ -31,8 +34,9 @@ export function Input({
     <View className="mb-4 w-full max-w-full">
       <Text className="mb-1.5 text-sm font-semibold text-app-text">{label}</Text>
       <TextInput
-        placeholderTextColor="#64748b"
+        placeholderTextColor={palette.textMuted}
         underlineColorAndroid="transparent"
+        style={[{ color: palette.text }, style]}
         multiline={multiline}
         scrollEnabled={multilineScroll}
         secureTextEntry={secureTextEntry}

@@ -4,12 +4,19 @@ const { assertPositiveIntId, assertOptionalMeetingUrl } = require("../utils/vali
 const BOOKING_STATUS_UPDATE = new Set(["pending", "confirmed", "cancelled", "completed"]);
 
 function validateBookingCreateBody(body) {
-  return {
+  const out = {
     clinic_id: assertPositiveIntId(body.clinic_id, "clinic_id"),
     doctor_id: assertPositiveIntId(body.doctor_id, "doctor_id"),
     service_id: assertPositiveIntId(body.service_id, "service_id"),
     slot_id: assertPositiveIntId(body.slot_id, "slot_id"),
   };
+  if (body.lab_test_ids !== undefined && body.lab_test_ids !== null) {
+    if (!Array.isArray(body.lab_test_ids)) {
+      throw new AppError(400, "lab_test_ids массив байх ёстой.");
+    }
+    out.lab_test_ids = body.lab_test_ids.map((id, i) => assertPositiveIntId(id, `lab_test_ids[${i}]`));
+  }
+  return out;
 }
 
 function validateBookingStatusUpdateBody(body) {

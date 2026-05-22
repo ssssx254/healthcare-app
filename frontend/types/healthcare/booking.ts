@@ -21,6 +21,11 @@ export type Booking = {
   slotId?: string;
   slotLabel?: string;
   healthSummary?: string;
+  /** Үнэгүй зөвлөгөөний талбарууд */
+  symptoms?: string;
+  question?: string;
+  consultNotes?: string;
+  providerNotes?: string;
   meetingLink?: string;
   patientId?: string;
   patientName?: string;
@@ -64,4 +69,6 @@ export type BookingDraft = {
   medications: string;
   allergies: string;
   questionnaireCompleted: boolean;
+  /** Захиалгад эмчид хуваалцах шинжилгээний ID-ууд */
+  sharedLabTestIds: number[];
 };

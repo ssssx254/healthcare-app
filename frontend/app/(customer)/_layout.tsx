@@ -8,6 +8,7 @@ import {
 } from "@/components";
 import { WebBottomTabBar } from "@/components/WebBottomTabBar";
 import { WebScreenFrame } from "@/components/WebScreenFrame";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useTabScreenOptions } from "@/hooks/useTabScreenOptions";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -15,6 +16,7 @@ import { Redirect, Tabs } from "expo-router";
 import { View } from "react-native";
 
 export default function CustomerGroupLayout() {
+  const { palette } = useAppTheme();
   const { isAuthenticated, user, authLoading, signOut } = useAuth();
   const tabOptions = useTabScreenOptions();
 
@@ -70,10 +72,14 @@ export default function CustomerGroupLayout() {
                   borderRadius: 19,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: focused ? "#2563eb" : "#dbeafe",
+                  backgroundColor: focused ? palette.brand : palette.brandMuted,
                 }}
               >
-                <MaterialCommunityIcons name="calendar-check-outline" size={22} color={focused ? "#ffffff" : "#2563eb"} />
+                <MaterialCommunityIcons
+                  name="calendar-check-outline"
+                  size={22}
+                  color={focused ? "#ffffff" : palette.brand}
+                />
               </View>
             ),
           }}
@@ -112,11 +118,8 @@ export default function CustomerGroupLayout() {
         <Tabs.Screen name="my-orders" options={{ href: null }} />
         <Tabs.Screen name="booking" options={{ href: null }} />
         <Tabs.Screen name="wallet" options={{ href: null }} />
-        <Tabs.Screen name="clinic/[clinicId]/index" options={{ href: null }} />
-        <Tabs.Screen name="clinic/[clinicId]/doctors" options={{ href: null }} />
-        <Tabs.Screen name="clinic/[clinicId]/doctor/[doctorId]/index" options={{ href: null }} />
-        <Tabs.Screen name="clinic/[clinicId]/doctor/[doctorId]/reviews" options={{ href: null }} />
-        <Tabs.Screen name="clinic/[clinicId]/doctor/[doctorId]/service/[serviceId]" options={{ href: null }} />
+        <Tabs.Screen name="payment-methods" options={{ href: null }} />
+        <Tabs.Screen name="clinic" options={{ href: null }} />
       </Tabs>
       </WebScreenFrame>
     </CustomerBookingProvider>

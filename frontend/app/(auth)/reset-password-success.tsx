@@ -32,7 +32,7 @@ export default function ResetPasswordSuccessScreen() {
         className="mb-4"
       />
 
-      <Card className="border-2 border-slate-200 shadow-md border-app-border-strong">
+      <Card className="border-2 border-app-border-strong shadow-md">
         <Text className="text-sm leading-6 text-app-text-secondary">{detail}</Text>
         <Link href={routes.login} asChild>
           <Button label="Нэвтрэх хуудас руу" className="mt-6 shadow-sm" />

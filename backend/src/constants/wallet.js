@@ -12,6 +12,8 @@ const REFERENCE_TYPES = Object.freeze({
 const MOCK_GATEWAYS = Object.freeze({
   INSTANT_TOPUP: "mock_instant_topup",
   QPAY_INVOICE: "mock_qpay_invoice",
+  QPAY_BOOKING: "mock_qpay_booking",
+  SAVED_CARD: "mock_saved_card",
   WALLET_DEBIT: "mock_wallet_debit",
   WALLET_REFUND: "mock_wallet_refund",
 });

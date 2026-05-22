@@ -88,35 +88,78 @@ async function listForCustomer(patientUserId, { filter } = {}) {
   return rows;
 }
 
-async function listForProvider(providerUserId, { patient_user_id, clinic_id, doctor_id } = {}) {
+/** Эмч/эмнэлэг: зөвхөн хуваалцсан эсвэл эмнэлэг өөрөө бүртгэсэн шинжилгээ */
+async function listSharedForProvider(providerUserId, { patient_user_id, booking_id, doctor_id } = {}) {
   const where = [
-    `EXISTS (
-      SELECT 1 FROM bookings b
-      INNER JOIN clinics c2 ON c2.id = b.clinic_id
-      WHERE b.patient_user_id = lt.patient_user_id AND c2.owner_user_id = ?
+    `(
+      (
+        lt.uploaded_by = 'clinic'
+        AND lt.clinic_id IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM clinics c0 WHERE c0.id = lt.clinic_id AND c0.owner_user_id = ?
+        )
+        AND EXISTS (
+          SELECT 1 FROM bookings b0
+          INNER JOIN clinics c1 ON c1.id = b0.clinic_id
+          WHERE b0.patient_user_id = lt.patient_user_id AND c1.owner_user_id = ?
+        )
+      )
+      OR EXISTS (
+        SELECT 1 FROM booking_lab_tests blt
+        INNER JOIN bookings b ON b.id = blt.booking_id
+        INNER JOIN clinics c ON c.id = b.clinic_id
+        WHERE blt.lab_test_id = lt.id AND c.owner_user_id = ?
+      )
     )`,
   ];
-  const params = [providerUserId];
+  const params = [providerUserId, providerUserId, providerUserId];
   if (patient_user_id) {
     where.push("lt.patient_user_id = ?");
     params.push(patient_user_id);
   }
-  if (clinic_id) {
-    where.push("lt.clinic_id = ?");
-    params.push(clinic_id);
+  if (booking_id) {
+    where.push(
+      `EXISTS (SELECT 1 FROM booking_lab_tests blt2 WHERE blt2.lab_test_id = lt.id AND blt2.booking_id = ?)`,
+    );
+    params.push(booking_id);
   }
   if (doctor_id) {
-    where.push("lt.doctor_id = ?");
+    where.push(
+      `EXISTS (
+        SELECT 1 FROM booking_lab_tests blt3
+        INNER JOIN bookings b2 ON b2.id = blt3.booking_id
+        WHERE blt3.lab_test_id = lt.id AND b2.doctor_id = ?
+      )`,
+    );
     params.push(doctor_id);
   }
   const [rows] = await pool.execute(
-    `SELECT ${SELECT_FIELDS}
+    `SELECT ${SELECT_FIELDS}, blt_link.booking_id AS shared_booking_id
      FROM lab_tests lt
      LEFT JOIN clinics c ON c.id = lt.clinic_id
      LEFT JOIN doctors d ON d.id = lt.doctor_id
+     LEFT JOIN (
+       SELECT blt.lab_test_id, MIN(blt.booking_id) AS booking_id
+       FROM booking_lab_tests blt
+       GROUP BY blt.lab_test_id
+     ) blt_link ON blt_link.lab_test_id = lt.id
      WHERE ${where.join(" AND ")}
      ORDER BY lt.test_date DESC, lt.created_at DESC`,
     params,
+  );
+  return rows;
+}
+
+async function listForBooking(bookingId) {
+  const [rows] = await pool.execute(
+    `SELECT ${SELECT_FIELDS}
+     FROM booking_lab_tests blt
+     INNER JOIN lab_tests lt ON lt.id = blt.lab_test_id
+     LEFT JOIN clinics c ON c.id = lt.clinic_id
+     LEFT JOIN doctors d ON d.id = lt.doctor_id
+     WHERE blt.booking_id = ?
+     ORDER BY blt.shared_at ASC`,
+    [bookingId],
   );
   return rows;
 }
@@ -126,5 +169,6 @@ module.exports = {
   insert,
   updateById,
   listForCustomer,
-  listForProvider,
+  listSharedForProvider,
+  listForBooking,
 };

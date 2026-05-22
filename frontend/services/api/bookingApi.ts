@@ -40,6 +40,7 @@ export type CreateBookingBody = {
   doctor_id: number;
   service_id: number;
   slot_id: number;
+  lab_test_ids?: number[];
 };
 
 export type RescheduleBookingBody = {
@@ -76,12 +77,24 @@ export const bookingApi = {
     return apiRequest<BookingRow>(`/bookings/${id}`, { method: "GET" });
   },
 
+  listSharedLabTests(bookingId: string | number): Promise<{ items: import("./labTestsApi").LabTestRow[] }> {
+    return apiRequest<{ items: import("./labTestsApi").LabTestRow[] }>(`/bookings/${bookingId}/lab-tests`, {
+      method: "GET",
+    });
+  },
+
   create(body: CreateBookingBody): Promise<BookingRow> {
     return apiRequest<BookingRow>("/bookings", { method: "POST", json: body });
   },
 
-  markPaid(id: string | number): Promise<BookingRow> {
-    return apiRequest<BookingRow>(`/bookings/${id}/payment`, { method: "PUT" });
+  markPaid(
+    id: string | number,
+    body?: import("./walletApi").PayBookingBody,
+  ): Promise<BookingRow> {
+    return apiRequest<BookingRow>(`/bookings/${id}/payment`, {
+      method: "PUT",
+      json: body ?? { booking_id: Number(id), channel: "wallet" },
+    });
   },
 
   updateStatus(

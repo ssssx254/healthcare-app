@@ -67,6 +67,30 @@ function applyBookingFilters(query, params, filters = {}) {
   }
 }
 
+async function attachSharedLabTestsToBooking(conn, patientUserId, bookingId, labTestIds) {
+  const unique = [...new Set(labTestIds.map((id) => Number(id)).filter((id) => id > 0))];
+  if (unique.length === 0) return;
+
+  for (const labTestId of unique) {
+    const [rows] = await conn.execute(
+      `SELECT id FROM lab_tests
+       WHERE id = ? AND patient_user_id = ? AND uploaded_by = 'customer'
+       LIMIT 1`,
+      [labTestId, patientUserId],
+    );
+    if (!rows[0]) {
+      throw new AppError(400, "Зөвхөн өөрийн хадгалсан шинжилгээг эмчид хуваалцана.");
+    }
+  }
+
+  for (const labTestId of unique) {
+    await conn.execute(`INSERT INTO booking_lab_tests (booking_id, lab_test_id) VALUES (?, ?)`, [
+      bookingId,
+      labTestId,
+    ]);
+  }
+}
+
 async function createBooking(patientUserId, body) {
   const clinicId = assertPositiveIntId(body.clinic_id, "clinic_id");
   const doctorId = assertPositiveIntId(body.doctor_id, "doctor_id");
@@ -135,8 +159,13 @@ async function createBooking(patientUserId, body) {
       [patientUserId, clinicId, doctorId, serviceId, slotId, Number(service.price || 0)],
     );
 
+    const bookingId = result.insertId;
+    if (Array.isArray(body.lab_test_ids) && body.lab_test_ids.length > 0) {
+      await attachSharedLabTestsToBooking(conn, patientUserId, bookingId, body.lab_test_ids);
+    }
+
     await conn.commit();
-    const created = await getBookingRow(result.insertId);
+    const created = await getBookingRow(bookingId);
     void require("./notificationTriggers.service").onBookingCreated(created);
     return created;
   } catch (err) {
@@ -204,6 +233,14 @@ async function listBookings(user, listQuery) {
   throw new AppError(403, "Захиалгын жагсаалтыг харах эрхгүй.");
 }
 
+async function listBookingSharedLabTests(bookingId, user) {
+  await getBookingById(bookingId, user);
+  const id = assertPositiveIntId(bookingId, "booking_id");
+  const labTestsRepo = require("../repositories/labTests.repository");
+  const items = await labTestsRepo.listForBooking(id);
+  return { items };
+}
+
 async function getBookingById(bookingId, user) {
   const id = assertPositiveIntId(bookingId, "booking_id");
   const row = await getBookingRow(id);
@@ -220,7 +257,7 @@ async function getBookingById(bookingId, user) {
   return row;
 }
 
-async function markBookingPaid(bookingId, user) {
+async function markBookingPaid(bookingId, user, paymentBody = {}) {
   if (user.role !== "customer") {
     throw new AppError(403, "Төлбөрийг зөвхөн үйлчлүүлэгч бүртгэнэ.");
   }
@@ -230,7 +267,12 @@ async function markBookingPaid(bookingId, user) {
     throw new AppError(400, "Цуцлагдсан захиалгад төлбөр хийхгүй.");
   }
   const walletService = require("./wallet.service");
-  return walletService.payBookingFromWallet(user.id, id);
+  return walletService.payBooking(user, {
+    booking_id: id,
+    channel: paymentBody.channel || "wallet",
+    payment_method_id: paymentBody.payment_method_id,
+    qpay_invoice_id: paymentBody.qpay_invoice_id,
+  });
 }
 
 function assertProviderStatusTransition(currentStatus, nextStatus) {
@@ -338,6 +380,7 @@ module.exports = {
   listCustomerBookings,
   listProviderBookings,
   getBookingById,
+  listBookingSharedLabTests,
   updateBookingStatus,
   cancelBooking,
   markBookingPaid,

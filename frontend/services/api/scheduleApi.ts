@@ -11,6 +11,7 @@ export type ScheduleSlotRow = {
   end_time: string;
   is_available: number | boolean;
   slot_status?: "available" | "booked" | "blocked" | "unavailable" | string;
+  consultation_type?: "paid_visit" | "free_consultation" | string;
 };
 
 export type ScheduleListParams = {
@@ -47,6 +48,7 @@ export const scheduleApi = {
     start_time: string;
     end_time: string;
     is_available?: boolean;
+    consultation_type?: "paid_visit" | "free_consultation";
   }): Promise<ScheduleSlotRow> {
     return apiRequest<ScheduleSlotRow>("/schedule-slots", { method: "POST", json: body });
   },
@@ -95,7 +97,9 @@ export const scheduleApi = {
   },
 
   /** Үйлчлүүлэгч: боломжит цагийн цонх. `GET /schedule-slots/available` */
-  listAvailablePaged(params: ScheduleAvailableParams): Promise<ApiPaginatedData<ScheduleSlotRow>> {
+  listAvailablePaged(
+    params: ScheduleAvailableParams & { consultation_type?: string },
+  ): Promise<ApiPaginatedData<ScheduleSlotRow>> {
     return apiRequestPaginated<ScheduleSlotRow>(withQuery("/schedule-slots/available", params));
   },
 
@@ -123,12 +127,14 @@ export const scheduleApi = {
     from_date?: string;
     to_date?: string;
     page_size?: number;
+    consultation_type?: "paid_visit" | "free_consultation" | string;
   }): Promise<ScheduleSlotRow[]> {
     const { items } = await this.listAvailablePaged({
       doctor_id: params.doctor_id,
       service_id: params.service_id,
       from_date: params.from_date,
       to_date: params.to_date,
+      consultation_type: params.consultation_type,
       page: 1,
       page_size: params.page_size ?? 200,
     });

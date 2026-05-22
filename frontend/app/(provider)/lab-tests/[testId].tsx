@@ -1,6 +1,10 @@
 import { Badge, Button, Card, ErrorState, Input, LoadingState, ScreenScrollView, SectionHeader } from "@/components";
 import { LabAttachmentPickerField } from "@/components/LabAttachmentPickerField";
-import { labTestStatusLabel, labTestStatusTone } from "@/constants/labTestStatus";
+import {
+  getLabTestStatusLabel,
+  labTestSuccessMessage,
+  labTestStatusTone,
+} from "@/constants/labTestStatus";
 import { labTestsApi, type LabTestRow } from "@/services/api/labTestsApi";
 import type { PickedLabFile } from "@/lib/labFilePick";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
@@ -68,7 +72,13 @@ export default function ProviderLabTestReviewScreen() {
         status,
       });
       setRow(updated);
-      Alert.alert("Амжилттай", status === "reviewed" ? "Шалгасан төлөвт шилжлээ." : "Хадгалагдлаа.");
+      const successMsg =
+        status === "reviewed"
+          ? labTestSuccessMessage.providerReviewed
+          : status === "completed"
+            ? labTestSuccessMessage.providerResultSent
+            : labTestSuccessMessage.providerSaved;
+      Alert.alert("Амжилттай", successMsg);
       router.back();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Хадгалахад алдаа гарлаа.";
@@ -104,7 +114,10 @@ export default function ProviderLabTestReviewScreen() {
           <Card>
             <View className="flex-row items-center justify-between gap-2">
               <Text className="flex-1 text-sm font-semibold text-app-text">{row.test_type}</Text>
-              <Badge label={labTestStatusLabel[row.status]} tone={labTestStatusTone(row.status)} />
+              <Badge
+                label={getLabTestStatusLabel(row.status, row.uploaded_by)}
+                tone={labTestStatusTone(row.status, row.uploaded_by)}
+              />
             </View>
             <Text className="mt-1 text-xs text-app-text-muted">{row.test_date}</Text>
             {row.description ? (
@@ -134,7 +147,7 @@ export default function ProviderLabTestReviewScreen() {
             />
 
             <Button
-              label="Хариу хадгалах"
+              label="Хариу илгээх"
               loading={saving}
               disabled={!isOnline}
               className="mt-2"
