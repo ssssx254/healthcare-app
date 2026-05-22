@@ -2,6 +2,7 @@ const {
   registerProviderWithOnboarding,
   submitProviderOnboarding,
   getProviderOnboardingStatus,
+  updateProviderLogo,
 } = require("../services/providerOnboarding.service");
 const { ok, created } = require("../utils/apiResponse");
 
@@ -32,9 +33,19 @@ async function getMyStatus(req, res, next) {
   }
 }
 
+async function patchLogo(req, res, next) {
+  try {
+    const result = await updateProviderLogo(req.user, req.body);
+    return ok(res, result, "Лого шинэчлэгдлээ.");
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   registerWithOnboarding,
   submit,
   getMyStatus,
+  patchLogo,
 };
 

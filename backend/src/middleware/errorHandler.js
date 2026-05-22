@@ -32,7 +32,7 @@ function mapMysqlDriverError(err) {
   if (code === "ER_BAD_FIELD_ERROR" || err.errno === 1054) {
     return new AppError(
       500,
-      "Өгөгдлийн сангийн бүтэц API-тай таарахгүй байна. Backend хавтаснаас `npm run db:migrate:catchup` ажиллуулна уу (эсвэл `sql/migrations` доторх 003–006-г ганцаарчлан).",
+      "Өгөгдлийн сангийн бүтэц API-тай таарахгүй байна. Production MySQL дээр `npm run db:migrate:deploy` эсвэл `npm run db:migrate:catchup` ажиллуулна уу (014_free_consultation_flow.sql орноц).",
       {
         code: "SCHEMA_BAD_FIELD",
         details: process.env.NODE_ENV !== "production" ? { sqlMessage: err.sqlMessage } : undefined,

@@ -29,6 +29,21 @@ export function HeaderNotificationLink({ href }: HeaderNotificationLinkProps) {
   );
 }
 
+export type HeaderNotificationAndChatProps = {
+  notificationHref: Href;
+  chatHref: Href;
+};
+
+/** Толгой зүүн — мэдэгдэл, түүний хажууд чат. */
+export function HeaderNotificationAndChat({ notificationHref, chatHref }: HeaderNotificationAndChatProps) {
+  return (
+    <View className="ml-1 flex-row items-center">
+      <HeaderNotificationLink href={notificationHref} />
+      <HeaderChatLink href={chatHref} />
+    </View>
+  );
+}
+
 export type HeaderChatLinkProps = {
   href: Href;
 };

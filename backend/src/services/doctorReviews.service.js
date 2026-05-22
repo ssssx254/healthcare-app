@@ -69,7 +69,12 @@ async function findEligibleBookingForReview(doctorId, customerUserId) {
      LEFT JOIN doctor_reviews dr ON dr.booking_id = b.id
      WHERE b.patient_user_id = ?
        AND b.doctor_id = ?
-       AND b.status = 'completed'
+       AND b.booking_type = 'formal'
+       AND b.payment_status = 'paid'
+       AND (
+         b.status IN ('confirmed', 'completed')
+         OR (b.status = 'pending' AND b.payment_status = 'paid')
+       )
        AND dr.id IS NULL
      ORDER BY b.created_at DESC
      LIMIT 1`,
@@ -131,7 +136,7 @@ async function createDoctorReview(doctorId, customerUserId, body) {
   const comment = optionalTrimmedString(body.comment, 2000);
 
   const [bookingRows] = await pool.execute(
-    `SELECT id, patient_user_id, doctor_id, status FROM bookings WHERE id = ? LIMIT 1`,
+    `SELECT id, patient_user_id, doctor_id, status, payment_status FROM bookings WHERE id = ? LIMIT 1`,
     [bookingId],
   );
   const booking = bookingRows[0];
@@ -144,8 +149,15 @@ async function createDoctorReview(doctorId, customerUserId, body) {
   if (Number(booking.doctor_id) !== Number(doctorId)) {
     throw new AppError(400, "Захиалга энэ эмчид хамаарахгүй байна.");
   }
-  if (booking.status !== "completed") {
-    throw new AppError(400, "Зөвхөн дууссан үзлэгт үнэлгээ өгнө.");
+  if (booking.payment_status !== "paid") {
+    throw new AppError(400, "Төлбөр төлсний дараа үнэлгээ өгнө.");
+  }
+  const st = String(booking.status);
+  const eligibleStatus =
+    ["confirmed", "completed"].includes(st) ||
+    (st === "pending" && booking.payment_status === "paid");
+  if (!eligibleStatus) {
+    throw new AppError(400, "Зөвхөн баталгаажсан эсвэл дууссан үзлэгт үнэлгээ өгнө.");
   }
 
   const [dup] = await pool.execute(`SELECT id FROM doctor_reviews WHERE booking_id = ? LIMIT 1`, [bookingId]);
@@ -160,11 +172,25 @@ async function createDoctorReview(doctorId, customerUserId, body) {
   );
 
   const [created] = await pool.execute(
-    `SELECT id, doctor_id, rating, comment, created_at FROM doctor_reviews WHERE id = ?`,
+    `SELECT dr.id, dr.doctor_id, dr.rating, dr.comment, dr.created_at, u.full_name AS customer_name
+     FROM doctor_reviews dr
+     INNER JOIN users u ON u.id = dr.customer_user_id
+     WHERE dr.id = ?`,
     [result.insertId],
   );
+  const row = created[0];
   const summary = await getDoctorRatingStats(doctorId);
-  return { review: created[0], summary };
+  return {
+    review: {
+      id: row.id,
+      doctor_id: row.doctor_id,
+      rating: row.rating,
+      comment: row.comment,
+      created_at: row.created_at,
+      customer_name: maskCustomerName(row.customer_name),
+    },
+    summary,
+  };
 }
 
 module.exports = {

@@ -1,4 +1,4 @@
-import { Button, Card, FormScrollView, Input, ProviderFormSection, SectionHeader } from "@/components";
+import { Button, Card, ClinicLogoPickerField, FormScrollView, Input, ProviderFormSection, SectionHeader } from "@/components";
 import { useProviderWorkspace } from "@/contexts/ProviderWorkspaceContext";
 import {
   validateAddressMn,
@@ -20,6 +20,7 @@ export default function ClinicEditScreen() {
   const [address, setAddress] = useState(clinic.address);
   const [phone, setPhone] = useState(clinic.phone);
   const [description, setDescription] = useState(clinic.description);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | null>(clinic.logoUrl ?? null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -53,6 +54,7 @@ export default function ClinicEditScreen() {
           address: address.trim(),
           phone: phone.trim(),
           description: description.trim(),
+          logoUrl: logoDataUrl,
         });
         setSavedOk(true);
         setTimeout(() => router.back(), 600);
@@ -81,6 +83,12 @@ export default function ClinicEditScreen() {
             <Text className="text-sm font-medium text-emerald-900 dark:text-emerald-100">Амжилттай хадгалагдлаа.</Text>
           </View>
         ) : null}
+
+        <Card className="mb-4">
+          <ProviderFormSection title="Лого" description="Үйлчлүүлэгчийн нүүр, эмнэлгийн жагсаалтад харагдана.">
+            <ClinicLogoPickerField value={logoDataUrl} onChange={setLogoDataUrl} />
+          </ProviderFormSection>
+        </Card>
 
         <Card className="mb-4">
           <ProviderFormSection title="Үндсэн мэдээлэл" description="Нэр, утас, байршлын гарчиг.">

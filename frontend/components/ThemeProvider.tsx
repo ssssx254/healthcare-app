@@ -1,11 +1,6 @@
 import { colors, type AppThemeMode, type ThemePalette } from "@/constants/theme";
 import { loadStoredTheme, saveStoredTheme } from "@/lib/themeStorage";
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider as NavigationThemeProvider,
-} from "@react-navigation/native";
-import {
   createContext,
   useCallback,
   useContext,
@@ -29,23 +24,6 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
-
-function buildNavTheme(mode: AppThemeMode) {
-  const p = colors[mode];
-  const base = mode === "dark" ? DarkTheme : DefaultTheme;
-  return {
-    ...base,
-    colors: {
-      ...base.colors,
-      primary: p.brand,
-      background: p.background,
-      card: p.surface,
-      text: p.text,
-      border: p.border,
-      notification: p.danger,
-    },
-  };
-}
 
 function applyNativeWindScheme(mode: AppThemeMode) {
   const setColorScheme = (Appearance as unknown as { setColorScheme?: (v: "light" | "dark" | null) => void })
@@ -110,23 +88,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [theme, palette, setTheme, toggleTheme],
   );
 
-  const navTheme = useMemo(() => buildNavTheme(theme), [theme]);
-
   if (!ready) {
     return <View style={{ flex: 1, backgroundColor: colors.dark.background }} />;
   }
 
   return (
     <ThemeContext.Provider value={value}>
-      <NavigationThemeProvider value={navTheme}>
-        <View
-          className={theme === "dark" ? "dark flex-1" : "flex-1"}
-          style={{ flex: 1, backgroundColor: palette.background }}
-        >
-          <StatusBar style={theme === "dark" ? "light" : "dark"} />
-          {children}
-        </View>
-      </NavigationThemeProvider>
+      <View
+        className={theme === "dark" ? "dark flex-1" : "flex-1"}
+        style={{ flex: 1, backgroundColor: palette.background }}
+      >
+        <StatusBar style={theme === "dark" ? "light" : "dark"} />
+        {children}
+      </View>
     </ThemeContext.Provider>
   );
 }

@@ -39,8 +39,12 @@ async function createClinic({
 
 async function findClinicById(id) {
   const [rows] = await pool.execute(
-    `SELECT id, owner_user_id, clinic_name, description, address, city, clinic_type, phone, email, approval_status, created_at
-     FROM clinics WHERE id = ? LIMIT 1`,
+    `SELECT c.id, c.owner_user_id, c.clinic_name, c.description, c.address, c.city, c.clinic_type, c.phone, c.email,
+            c.approval_status, c.created_at,
+            COALESCE(NULLIF(TRIM(c.logo_url), ''), pos.logo_url) AS logo_url
+     FROM clinics c
+     LEFT JOIN provider_onboarding_submissions pos ON pos.user_id = c.owner_user_id
+     WHERE c.id = ? LIMIT 1`,
     [id],
   );
   return rows[0] || null;
@@ -69,8 +73,10 @@ async function listClinicsPublicPaged(filters) {
   // LIMIT/OFFSET-ийг placeholder-оор биш тоогоор оруулна (зарим MariaDB/mysql2 хослолд ER_WRONG_ARGUMENTS гардаг).
   const [rows] = await pool.execute(
     `SELECT c.id, c.owner_user_id, c.clinic_name, c.description, c.address, c.city, c.clinic_type, c.phone, c.email,
-            c.approval_status, c.created_at
+            c.approval_status, c.created_at,
+            COALESCE(NULLIF(TRIM(c.logo_url), ''), pos.logo_url) AS logo_url
      FROM clinics c
+     LEFT JOIN provider_onboarding_submissions pos ON pos.user_id = c.owner_user_id
      WHERE ${where.join(" AND ")}
      ORDER BY ${sortCol} ${dir}
      LIMIT ${lim} OFFSET ${off}`,
@@ -157,8 +163,12 @@ async function updateClinicApprovalStatus(clinicId, approval_status) {
 
 async function findClinicByOwnerUserId(ownerUserId) {
   const [rows] = await pool.execute(
-    `SELECT id, owner_user_id, clinic_name, description, address, city, clinic_type, phone, email, approval_status, created_at
-     FROM clinics WHERE owner_user_id = ? LIMIT 1`,
+    `SELECT c.id, c.owner_user_id, c.clinic_name, c.description, c.address, c.city, c.clinic_type, c.phone, c.email,
+            c.approval_status, c.created_at,
+            COALESCE(NULLIF(TRIM(c.logo_url), ''), pos.logo_url) AS logo_url
+     FROM clinics c
+     LEFT JOIN provider_onboarding_submissions pos ON pos.user_id = c.owner_user_id
+     WHERE c.owner_user_id = ? LIMIT 1`,
     [ownerUserId],
   );
   return rows[0] || null;

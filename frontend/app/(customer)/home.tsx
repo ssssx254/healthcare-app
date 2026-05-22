@@ -1,14 +1,15 @@
-import { AppImage, Card, EmptyState, ErrorState, LoadingState, ScreenScrollView } from "@/components";
+import { AppImage, Card, EmptyState, ErrorState, LoadingState, ScreenScrollView, ServiceCategorySection } from "@/components";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { routes } from "@/constants/appRoutes";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDoctorRatingLabel } from "@/lib/formatDoctorRating";
+import { resolveClinicLogoUri } from "@/lib/clinicLogo";
 import { resolveDoctorAvatarUri } from "@/lib/doctorAvatar";
-import { getClinicList, getProviderServiceCategories, getSpotlightDoctors } from "@/services/customerCatalog";
+import { getClinicList, getSpotlightDoctors } from "@/services/customerCatalog";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Link, router, Tabs } from "expo-router";
+import { Link, router, Tabs, useFocusEffect } from "expo-router";
 import type { ComponentProps } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type { MockClinicDetail, MockDoctor } from "@/types/customer";
 
@@ -49,7 +50,6 @@ export default function CustomerHomeScreen() {
   const [clinics, setClinics] = useState<MockClinicDetail[] | null>(null);
   const [clinicsError, setClinicsError] = useState<string | null>(null);
   const [featuredDoctors, setFeaturedDoctors] = useState<MockDoctor[] | null>(null);
-  const [serviceCategories, setServiceCategories] = useState<string[] | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -69,21 +69,7 @@ export default function CustomerHomeScreen() {
     };
   }, []);
 
-  useEffect(() => {
-    let alive = true;
-    getProviderServiceCategories()
-      .then((cats) => {
-        if (alive) setServiceCategories(cats);
-      })
-      .catch(() => {
-        if (alive) setServiceCategories([]);
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  useEffect(() => {
+  const loadFeaturedDoctors = useCallback(() => {
     let alive = true;
     getSpotlightDoctors(6)
       .then((d) => {
@@ -96,6 +82,8 @@ export default function CustomerHomeScreen() {
       alive = false;
     };
   }, []);
+
+  useFocusEffect(loadFeaturedDoctors);
 
   const topClinics = (clinics ?? []).slice(0, 2);
 
@@ -176,25 +164,8 @@ export default function CustomerHomeScreen() {
               accent="bg-emerald-50 dark:bg-emerald-950/40"
             />
           </View>
-          <Card className="mt-3">
-            <Text className="text-sm font-semibold text-app-text">Үйлчилгээний ангиллууд</Text>
-            {serviceCategories === null ? (
-              <Text className="mt-2 text-xs text-app-text-muted">Ачааллаж байна…</Text>
-            ) : serviceCategories.length === 0 ? (
-              <Text className="mt-2 text-xs text-app-text-muted">Үзүүлэгчийн ангилал хараахан бүртгэгдээгүй байна.</Text>
-            ) : (
-              <View className="mt-3 flex-row flex-wrap gap-2">
-                {serviceCategories.slice(0, 10).map((cat) => (
-                  <Pressable
-                    key={cat}
-                    onPress={() => router.push({ pathname: routes.customerSearch, params: { q: cat } })}
-                    className="rounded-full px-3 py-2 border-app-border bg-app-card"
-                  >
-                    <Text className="text-xs text-app-text-secondary">{cat}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            )}
+          <Card className="mt-3 p-4">
+            <ServiceCategorySection />
           </Card>
         </View>
 
@@ -257,16 +228,25 @@ export default function CustomerHomeScreen() {
             <View className="gap-3">
               {topClinics.map((c) => (
                 <Link key={c.id} href={`/clinic/${c.id}`} asChild>
-                  <Pressable className="rounded-2xl p-4 shadow-sm border-app-border bg-app-card">
-                    <Text className="text-sm font-semibold text-app-text" numberOfLines={2}>
-                      {c.name}
-                    </Text>
-                    <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={1}>
-                      {c.city}
-                    </Text>
-                    <Text className="mt-2 text-xs text-app-text-muted" numberOfLines={2}>
-                      {c.description}
-                    </Text>
+                  <Pressable className="rounded-2xl p-4 shadow-sm border-app-border bg-app-card active:opacity-95">
+                    <View className="flex-row items-start gap-3">
+                      <AppImage
+                        source={{ uri: resolveClinicLogoUri(c, 64) }}
+                        fallbackIcon="hospital-building"
+                        className="h-10 w-10 shrink-0 rounded-xl border border-app-border"
+                      />
+                      <View className="min-w-0 flex-1">
+                        <Text className="text-sm font-semibold text-app-text" numberOfLines={2}>
+                          {c.name}
+                        </Text>
+                        <Text className="mt-1 text-xs text-app-text-muted" numberOfLines={1}>
+                          {c.city}
+                        </Text>
+                        <Text className="mt-2 text-xs leading-4 text-app-text-muted" numberOfLines={2}>
+                          {c.description}
+                        </Text>
+                      </View>
+                    </View>
                   </Pressable>
                 </Link>
               ))}

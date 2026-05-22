@@ -66,6 +66,21 @@ async function getProviderOnboardingStatus(user) {
   };
 }
 
+async function updateProviderLogo(user, { logo_url }) {
+  ensureProvider(user);
+  const clinic = await clinicsRepo.findClinicByOwnerUserId(user.id);
+  if (!clinic) {
+    const updated = await providerOnboardingRepo.updateLogoUrlByUserId(user.id, logo_url);
+    if (!updated) {
+      throw new AppError(404, "Эмнэлэг олдсонгүй. Эхлээд эмнэлгээ бүртгэнэ үү.");
+    }
+    return { logo_url };
+  }
+  await clinicsRepo.updateClinicById(clinic.id, { logo_url });
+  await providerOnboardingRepo.updateLogoUrlByUserId(user.id, logo_url);
+  return { logo_url };
+}
+
 async function listPendingProviderSubmissions() {
   return providerOnboardingRepo.listPendingProvidersForAdmin();
 }
@@ -127,6 +142,7 @@ module.exports = {
   registerProviderWithOnboarding,
   submitProviderOnboarding,
   getProviderOnboardingStatus,
+  updateProviderLogo,
   listPendingProviderSubmissions,
   approveOrRejectProvider,
 };

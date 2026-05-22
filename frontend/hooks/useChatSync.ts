@@ -1,8 +1,9 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { scheduleLocalDemoNotification } from "@/lib/notifications/expoNotifications";
-import { chatApi } from "@/services/api/chatApi";
+import { chatApi, type ChatConversationRow } from "@/services/api/chatApi";
 import type { ChatConversation } from "@/types/healthcare";
+import type { User } from "@/types/healthcare/user";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 function toIso(v?: string | null): string {
@@ -13,6 +14,46 @@ function toIso(v?: string | null): string {
 
 function toRole(senderUserId: number, customerId: number): "customer" | "provider" {
   return senderUserId === customerId ? "customer" : "provider";
+}
+
+function mapConversationRow(
+  row: ChatConversationRow,
+  user: Pick<User, "id" | "role"> | null | undefined,
+  isOnline: boolean,
+  providerDisplayName?: string,
+): ChatConversation {
+  const legacy = row as ChatConversationRow & { customerId?: number; providerId?: number };
+  const customerId = String(row.customer_user_id ?? legacy.customerId ?? "");
+  const providerId = String(row.provider_user_id ?? legacy.providerId ?? "");
+  const lastAt = row.last_message_at || row.updated_at || row.created_at;
+  const providerName =
+    providerDisplayName?.trim() ||
+    row.provider_full_name?.trim() ||
+    (row.clinic_name ? `${row.clinic_name}` : "") ||
+    (providerId ? `Эмнэлэг #${providerId}` : "Эмнэлэг");
+  return {
+    id: String(row.id),
+    customer: { id: customerId, name: row.customer_full_name?.trim() || `Үйлчлүүлэгч #${customerId}` },
+    provider: { id: providerId, name: providerName },
+    providerTitle: row.clinic_name ? `${row.clinic_name} · Эмнэлгийн баг` : "Эмнэлгийн баг",
+    providerPresence: isOnline ? "online" : "offline",
+    messages: row.last_message_preview
+      ? [
+          {
+            id: `preview-${row.id}`,
+            conversationId: String(row.id),
+            senderRole: toRole(Number(row.last_message_sender_id || row.provider_user_id), row.customer_user_id),
+            senderId: String(row.last_message_sender_id || ""),
+            senderName: "",
+            text: row.last_message_preview || row.last_message || "",
+            sentAtIso: toIso(lastAt),
+          },
+        ]
+      : [],
+    unreadForCustomer: user?.role === "customer" ? Number(row.unread_count || 0) : 0,
+    unreadForProvider: user?.role === "provider" ? Number(row.unread_count || 0) : 0,
+    updatedAtIso: toIso(lastAt),
+  };
 }
 
 export function useChatSync() {
@@ -50,50 +91,26 @@ export function useChatSync() {
     [],
   );
 
-  const refreshConversations = useCallback(async () => {
+  const refreshConversations = useCallback(async (opts?: { skipCache?: boolean }) => {
     if (!user?.id || (user.role !== "customer" && user.role !== "provider")) {
       setConversations([]);
       return;
     }
-    const rows = await chatApi.listConversations();
-    const mapped: ChatConversation[] = rows.map((row) => {
-      const customerId = String(row.customer_user_id);
-      const providerId = String(row.provider_user_id);
-      const lastAt = row.last_message_at || row.updated_at || row.created_at;
-      return {
-        id: String(row.id),
-        customer: { id: customerId, name: row.customer_full_name?.trim() || `Үйлчлүүлэгч #${customerId}` },
-        provider: { id: providerId, name: row.provider_full_name?.trim() || `Эмч #${providerId}` },
-        providerTitle: row.clinic_name ? `${row.clinic_name} эмнэлэг` : "Эмнэлгийн баг",
-        providerPresence: isOnline ? "online" : "offline",
-        messages: row.last_message_preview
-          ? [
-              {
-                id: `preview-${row.id}`,
-                conversationId: String(row.id),
-                senderRole: toRole(Number(row.last_message_sender_id || row.provider_user_id), row.customer_user_id),
-                senderId: String(row.last_message_sender_id || ""),
-                senderName: "",
-                text: row.last_message_preview || row.last_message || "",
-                sentAtIso: toIso(lastAt),
-              },
-            ]
-          : [],
-        unreadForCustomer: user.role === "customer" ? Number(row.unread_count || 0) : 0,
-        unreadForProvider: user.role === "provider" ? Number(row.unread_count || 0) : 0,
-        updatedAtIso: toIso(lastAt),
-      };
-    });
-    setConversations((prev) =>
-      mapped.map((next) => {
+    const rows = await chatApi.listConversations({ skipCache: opts?.skipCache });
+    const mapped: ChatConversation[] = rows.map((row) => mapConversationRow(row, user, isOnline));
+    setConversations((prev) => {
+      const merged = mapped.map((next) => {
         const old = prev.find((p) => p.id === next.id);
         if (!old) return next;
         return {
           ...next,
           messages: mergeMessages(old.messages, next.messages),
         };
-      }),
-    );
+      });
+      const mergedIds = new Set(merged.map((c) => c.id));
+      const pendingOnly = prev.filter((p) => !mergedIds.has(p.id));
+      return [...pendingOnly, ...merged].sort((a, b) => b.updatedAtIso.localeCompare(a.updatedAtIso));
+    });
   }, [isOnline, mergeMessages, user?.id, user?.role]);
 
   useEffect(() => {
@@ -105,16 +122,26 @@ export function useChatSync() {
   }, [refreshConversations]);
 
   const ensureCustomerConversation = useCallback(
-    async (params: { clinicId: number; customerUserId?: number; providerUserId?: number }) => {
+    async (params: {
+      clinicId: number;
+      customerUserId?: number;
+      providerUserId?: number;
+      providerDisplayName?: string;
+    }) => {
       const body =
         user?.role === "provider"
           ? { clinic_id: params.clinicId, customer_user_id: Number(params.customerUserId) }
           : { clinic_id: params.clinicId };
       const row = await chatApi.ensureConversation(body);
-      await refreshConversations();
+      const ensured = mapConversationRow(row, user, isOnline, params.providerDisplayName);
+      setConversations((prev) => {
+        const rest = prev.filter((c) => c.id !== ensured.id);
+        return [ensured, ...rest];
+      });
+      await refreshConversations({ skipCache: true });
       return String(row.id);
     },
-    [refreshConversations, user?.role],
+    [isOnline, refreshConversations, user?.role],
   );
 
   const loadConversationMessages = useCallback(

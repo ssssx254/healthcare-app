@@ -53,11 +53,14 @@ type PaginatedData<T> = {
 
 export const chatApi = {
   ensureConversation(body: EnsureChatConversationBody): Promise<ChatConversationRow> {
-    return apiRequest<ChatConversationRow>("/chat/conversations", { method: "POST", json: body });
+    return apiRequest<ChatConversationRow>("/chat/conversations/ensure", { method: "POST", json: body });
   },
 
-  listConversations(): Promise<ChatConversationRow[]> {
-    return apiRequest<PaginatedData<ChatConversationRow> | ChatConversationRow[]>("/chat/conversations", { method: "GET" }).then((res) =>
+  listConversations(opts?: { skipCache?: boolean }): Promise<ChatConversationRow[]> {
+    return apiRequest<PaginatedData<ChatConversationRow> | ChatConversationRow[]>("/chat/conversations", {
+      method: "GET",
+      skipCache: opts?.skipCache,
+    }).then((res) =>
       Array.isArray(res) ? res : res.items,
     );
   },

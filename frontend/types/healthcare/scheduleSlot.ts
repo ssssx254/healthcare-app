@@ -10,5 +10,6 @@ export type ScheduleSlot = {
   durationMinutes?: number;
   status?: "available" | "booked" | "blocked" | "unavailable" | string;
   isAvailable?: boolean;
+  consultationType?: "paid_visit" | "free_consultation";
   label: string;
 };

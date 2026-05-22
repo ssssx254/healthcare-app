@@ -86,6 +86,18 @@ async function getClinicById(id, { restrictToApproved = false } = {}) {
   return row;
 }
 
+const LOGO_URL_MAX_LENGTH = 5_000_000;
+
+function normalizeLogoUrl(value) {
+  if (value === undefined) return undefined;
+  if (value === null || String(value).trim() === "") return null;
+  const logo_url = String(value).trim();
+  if (logo_url.length > LOGO_URL_MAX_LENGTH) {
+    throw new AppError(400, "Лого хэт том байна. Жижиг зураг сонгоно уу.");
+  }
+  return logo_url;
+}
+
 async function updateClinic(clinicId, ownerUserId, body) {
   await assertClinicOwner(clinicId, ownerUserId);
   const patch = {};
@@ -94,6 +106,9 @@ async function updateClinic(clinicId, ownerUserId, body) {
     if (body[key] !== undefined) {
       patch[key] = body[key];
     }
+  }
+  if (body.logo_url !== undefined) {
+    patch.logo_url = normalizeLogoUrl(body.logo_url);
   }
   if (Object.keys(patch).length === 0) {
     throw new AppError(400, "Шинэчлэх талбар байхгүй байна.");

@@ -58,10 +58,13 @@ export type ConsultationListParams = {
 };
 
 export const consultationApi = {
-  listFreeAvailability(params?: { from_date?: string; to_date?: string }): Promise<{ items: FreeConsultDoctorAvailability[] }> {
+  listFreeAvailability(
+    params?: { from_date?: string; to_date?: string },
+    opts?: { skipCache?: boolean },
+  ): Promise<{ items: FreeConsultDoctorAvailability[] }> {
     return apiRequest<{ items: FreeConsultDoctorAvailability[] }>(
       withQuery("/consultations/free-availability", params ?? {}),
-      { method: "GET" },
+      { method: "GET", skipCache: opts?.skipCache },
     );
   },
 

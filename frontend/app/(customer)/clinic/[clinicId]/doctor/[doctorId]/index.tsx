@@ -9,23 +9,23 @@ import {
   ScreenScrollView,
   StarRating,
 } from "@/components";
-import { adviceArticles } from "@/data/healthcare/adviceArticles";
 import { routes } from "@/constants/appRoutes";
 import { orderStatusLabel } from "@/constants/orderStatus";
 import { useCustomerBooking } from "@/contexts/CustomerBookingContext";
 import { useChatSync } from "@/hooks/useChatSync";
 import { formatDoctorRatingCount, formatDoctorRatingLabel } from "@/lib/formatDoctorRating";
 import { resolveDoctorAvatarUri } from "@/lib/doctorAvatar";
-import { doctorReviewApi, type DoctorReviewRow, type DoctorReviewViewer } from "@/services/api/doctorReviewApi";
+import {
+  doctorReviewApi,
+  type DoctorReviewRow,
+  type DoctorReviewSummary,
+  type DoctorReviewViewer,
+} from "@/services/api/doctorReviewApi";
 import { getClinicById, getDoctor, getServicesByDoctor } from "@/services/customerCatalog";
-import { cn } from "@/utils/cn";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Link, router, useLocalSearchParams, useNavigation } from "expo-router";
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { Text, View } from "react-native";
 import type { MockClinicDetail, MockDoctor, MockService } from "@/types/customer";
-
-type TabId = "about" | "articles";
 
 function serviceStatusBadge(kind: MockService["kind"]) {
   if (kind === "free_online") return { label: orderStatusLabel.free_consult, tone: "success" as const };
@@ -41,7 +41,6 @@ function formatReviewDate(iso: string): string {
 }
 
 export default function DoctorDetailScreen() {
-  const navigation = useNavigation();
   const { clinicId, doctorId, reviewBookingId } = useLocalSearchParams<{
     clinicId: string;
     doctorId: string;
@@ -52,7 +51,6 @@ export default function DoctorDetailScreen() {
   const [clinic, setClinic] = useState<MockClinicDetail | null | undefined>(undefined);
   const [doctor, setDoctor] = useState<MockDoctor | null | undefined>(undefined);
   const [services, setServices] = useState<MockService[] | null>(null);
-  const [tab, setTab] = useState<TabId>("about");
   const [reviews, setReviews] = useState<DoctorReviewRow[]>([]);
   const [reviewSummary, setReviewSummary] = useState<{ average_rating: number | null; review_count: number } | null>(null);
   const [viewer, setViewer] = useState<DoctorReviewViewer | null>(null);
@@ -61,26 +59,51 @@ export default function DoctorDetailScreen() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
 
-  const loadReviews = useCallback(async () => {
+  const loadReviews = useCallback(async (opts?: { skipCache?: boolean }) => {
     if (!doctorId) return;
     setReviewsLoading(true);
     try {
-      const res = await doctorReviewApi.list(doctorId, { page: 1, page_size: 20 });
+      const res = await doctorReviewApi.list(doctorId, { page: 1, page_size: 20, skipCache: opts?.skipCache });
       setReviews(res.items);
       setReviewSummary(res.summary);
       setViewer(res.viewer);
     } catch {
-      setReviews([]);
-      setReviewSummary(null);
-      setViewer({
-        can_submit: false,
-        booking_id: null,
-        message: "Зөвхөн үзлэгт хамрагдсан хэрэглэгч үнэлгээ өгөх боломжтой.",
-      });
+      setViewer((prev) =>
+        prev ?? {
+          can_submit: false,
+          booking_id: null,
+          message: "Зөвхөн үзлэгт хамрагдсан хэрэглэгч үнэлгээ өгөх боломжтой.",
+        },
+      );
     } finally {
       setReviewsLoading(false);
     }
   }, [doctorId]);
+
+  const applyReviewSuccess = useCallback(
+    (result: { review: DoctorReviewRow; summary: DoctorReviewSummary }) => {
+      setReviewSummary(result.summary);
+      setReviews((prev) => {
+        if (prev.some((r) => r.id === result.review.id)) return prev;
+        return [result.review, ...prev];
+      });
+      setDoctor((prev) =>
+        prev
+          ? {
+              ...prev,
+              averageRating: result.summary.average_rating,
+              reviewCount: result.summary.review_count,
+            }
+          : prev,
+      );
+      setViewer({
+        can_submit: false,
+        booking_id: null,
+        message: "Та энэ үзлэгт үнэлгээ өгсөн байна.",
+      });
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!clinicId) return;
@@ -144,8 +167,15 @@ export default function DoctorDetailScreen() {
     setChatError(null);
     setChatLoading(true);
     try {
-      const conversationId = await ensureCustomerConversation({ clinicId: Number(clinicId) });
-      router.push({ pathname: routes.customerChatDetail, params: { conversationId } });
+      const doctorName = doctor?.name?.trim() || "Эмч";
+      const conversationId = await ensureCustomerConversation({
+        clinicId: Number(clinicId),
+        providerDisplayName: doctorName,
+      });
+      router.push({
+        pathname: routes.customerChatDetail,
+        params: { conversationId, providerName: doctorName },
+      });
     } catch (e) {
       setChatError(e instanceof Error ? e.message : "Чат нээх үед алдаа гарлаа.");
     } finally {
@@ -155,12 +185,10 @@ export default function DoctorDetailScreen() {
 
   const firstFormalService = services?.find((s) => s.kind === "formal");
 
-  useLayoutEffect(() => {
-    navigation.setOptions({ title: doctor?.name ?? "Эмч" });
-  }, [navigation, doctor?.name]);
-
   return (
-    <ScreenScrollView
+    <>
+      <Stack.Screen options={{ title: doctor?.name ?? "Эмч" }} />
+      <ScreenScrollView
         className="flex-1 bg-app-bg"
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
       >
@@ -229,31 +257,7 @@ export default function DoctorDetailScreen() {
               </View>
             </Card>
 
-            <View className="mb-4 flex-row rounded-2xl border border-app-border bg-app-muted p-1">
-              {(["about", "articles"] as TabId[]).map((t) => (
-                <Pressable
-                  key={t}
-                  onPress={() => setTab(t)}
-                  className={cn(
-                    "flex-1 items-center rounded-xl py-2.5",
-                    tab === t ? "bg-app-card shadow-sm" : "",
-                  )}
-                >
-                  <Text
-                    className={cn(
-                      "text-sm font-bold",
-                      tab === t ? "text-brand-600 dark:text-brand-300" : "text-app-text-muted",
-                    )}
-                  >
-                    {t === "about" ? "Тухай" : "Нийтлэл"}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
-            {tab === "about" ? (
-              <>
-                <Text className="mb-2 text-sm font-semibold text-app-text">Танилцуулга</Text>
+            <Text className="mb-2 text-sm font-semibold text-app-text">Танилцуулга</Text>
                 <Card className="mb-4">
                   <Text className="text-sm leading-6 text-app-text-secondary">
                     {doctor.bio?.trim() || "Танилцуулга бүртгэгдээгүй байна."}
@@ -339,10 +343,13 @@ export default function DoctorDetailScreen() {
                     <DoctorReviewForm
                       doctorId={String(doctorId)}
                       bookingId={reviewBookingIdNum}
-                      onSuccess={() => {
+                      onSuccess={(result) => {
                         setShowReviewForm(false);
-                        void loadReviews();
-                        void getDoctor(String(clinicId), String(doctorId)).then((d) => setDoctor(d ?? null));
+                        applyReviewSuccess(result);
+                        void loadReviews({ skipCache: true });
+                        void getDoctor(String(clinicId), String(doctorId)).then((d) => {
+                          if (d) setDoctor(d);
+                        });
                       }}
                       onCancel={() => setShowReviewForm(false)}
                     />
@@ -386,28 +393,9 @@ export default function DoctorDetailScreen() {
                     ))}
                   </View>
                 )}
-              </>
-            ) : (
-              <Card className="mb-4">
-                <View className="flex-row gap-3">
-                  <MaterialCommunityIcons name="book-open-page-variant-outline" size={28} color="#2563eb" />
-                  <View className="min-w-0 flex-1">
-                    <Text className="text-base font-bold text-app-text">Эрүүл мэндийн зөвлөгөө</Text>
-                    <Text className="mt-2 text-sm leading-6 text-app-text-secondary">
-                      Урьдчилан сэргийлэх зөвлөмж, нийтлэлүүдийг платформын зөвлөгөөний хэсгээс уншина уу.
-                    </Text>
-                    <Button
-                      label="Зөвлөгөөний хэсэг нээх"
-                      variant="outline"
-                      className="mt-4 w-full"
-                      onPress={() => router.push(routes.customerAdvice)}
-                    />
-                  </View>
-                </View>
-              </Card>
-            )}
           </>
         )}
       </ScreenScrollView>
+    </>
   );
 }

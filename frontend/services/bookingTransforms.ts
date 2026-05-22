@@ -35,7 +35,7 @@ function resolveCustomerStatus(row: BookingRow): OrderUiStatus {
     if (st === "completed") return "completed";
     if (st === "confirmed") return "confirmed";
     if (st === "pending") {
-      return pay === "paid" ? "pending" : "payment_required";
+      return pay === "paid" ? "confirmed" : "payment_required";
     }
   }
   return "pending";

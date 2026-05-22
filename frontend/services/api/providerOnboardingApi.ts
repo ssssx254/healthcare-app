@@ -31,4 +31,11 @@ export const providerOnboardingApi = {
       json: body,
     });
   },
+
+  updateLogo(logo_url: string | null): Promise<{ logo_url: string | null }> {
+    return apiRequest<{ logo_url: string | null }>("/provider-onboarding/logo", {
+      method: "PATCH",
+      json: { logo_url },
+    });
+  },
 };

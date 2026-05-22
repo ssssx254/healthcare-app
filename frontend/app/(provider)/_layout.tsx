@@ -1,5 +1,5 @@
 import { routes } from "@/constants/appRoutes";
-import { HeaderChatLink, HeaderNotificationLink, HeaderThemeAndLogout } from "@/components";
+import { HeaderNotificationAndChat, HeaderThemeAndLogout } from "@/components";
 import { ProviderWorkspaceProvider } from "@/contexts/ProviderWorkspaceContext";
 import { WebBottomTabBar } from "@/components/WebBottomTabBar";
 import { WebScreenFrame } from "@/components/WebScreenFrame";
@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTabScreenOptions } from "@/hooks/useTabScreenOptions";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
-import { View } from "react-native";
 
 export default function ProviderGroupLayout() {
   const { isAuthenticated, user, authLoading, signOut } = useAuth();
@@ -27,10 +26,10 @@ export default function ProviderGroupLayout() {
           ...tabOptions,
           headerTitle: "",
           headerLeft: () => (
-            <View className="ml-1 flex-row items-center">
-              <HeaderNotificationLink href={routes.providerNotifications} />
-              <HeaderChatLink href={routes.providerChat} />
-            </View>
+            <HeaderNotificationAndChat
+              notificationHref={routes.providerNotifications}
+              chatHref={routes.providerChat}
+            />
           ),
           headerRight: () => <HeaderThemeAndLogout onPress={signOut} />,
         })}

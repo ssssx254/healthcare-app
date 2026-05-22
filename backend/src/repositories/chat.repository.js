@@ -33,6 +33,33 @@ async function getConversationById(id) {
   return rows[0] || null;
 }
 
+async function getConversationWithUnreadById(conversationId, viewerUserId) {
+  const [rows] = await pool.execute(
+    `SELECT c.*,
+      cu.full_name AS customer_full_name,
+      pu.full_name AS provider_full_name,
+      cl.clinic_name,
+      (SELECT COUNT(*) FROM chat_messages m
+        WHERE m.conversation_id = c.id
+        AND m.sender_user_id <> ?
+        AND m.id > COALESCE(
+          (SELECT pr.last_read_message_id FROM chat_participant_reads pr
+           WHERE pr.conversation_id = c.id AND pr.user_id = ? LIMIT 1),
+          0
+        )
+      ) AS unread_count
+     FROM chat_conversations c
+     INNER JOIN users cu ON cu.id = c.customer_user_id
+     INNER JOIN users pu ON pu.id = c.provider_user_id
+     INNER JOIN clinics cl ON cl.id = c.clinic_id
+     WHERE c.id = ?
+       AND (c.customer_user_id = ? OR c.provider_user_id = ?)
+     LIMIT 1`,
+    [viewerUserId, viewerUserId, conversationId, viewerUserId, viewerUserId],
+  );
+  return rows[0] || null;
+}
+
 async function updateConversationLastMessage(conn, conversationId, preview, senderUserId) {
   const c = conn || pool;
   await c.execute(
@@ -45,9 +72,10 @@ async function updateConversationLastMessage(conn, conversationId, preview, send
 
 async function insertMessage(conn, { conversation_id, sender_user_id, body }) {
   const c = conn || pool;
+  const text = String(body || "").trim();
   const [r] = await c.execute(
-    `INSERT INTO chat_messages (conversation_id, sender_user_id, body) VALUES (?, ?, ?)`,
-    [conversation_id, sender_user_id, body],
+    `INSERT INTO chat_messages (conversation_id, sender_user_id, body, message_text) VALUES (?, ?, ?, ?)`,
+    [conversation_id, sender_user_id, text, text],
   );
   const [rows] = await c.execute(`SELECT * FROM chat_messages WHERE id = ? LIMIT 1`, [r.insertId]);
   return rows[0];
@@ -187,6 +215,7 @@ module.exports = {
   insertConversationOnly,
   seedParticipantReads,
   getConversationById,
+  getConversationWithUnreadById,
   updateConversationLastMessage,
   insertMessage,
   listMessages,

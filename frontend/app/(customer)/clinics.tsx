@@ -1,4 +1,5 @@
-import { Button, Card, EmptyState, ErrorState, LoadingState, ScreenScrollView, SectionHeader } from "@/components";
+import { AppImage, Button, Card, EmptyState, ErrorState, LoadingState, ScreenScrollView, SectionHeader } from "@/components";
+import { resolveClinicLogoUri } from "@/lib/clinicLogo";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { useCustomerBooking } from "@/contexts/CustomerBookingContext";
 import { getClinicList } from "@/services/customerCatalog";
@@ -65,15 +66,24 @@ export default function ClinicsScreen() {
           <View className="gap-3">
             {clinics.map((c) => (
               <Card key={c.id}>
-                <Text className="text-lg font-semibold text-app-text" numberOfLines={2}>
-                  {c.name}
-                </Text>
-                <Text className="mt-1 text-sm text-app-text-secondary" numberOfLines={1}>
-                  {c.city}
-                </Text>
-                <Text className="mt-2 text-xs leading-5 text-app-text-muted" numberOfLines={4}>
-                  {c.description}
-                </Text>
+                <View className="flex-row items-start gap-3">
+                  <AppImage
+                    source={{ uri: resolveClinicLogoUri(c, 64) }}
+                    fallbackIcon="hospital-building"
+                    className="h-10 w-10 shrink-0 rounded-xl border border-app-border"
+                  />
+                  <View className="min-w-0 flex-1">
+                    <Text className="text-lg font-semibold text-app-text" numberOfLines={2}>
+                      {c.name}
+                    </Text>
+                    <Text className="mt-1 text-sm text-app-text-secondary" numberOfLines={1}>
+                      {c.city}
+                    </Text>
+                    <Text className="mt-2 text-xs leading-5 text-app-text-muted" numberOfLines={4}>
+                      {c.description}
+                    </Text>
+                  </View>
+                </View>
                 <Link href={`/clinic/${c.id}`} asChild>
                   <Button label="Дэлгэрэнгүй үзэх" className="mt-4" />
                 </Link>

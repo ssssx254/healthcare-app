@@ -7,6 +7,7 @@ export type Clinic = {
   phone: string;
   description: string;
   doctorsCount: number;
+  logoUrl?: string | null;
 };
 
 /** Жагсаалт, хайлтын товч харагдац. */

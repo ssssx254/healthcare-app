@@ -1,6 +1,11 @@
 import { getApiBaseUrl } from "@/config/api";
 import { getAuthToken, getAuthTokenFromStorage } from "@/lib/api/authToken";
-import { readGetCache, saveGetCache } from "@/lib/api/responseCache";
+import {
+  invalidateGetCachesForMutation,
+  readGetCache,
+  removeGetCache,
+  saveGetCache,
+} from "@/lib/api/responseCache";
 import { getNetworkSnapshot, markServedFromCache } from "@/lib/network/networkRuntime";
 import type { ApiPaginatedData } from "@/types/api/envelope";
 
@@ -37,6 +42,8 @@ export type ApiRequestOptions = Omit<RequestInit, "body"> & {
   body?: RequestInit["body"];
   timeoutMs?: number;
   retryGetCount?: number;
+  /** GET-д хадгалсан кэшийг алгасаж серверээс шууд татна */
+  skipCache?: boolean;
 };
 
 function buildCacheKey(path: string, method: string): string {
@@ -132,6 +139,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     body: rawBody,
     timeoutMs = REQUEST_TIMEOUT_MS,
     retryGetCount = SAFE_GET_RETRY_COUNT,
+    skipCache = false,
     method = "GET",
     ...rest
   } = options;
@@ -155,12 +163,16 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   }
 
   if (!isOnline && normalizedMethod === "GET") {
-    const cached = await readGetCache<T>(cacheKey);
+    const cached = skipCache ? null : await readGetCache<T>(cacheKey);
     if (cached) {
       markServedFromCache();
       return cached.data;
     }
     throw new ApiError(NETWORK_ERROR_MESSAGE, 0);
+  }
+
+  if (skipCache && normalizedMethod === "GET") {
+    await removeGetCache(cacheKey);
   }
 
   for (let i = 0; i < attempts; i += 1) {
@@ -193,6 +205,8 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
       const output = unwrapEnvelope<T>(parsed, res.status);
       if (normalizedMethod === "GET") {
         await saveGetCache(cacheKey, output);
+      } else if (["POST", "PUT", "PATCH", "DELETE"].includes(normalizedMethod)) {
+        await invalidateGetCachesForMutation(path);
       }
       return output;
     } catch (error) {
@@ -207,7 +221,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
         await sleep(SAFE_GET_RETRY_DELAY_MS * (i + 1));
         continue;
       }
-      if (normalizedMethod === "GET") {
+      if (normalizedMethod === "GET" && !skipCache) {
         const cached = await readGetCache<T>(cacheKey);
         if (cached) {
           markServedFromCache();

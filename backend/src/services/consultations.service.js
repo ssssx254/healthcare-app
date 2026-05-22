@@ -5,6 +5,21 @@ const { assertPositiveIntId, assertOptionalMeetingUrl, optionalTrimmedString } =
 const { CONSULTATION_REQUEST_STATUSES, isConsultationRequestStatus } = require("../constants/consultationRequests");
 const { CONSULTATION_TYPES } = require("../constants/consultationTypes");
 const { BOOKING_BUSINESS_RULES } = require("../constants/bookings");
+const { todayDateString } = require("../utils/localDate");
+
+/** Үнэгүй зөвлөгөөнд ашиглах боломжтой слот (free_consultation эсвэл онлайн үнэгүй үйлчилгээтэй эмчийн paid_visit). */
+const FREE_CONSULT_SLOT_WHERE = `(
+  s.consultation_type = ?
+  OR (
+    s.consultation_type = ?
+    AND EXISTS (
+      SELECT 1 FROM services sv
+      WHERE sv.doctor_id = d.id
+        AND sv.is_free_consultation = 1
+        AND (sv.is_active = 1 OR sv.is_active IS TRUE)
+    )
+  )
+)`;
 
 async function assertConsultationClinicOwner(consultationId, ownerUserId, conn = pool) {
   const [rows] = await conn.execute(
@@ -22,7 +37,7 @@ async function getConsultationRow(id, conn = pool) {
   const [rows] = await conn.execute(
     `SELECT cr.*,
             s.slot_date, s.start_time AS slot_start_time, s.end_time AS slot_end_time,
-            d.full_name AS doctor_name, d.specialty AS doctor_specialty,
+            d.full_name AS doctor_name, d.specialization AS doctor_specialty,
             c.clinic_name
      FROM consultation_requests cr
      LEFT JOIN schedule_slots s ON s.id = cr.slot_id
@@ -63,6 +78,15 @@ function assertFreeOnlineConsultationBody(body) {
   return { requestType };
 }
 
+function formatSlotDateYmd(raw) {
+  if (raw == null || raw === "") return "";
+  if (raw instanceof Date && !Number.isNaN(raw.getTime())) {
+    return raw.toISOString().slice(0, 10);
+  }
+  const m = String(raw).match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : String(raw).slice(0, 10);
+}
+
 function formatTimeHm(t) {
   const raw = String(t || "").trim();
   const m = raw.match(/^(\d{2}):(\d{2})/);
@@ -76,8 +100,8 @@ async function listFreeConsultationAvailability(listQuery = {}) {
   const from =
     listQuery.from_date && String(listQuery.from_date).trim()
       ? String(listQuery.from_date).trim()
-      : new Date().toISOString().slice(0, 10);
-  const params = [from];
+      : todayDateString();
+  const params = [CONSULTATION_TYPES.FREE_CONSULTATION, CONSULTATION_TYPES.PAID_VISIT, from];
   let dateToSql = "";
   if (listQuery.to_date && String(listQuery.to_date).trim()) {
     dateToSql = " AND s.slot_date <= ?";
@@ -85,17 +109,17 @@ async function listFreeConsultationAvailability(listQuery = {}) {
   }
   const [rows] = await pool.execute(
     `SELECT s.id AS slot_id, s.slot_date, s.start_time, s.end_time,
-            d.id AS doctor_id, d.full_name AS doctor_name, d.specialty,
+            d.id AS doctor_id, d.full_name AS doctor_name, d.specialization AS specialty,
             c.id AS clinic_id, c.clinic_name
      FROM schedule_slots s
      INNER JOIN doctors d ON d.id = s.doctor_id
      INNER JOIN clinics c ON c.id = d.clinic_id
-     WHERE s.consultation_type = ?
+     WHERE ${FREE_CONSULT_SLOT_WHERE}
        AND s.is_available = 1 AND s.slot_status = 'available'
        AND s.slot_date >= ?${dateToSql}
      ORDER BY s.slot_date ASC, s.start_time ASC, d.full_name ASC
      LIMIT 500`,
-    [CONSULTATION_TYPES.FREE_CONSULTATION, ...params],
+    params,
   );
   const byDoctor = new Map();
   for (const r of rows) {
@@ -103,18 +127,19 @@ async function listFreeConsultationAvailability(listQuery = {}) {
       byDoctor.set(r.doctor_id, {
         doctor_id: r.doctor_id,
         doctor_name: r.doctor_name,
-        specialty: r.doctor_specialty ?? null,
+        specialty: r.specialty ?? null,
         clinic_id: r.clinic_id,
         clinic_name: r.clinic_name,
         slots: [],
       });
     }
+    const slotDate = formatSlotDateYmd(r.slot_date);
     byDoctor.get(r.doctor_id).slots.push({
       id: r.slot_id,
-      slot_date: r.slot_date,
+      slot_date: slotDate,
       start_time: formatTimeHm(r.start_time),
       end_time: formatTimeHm(r.end_time),
-      label: `${r.slot_date} ${formatTimeHm(r.start_time)} – ${formatTimeHm(r.end_time)}`,
+      label: `${slotDate} ${formatTimeHm(r.start_time)} – ${formatTimeHm(r.end_time)}`,
     });
   }
   return { items: [...byDoctor.values()] };
@@ -158,7 +183,17 @@ async function createConsultation(patientUserId, body) {
       );
       const slot = slotRows[0];
       if (!slot) throw new AppError(404, "Сонгосон цаг олдсонгүй.");
-      if (slot.consultation_type !== CONSULTATION_TYPES.FREE_CONSULTATION) {
+      if (slot.consultation_type === CONSULTATION_TYPES.PAID_VISIT) {
+        const [freeSvc] = await conn.execute(
+          `SELECT id FROM services
+           WHERE doctor_id = ? AND is_free_consultation = 1 AND (is_active = 1 OR is_active IS TRUE)
+           LIMIT 1`,
+          [slot.doctor_id],
+        );
+        if (!freeSvc[0]) {
+          throw new AppError(400, "Энэ цаг үнэгүй зөвлөгөөнд зориулагдаагүй.");
+        }
+      } else if (slot.consultation_type !== CONSULTATION_TYPES.FREE_CONSULTATION) {
         throw new AppError(400, "Энэ цаг үнэгүй зөвлөгөөнд зориулагдаагүй.");
       }
       if (Number(slot.is_available) !== 1 || slot.slot_status !== "available") {

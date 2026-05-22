@@ -1,23 +1,19 @@
 /**
- * Render / production deploy — шаардлагатай idempotent migration-уудыг API эхлэхээс өмнө ажиллуулна.
- * Одоогоор: lab_tests (011).
+ * Production DB — API эхлэхээс өмнө эсвэл deploy дараа нэг удаа ажиллуулна.
+ * `npm run db:migrate:deploy`
+ *
+ * .env дээр production DATABASE_* тохируулсан байх ёстой.
  */
 const fs = require("fs");
 const path = require("path");
 const mysql = require("mysql2/promise");
 const { getDbConnectOptions } = require("./dbConnectOptions");
-
-const DEPLOY_MIGRATIONS = [
-  "011_lab_tests.sql",
-  "012_booking_lab_tests.sql",
-  "013_payment_methods.sql",
-  "014_free_consultation_flow.sql",
-];
+const { CATCHUP_MIGRATIONS } = require("./migration-manifest");
 
 async function main() {
   const conn = await mysql.createConnection(getDbConnectOptions());
   try {
-    for (const file of DEPLOY_MIGRATIONS) {
+    for (const file of CATCHUP_MIGRATIONS) {
       const abs = path.join(__dirname, "..", "sql/migrations", file);
       if (!fs.existsSync(abs)) {
         throw new Error(`Migration файл олдсонгүй: ${abs}`);

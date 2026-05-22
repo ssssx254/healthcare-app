@@ -1,8 +1,11 @@
 import { Badge, Button, Card, ScreenScrollView, SectionHeader } from "@/components";
+import { routes } from "@/constants/appRoutes";
 import { orderStatusLabel, type OrderUiStatus } from "@/constants/orderStatus";
 import { useCustomerBooking } from "@/contexts/CustomerBookingContext";
+import { useChatSync } from "@/hooks/useChatSync";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { ApiError } from "@/lib/api/client";
+import { orderEligibleForDoctorReview } from "@/lib/canSubmitDoctorReview";
 import { bookingApi } from "@/services/api/bookingApi";
 import { doctorReviewApi } from "@/services/api/doctorReviewApi";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -19,16 +22,18 @@ function statusTone(s: OrderUiStatus): "brand" | "neutral" | "success" | "warnin
 export default function OrderDetailScreen() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const { orders, cancelOrder } = useCustomerBooking();
+  const { ensureCustomerConversation } = useChatSync();
   const { isOnline } = useNetworkStatus();
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [chatLoading, setChatLoading] = useState(false);
   const [rescheduleInfo, setRescheduleInfo] = useState<string | null>(null);
   const [reviewBookingId, setReviewBookingId] = useState<number | null>(null);
   const [reviewHint, setReviewHint] = useState<string | null>(null);
   const order = useMemo(() => orders.find((o) => o.id === orderId), [orders, orderId]);
 
   useEffect(() => {
-    if (!order || order.customerStatus !== "completed" || order.kind !== "formal") {
+    if (!order || !orderEligibleForDoctorReview(order)) {
       setReviewBookingId(null);
       setReviewHint(null);
       return;
@@ -60,6 +65,27 @@ export default function OrderDetailScreen() {
       order.customerStatus === "payment_required" ||
       (order.kind === "free_online" &&
         (order.customerStatus === "free_consult" || order.customerStatus === "confirmed")));
+
+  const openClinicChat = async () => {
+    if (!order?.clinicId) return;
+    setActionError(null);
+    setChatLoading(true);
+    try {
+      const doctorName = order.doctorName?.trim() || undefined;
+      const conversationId = await ensureCustomerConversation({
+        clinicId: Number(order.clinicId),
+        providerDisplayName: doctorName,
+      });
+      router.push({
+        pathname: routes.customerChatDetail,
+        params: { conversationId, ...(doctorName ? { providerName: doctorName } : {}) },
+      });
+    } catch (e) {
+      setActionError(e instanceof ApiError ? e.message : "Чат нээх үед алдаа гарлаа.");
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   return (
     <>
@@ -148,23 +174,34 @@ export default function OrderDetailScreen() {
               </Card>
             ) : null}
 
-            {order.kind === "free_online" && order.customerStatus === "confirmed" ? (
+            {order.kind === "free_online" && order.customerStatus !== "cancelled" ? (
               <Card className="mb-4 border border-emerald-200 dark:border-emerald-900/50">
-                <Text className="text-sm font-semibold text-app-text">Онлайн уулзалт</Text>
-                {order.meetingLink ? (
-                  <>
-                    <Text className="mt-2 text-xs leading-5 text-app-text-muted">
-                      Эмч зөвшөөрсний дараа уулзалтын холбоос харагдана.
-                    </Text>
+                <Text className="text-sm font-semibold text-app-text">Онлайн холбогдох</Text>
+                <Text className="mt-2 text-xs leading-5 text-app-text-muted">
+                  Эмчтэй чатаар холбогдож, зөвшөөрсний дараа Google Meet-ээр уулзана.
+                </Text>
+                <Button
+                  label={chatLoading ? "Чат нээж байна…" : "Чатлах"}
+                  variant="outline"
+                  className="mt-4"
+                  disabled={chatLoading}
+                  onPress={() => void openClinicChat()}
+                />
+                {order.customerStatus === "confirmed" ? (
+                  order.meetingLink ? (
                     <Button
                       label="Google Meet рүү орох"
-                      className="mt-4"
+                      className="mt-3"
                       onPress={() => void Linking.openURL(order.meetingLink!)}
                     />
-                  </>
+                  ) : (
+                    <Text className="mt-3 text-sm text-app-text-secondary">
+                      Эмч зөвшөөрсөн. Уулзалтын холбоос оруулаагүй байна — чатаар холбогдоно уу.
+                    </Text>
+                  )
                 ) : (
-                  <Text className="mt-2 text-sm text-app-text-secondary">
-                    Эмч зөвшөөрсний дараа уулзалтын холбоос харагдана.
+                  <Text className="mt-3 text-sm text-app-text-secondary">
+                    Эмч хүсэлтийг зөвшөөрсний дараа Meet холбоос энд харагдана.
                   </Text>
                 )}
                 {order.providerNotes ? (
@@ -187,7 +224,7 @@ export default function OrderDetailScreen() {
                   })
                 }
               />
-            ) : reviewHint && order.customerStatus === "completed" && order.kind === "formal" ? (
+            ) : reviewHint && orderEligibleForDoctorReview(order) ? (
               <Card className="mb-3 border-app-border bg-app-muted">
                 <Text className="text-center text-xs text-app-text-secondary">{reviewHint}</Text>
               </Card>

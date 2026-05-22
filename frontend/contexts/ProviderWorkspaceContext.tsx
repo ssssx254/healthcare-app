@@ -56,7 +56,9 @@ type ProviderWorkspaceValue = {
   refreshWorkspace: () => Promise<void>;
   setClinic: (patch: Partial<ProviderClinicProfile>) => void;
   registerClinic: (data: Pick<Clinic, "name" | "city" | "address" | "phone" | "description">) => Promise<void>;
-  saveClinicToApi: (data: Pick<Clinic, "name" | "city" | "address" | "phone" | "description">) => Promise<void>;
+  saveClinicToApi: (
+    data: Pick<Clinic, "name" | "city" | "address" | "phone" | "description"> & { logoUrl?: string | null },
+  ) => Promise<void>;
   doctors: ProviderDoctor[];
   addDoctor: (d: Omit<ProviderDoctor, "id">) => Promise<ProviderDoctor>;
   updateDoctor: (id: string, patch: Partial<ProviderDoctor>) => Promise<void>;
@@ -122,6 +124,7 @@ function mapClinicRowToProfile(row: import("@/services/api/clinicApi").ClinicRow
     row.city && String(row.city).trim()
       ? String(row.city).trim()
       : row.address.split(",")[0]?.trim() || "—";
+  const logoUrl = row.logo_url?.trim() || undefined;
   return {
     id: String(row.id),
     name: row.clinic_name,
@@ -131,6 +134,7 @@ function mapClinicRowToProfile(row: import("@/services/api/clinicApi").ClinicRow
     description: row.description?.trim() ?? "",
     doctorsCount,
     registered: true,
+    ...(logoUrl ? { logoUrl } : {}),
   };
 }
 
@@ -275,7 +279,7 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
   );
 
   const saveClinicToApi = useCallback(
-    async (data: Pick<Clinic, "name" | "city" | "address" | "phone" | "description">) => {
+    async (data: Pick<Clinic, "name" | "city" | "address" | "phone" | "description"> & { logoUrl?: string | null }) => {
       if (!clinic.id) throw new Error("Эмнэлэг олдсонгүй.");
       const addressJoined = [data.city?.trim(), data.address?.trim()].filter(Boolean).join(", ") || data.address.trim();
       await clinicApi.update(clinic.id, {
@@ -283,6 +287,7 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
         description: data.description?.trim() || null,
         address: addressJoined,
         phone: data.phone.trim(),
+        ...(data.logoUrl !== undefined ? { logo_url: data.logoUrl?.trim() || null } : {}),
       });
       await refreshWorkspace();
     },
@@ -569,6 +574,8 @@ export function ProviderWorkspaceProvider({ children }: { children: ReactNode })
       }
       const overlapExists = slots.some((s) => {
         if (s.doctorId !== slot.doctorId || s.dateIso !== slot.dateIso) return false;
+        const existingType = s.consultationType ?? "paid_visit";
+        if (existingType !== consultationType) return false;
         if (s.status === "unavailable") return false;
         const sStart = toMinutes(s.startTime ?? "");
         const sEnd = toMinutes(s.endTime ?? "");

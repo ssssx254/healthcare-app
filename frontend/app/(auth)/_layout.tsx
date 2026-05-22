@@ -3,17 +3,20 @@ import { WebScreenFrame } from "@/components/WebScreenFrame";
 import { authStackScreenOptions } from "@/constants/navigationTheme";
 import { Stack } from "expo-router";
 import { useNavigationColorScheme } from "@/hooks/useNavigationColorScheme";
+import { useMemo } from "react";
 
 export default function AuthGroupLayout() {
   const colorScheme = useNavigationColorScheme();
+  const screenOptions = useMemo(
+    () => ({
+      ...authStackScreenOptions(colorScheme),
+      headerRight: () => <HeaderThemeToggleButton />,
+    }),
+    [colorScheme],
+  );
   return (
     <WebScreenFrame>
-      <Stack
-        screenOptions={() => ({
-          ...authStackScreenOptions(colorScheme),
-          headerRight: () => <HeaderThemeToggleButton />,
-        })}
-      >
+      <Stack screenOptions={screenOptions}>
       <Stack.Screen name="splash" options={{ headerShown: false }} />
       <Stack.Screen name="intro" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: "Нэвтрэх" }} />

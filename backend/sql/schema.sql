@@ -190,6 +190,7 @@ CREATE TABLE `clinics` (
   `clinic_type` VARCHAR(128) NULL DEFAULT NULL,
   `phone` VARCHAR(32) NOT NULL,
   `email` VARCHAR(191) NULL DEFAULT NULL,
+  `logo_url` MEDIUMTEXT NULL DEFAULT NULL COMMENT 'HTTPS URL эсвэл data:image/...',
   `approval_status` ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

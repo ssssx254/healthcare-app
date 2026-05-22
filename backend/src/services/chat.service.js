@@ -39,7 +39,10 @@ async function ensureConversation(user, body) {
       throw new AppError(400, "Өөртэйгээ чатлах боломжгүй.");
     }
     let conv = await chatRepo.findConversationByClinicCustomerProvider(clinicId, customerUserId, providerUserId);
-    if (conv) return mapConversationRow(conv);
+    if (conv) {
+      const full = await chatRepo.getConversationWithUnreadById(conv.id, customerUserId);
+      return mapConversationRow(full || conv);
+    }
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
@@ -50,7 +53,7 @@ async function ensureConversation(user, body) {
       });
       await chatRepo.seedParticipantReads(conn, id, customerUserId, providerUserId);
       await conn.commit();
-      const created = await chatRepo.getConversationById(id);
+      const created = await chatRepo.getConversationWithUnreadById(id, customerUserId);
       return mapConversationRow(created);
     } catch (e) {
       await conn.rollback();
@@ -65,7 +68,10 @@ async function ensureConversation(user, body) {
     await assertClinicOwnedByProvider(clinicId, user.id);
     const providerUserId = user.id;
     let conv = await chatRepo.findConversationByClinicCustomerProvider(clinicId, customerUserId, providerUserId);
-    if (conv) return mapConversationRow(conv);
+    if (conv) {
+      const full = await chatRepo.getConversationWithUnreadById(conv.id, providerUserId);
+      return mapConversationRow(full || conv);
+    }
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
@@ -76,7 +82,7 @@ async function ensureConversation(user, body) {
       });
       await chatRepo.seedParticipantReads(conn, id, customerUserId, providerUserId);
       await conn.commit();
-      const created = await chatRepo.getConversationById(id);
+      const created = await chatRepo.getConversationWithUnreadById(id, providerUserId);
       return mapConversationRow(created);
     } catch (e) {
       await conn.rollback();
@@ -90,28 +96,41 @@ async function ensureConversation(user, body) {
 }
 
 function mapConversationRow(row) {
+  const preview = row.last_message_preview || row.last_message || "";
   return {
     id: Number(row.id),
-    customerId: Number(row.customer_user_id),
-    providerId: Number(row.provider_user_id),
-    lastMessage: row.last_message_preview || "",
-    unreadCount: Number(row.unread_count || 0),
-    updatedAt: row.last_message_at || row.updated_at || row.created_at,
+    clinic_id: Number(row.clinic_id),
+    clinic_name: row.clinic_name || null,
+    customer_user_id: Number(row.customer_user_id),
+    customer_full_name: row.customer_full_name || null,
+    provider_user_id: Number(row.provider_user_id),
+    provider_full_name: row.provider_full_name || null,
+    last_message_at: row.last_message_at || null,
+    last_message: preview || null,
+    last_message_preview: preview || null,
+    last_message_sender_id: row.last_message_sender_id != null ? Number(row.last_message_sender_id) : null,
+    unread_count: Number(row.unread_count || 0),
+    created_at: row.created_at,
+    updated_at: row.updated_at,
   };
 }
 
 function mapMessageRow(row, conversation, lastReadMessageId, viewerUserId) {
   const senderRole = Number(row.sender_user_id) === Number(conversation.customer_user_id) ? "customer" : "provider";
+  const text = row.body || row.message_text || "";
   const isRead =
     Number(row.sender_user_id) === Number(viewerUserId) || Number(row.id) <= Number(lastReadMessageId || 0);
   return {
     id: Number(row.id),
-    conversationId: Number(row.conversation_id),
-    senderId: Number(row.sender_user_id),
-    senderRole,
-    message: row.body,
-    createdAt: row.created_at,
-    isRead,
+    conversation_id: Number(row.conversation_id),
+    sender_user_id: Number(row.sender_user_id),
+    sender_role: senderRole,
+    sender_full_name: row.sender_full_name || null,
+    body: text,
+    message: text,
+    message_text: text,
+    created_at: row.created_at,
+    is_read: isRead,
   };
 }
 

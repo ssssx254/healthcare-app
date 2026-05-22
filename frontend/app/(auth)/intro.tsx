@@ -10,7 +10,7 @@ import {
 import { copy } from "@/constants/copy";
 import { routes } from "@/constants/appRoutes";
 import { authHeaderlessScrollContent } from "@/utils/authScrollContent";
-import { Link } from "expo-router";
+import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -61,22 +61,22 @@ export default function IntroScreen() {
         </View>
       </Card>
 
-      <Link href={routes.login} asChild>
-        <Button label="Нэвтрэх" className="shadow-sm" />
-      </Link>
-      <Link href={routes.register} asChild>
-        <Button label="Шинээр бүртгүүлэх" variant="outline" className="mt-3" />
-      </Link>
+      <Button label="Нэвтрэх" className="shadow-sm" onPress={() => router.push(routes.login)} />
+      <Button
+        label="Шинээр бүртгүүлэх"
+        variant="outline"
+        className="mt-3"
+        onPress={() => router.push(routes.register)}
+      />
 
-      <Link href="/forgot-password" asChild>
-        <Pressable
-          accessibilityRole="link"
-          className="mt-5 items-center py-2 active:opacity-80"
-          accessibilityLabel="Нууц үг мартсан, сэргээх"
-        >
-          <Text className="text-center text-sm font-semibold text-brand-600 underline dark:text-brand-400">Нууц үг мартсан уу?</Text>
-        </Pressable>
-      </Link>
+      <Pressable
+        accessibilityRole="link"
+        className="mt-5 items-center py-2 active:opacity-80"
+        accessibilityLabel="Нууц үг мартсан, сэргээх"
+        onPress={() => router.push("/forgot-password")}
+      >
+        <Text className="text-center text-sm font-semibold text-brand-600 underline dark:text-brand-400">Нууц үг мартсан уу?</Text>
+      </Pressable>
       </FormScrollView>
     </View>
   );

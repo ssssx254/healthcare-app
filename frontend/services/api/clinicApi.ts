@@ -14,6 +14,7 @@ export type ClinicRow = {
   email?: string | null;
   approval_status?: string;
   created_at?: string;
+  logo_url?: string | null;
 };
 
 export type ClinicByProviderResponse = {
@@ -74,7 +75,14 @@ export const clinicApi = {
 
   update(
     id: string | number,
-    body: Partial<{ clinic_name: string; description: string | null; address: string; phone: string; email: string | null }>,
+    body: Partial<{
+      clinic_name: string;
+      description: string | null;
+      address: string;
+      phone: string;
+      email: string | null;
+      logo_url: string | null;
+    }>,
   ): Promise<ClinicRow> {
     return apiRequest<ClinicRow>(`/clinics/${id}`, { method: "PUT", json: body });
   },

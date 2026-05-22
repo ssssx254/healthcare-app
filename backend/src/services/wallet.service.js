@@ -108,17 +108,31 @@ async function loadBookingForPayment(conn, customerUserId, bookingId) {
   return { booking, bid, total };
 }
 
+/** Төлбөр төлсний дараа formal захиалгыг confirmed болгоно (үнэлгээ өгөх боломжтой). */
+async function finalizeBookingAfterPayment(conn, bid) {
+  await conn.execute(
+    `UPDATE bookings
+     SET payment_status = 'paid',
+         status = CASE
+           WHEN booking_type = 'formal' AND status = 'pending' THEN 'confirmed'
+           ELSE status
+         END
+     WHERE id = ?`,
+    [bid],
+  );
+  const [rows] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
+  return rows[0];
+}
+
 async function markBookingPaidMock(conn, customerUserId, booking, bid, total, channelMeta) {
   if (booking.payment_status === "paid") {
-    return booking;
+    return finalizeBookingAfterPayment(conn, bid);
   }
   const alreadyPaidTx = await walletRepo.findBookingPaymentTx(customerUserId, bid, conn);
   if (alreadyPaidTx) {
-    await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bid]);
-    const [synced] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
-    return synced[0];
+    return finalizeBookingAfterPayment(conn, bid);
   }
-  await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bid]);
+  await finalizeBookingAfterPayment(conn, bid);
   const wallet = await walletRepo.lockWalletForUpdate(conn, customerUserId);
   const prev = Number(wallet.balance);
   await walletRepo.insertWalletTransaction(conn, {
@@ -139,7 +153,7 @@ async function markBookingPaidMock(conn, customerUserId, booking, bid, total, ch
     },
   });
   const [out] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
-  return out[0];
+  return out[0] ?? booking;
 }
 
 async function payBookingFromWallet(customerUserId, bookingId) {
@@ -148,15 +162,15 @@ async function payBookingFromWallet(customerUserId, bookingId) {
     await conn.beginTransaction();
     const { booking, bid, total } = await loadBookingForPayment(conn, customerUserId, bookingId);
     if (booking.payment_status === "paid") {
+      const synced = await finalizeBookingAfterPayment(conn, bid);
       await conn.commit();
-      return booking;
+      return synced;
     }
     const alreadyPaidTx = await walletRepo.findBookingPaymentTx(customerUserId, bid, conn);
     if (alreadyPaidTx) {
-      await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bid]);
-      const [synced] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
+      const synced = await finalizeBookingAfterPayment(conn, bid);
       await conn.commit();
-      return synced[0];
+      return synced;
     }
     const wallet = await walletRepo.lockWalletForUpdate(conn, customerUserId);
     const bal = Number(wallet.balance);
@@ -176,10 +190,9 @@ async function payBookingFromWallet(customerUserId, bookingId) {
       gateway_ref: `${MOCK_GATEWAYS.WALLET_DEBIT}:${crypto.randomUUID()}`,
       metadata: { booking_id: bid, clinic_id: booking.clinic_id, channel: PAYMENT_CHANNELS.WALLET },
     });
-    await conn.execute(`UPDATE bookings SET payment_status = 'paid' WHERE id = ?`, [bid]);
-    const [out] = await conn.execute(`SELECT * FROM bookings WHERE id = ? LIMIT 1`, [bid]);
+    const out = await finalizeBookingAfterPayment(conn, bid);
     await conn.commit();
-    return out[0];
+    return out;
   } catch (e) {
     await conn.rollback();
     throw e;

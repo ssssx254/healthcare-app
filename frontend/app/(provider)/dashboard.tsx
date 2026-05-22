@@ -3,8 +3,8 @@ import {
   Button,
   Card,
   ErrorState,
+  HeaderNotificationAndChat,
   HeaderThemeAndLogout,
-  HeaderNotificationLink,
   ListSkeleton,
   LoadingState,
   ScreenScrollView,
@@ -174,7 +174,12 @@ export default function ProviderDashboardScreen() {
         options={{
           title: "Самбар",
           headerTitle: "",
-          headerLeft: () => <HeaderNotificationLink href={routes.providerNotifications} />,
+          headerLeft: () => (
+            <HeaderNotificationAndChat
+              notificationHref={routes.providerNotifications}
+              chatHref={routes.providerChat}
+            />
+          ),
           headerRight: () => <HeaderThemeAndLogout onPress={onLogout} />,
         }}
       />

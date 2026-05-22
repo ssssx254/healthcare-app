@@ -1,5 +1,5 @@
 import { Button, Card, Input, StarRating } from "@/components";
-import { doctorReviewApi } from "@/services/api/doctorReviewApi";
+import { doctorReviewApi, type DoctorReviewRow, type DoctorReviewSummary } from "@/services/api/doctorReviewApi";
 import { toFriendlyErrorMn } from "@/lib/friendlyErrorMn";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -7,7 +7,7 @@ import { Text, View } from "react-native";
 export type DoctorReviewFormProps = {
   doctorId: string;
   bookingId: number;
-  onSuccess?: () => void;
+  onSuccess?: (result: { review: DoctorReviewRow; summary: DoctorReviewSummary }) => void;
   onCancel?: () => void;
 };
 
@@ -25,12 +25,12 @@ export function DoctorReviewForm({ doctorId, bookingId, onSuccess, onCancel }: D
     setError(null);
     setLoading(true);
     try {
-      await doctorReviewApi.create(doctorId, {
+      const result = await doctorReviewApi.create(doctorId, {
         booking_id: bookingId,
         rating,
         comment: comment.trim() || null,
       });
-      onSuccess?.();
+      onSuccess?.(result);
     } catch (e) {
       setError(toFriendlyErrorMn(e instanceof Error ? e.message : "Үнэлгээ илгээхэд алдаа гарлаа."));
     } finally {

@@ -7,28 +7,22 @@ import type { MockClinicDetail, MockDoctor, MockService, MockTimeSlot } from "@/
 import type { ServiceKind } from "@/types/healthcare";
 
 export function mapClinicRow(row: ClinicRow, doctorsCount: number): MockClinicDetail {
-  if (row.city && String(row.city).trim()) {
-    return {
-      id: String(row.id),
-      name: row.clinic_name,
-      city: String(row.city).trim(),
-      address: row.address,
-      phone: row.phone,
-      description: row.description?.trim() || "—",
-      doctorsCount,
-    };
-  }
-  const firstLine = row.address.split("\n")[0]?.trim() || row.address;
-  const city = firstLine.length > 32 ? `${firstLine.slice(0, 32)}…` : firstLine || "—";
-  return {
+  const logoUrl = row.logo_url?.trim() || undefined;
+  const base = {
     id: String(row.id),
     name: row.clinic_name,
-    city,
     address: row.address,
     phone: row.phone,
     description: row.description?.trim() || "—",
     doctorsCount,
+    ...(logoUrl ? { logoUrl } : {}),
   };
+  if (row.city && String(row.city).trim()) {
+    return { ...base, city: String(row.city).trim() };
+  }
+  const firstLine = row.address.split("\n")[0]?.trim() || row.address;
+  const city = firstLine.length > 32 ? `${firstLine.slice(0, 32)}…` : firstLine || "—";
+  return { ...base, city };
 }
 
 export function mapDoctorRow(row: DoctorRow): MockDoctor {
@@ -114,6 +108,10 @@ export function mapSlotRow(row: ScheduleSlotRow): MockTimeSlot {
     durationMinutes: Math.max(0, toMinutes(end) - toMinutes(start)),
     status: row.slot_status,
     isAvailable: row.is_available === 1 || row.is_available === true,
+    consultationType:
+      row.consultation_type === "free_consultation" || row.consultation_type === "paid_visit"
+        ? row.consultation_type
+        : undefined,
     label,
   };
 }

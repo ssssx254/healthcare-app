@@ -32,7 +32,7 @@ function timeLabel(iso: string): string {
 
 export default function CustomerChatDetailScreen() {
   const { user } = useAuth();
-  const { conversationId } = useLocalSearchParams<{ conversationId?: string }>();
+  const { conversationId, providerName } = useLocalSearchParams<{ conversationId?: string; providerName?: string }>();
   const { isOnline } = useNetworkStatus();
   const { conversations, refreshConversations, loadConversationMessages, sendConversationMessage, markConversationRead, retryMessage, loadingConversationId } = useChatSync();
   const [draft, setDraft] = useState("");
@@ -40,11 +40,13 @@ export default function CustomerChatDetailScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const conversation = useMemo(
-    () => conversations.find((c) => c.id === String(conversationId) && c.customer.id === String(user?.id ?? "")),
-    [conversationId, conversations, user?.id],
+    () => conversations.find((c) => c.id === String(conversationId)),
+    [conversationId, conversations],
   );
   const messages = conversation?.messages ?? [];
   const isLoadingMessages = loadingConversationId === String(conversationId);
+  const headerProviderName = providerName?.trim() || conversation?.provider.name || "Эмч";
+  const headerProviderTitle = conversation?.providerTitle || "Эмнэлгийн баг";
 
   useEffect(() => {
     if (!conversationId) {
@@ -139,16 +141,16 @@ export default function CustomerChatDetailScreen() {
             <Card className="mb-3">
               <View className="flex-row items-center gap-3">
                 <AppImage
-                  source={{ uri: providerAvatar(conversation.provider.name) }}
+                  source={{ uri: providerAvatar(headerProviderName) }}
                   fallbackIcon="hospital-building"
                   className="h-12 w-12 rounded-xl"
                 />
                 <View className="min-w-0 flex-1">
                   <Text className="text-sm font-semibold text-app-text" numberOfLines={1}>
-                    {conversation.provider.name}
+                    {headerProviderName}
                   </Text>
                   <Text className="mt-0.5 text-xs text-app-text-muted" numberOfLines={1}>
-                    {conversation.providerTitle || "Эмнэлэг"}
+                    {headerProviderTitle}
                   </Text>
                 </View>
                 <Text className="text-xs text-app-text-muted">

@@ -285,24 +285,40 @@ export default function DoctorRegisterScreen() {
         }
         await refreshWorkspace();
 
-        const slotKind: "paid_visit" | "free_consultation" = ambulatoryEnabled ? "paid_visit" : "free_consultation";
-        if (slotKind === "paid_visit" && !ambulatoryServiceId) {
+        if (ambulatoryEnabled && !ambulatoryServiceId) {
           throw new Error("Амбулаторийн үйлчилгээ үүсээгүй байна. 3-р алхам дахин шалгана уу.");
         }
 
         const generatedSlots = buildSlotsForNext14Days();
-        for (const slot of generatedSlots) {
-          await addSlot(
-            {
-              doctorId: doctor.id,
-              dateIso: slot.dateIso,
-              startTime: slot.startTime,
-              endTime: slot.endTime,
-              consultationType: slotKind,
-              serviceId: slotKind === "paid_visit" ? ambulatoryServiceId : null,
-            },
-            { deferRefresh: true },
-          );
+        if (onlineEnabled) {
+          for (const slot of generatedSlots) {
+            await addSlot(
+              {
+                doctorId: doctor.id,
+                dateIso: slot.dateIso,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                consultationType: "free_consultation",
+                serviceId: null,
+              },
+              { deferRefresh: true },
+            );
+          }
+        }
+        if (ambulatoryEnabled && ambulatoryServiceId) {
+          for (const slot of generatedSlots) {
+            await addSlot(
+              {
+                doctorId: doctor.id,
+                dateIso: slot.dateIso,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                consultationType: "paid_visit",
+                serviceId: ambulatoryServiceId,
+              },
+              { deferRefresh: true },
+            );
+          }
         }
         await refreshWorkspace();
         router.replace(routes.providerDoctors);

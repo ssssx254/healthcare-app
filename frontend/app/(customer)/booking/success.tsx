@@ -1,5 +1,6 @@
 import { Button, Card, FormScrollView, SectionHeader } from "@/components";
 import { routes } from "@/constants/appRoutes";
+import { orderEligibleForDoctorReview } from "@/lib/canSubmitDoctorReview";
 import { formatMnt } from "@/lib/formatMnt";
 import { useCustomerBooking } from "@/contexts/CustomerBookingContext";
 import { doctorReviewApi } from "@/services/api/doctorReviewApi";
@@ -15,7 +16,7 @@ export default function BookingSuccessScreen() {
   const [reviewBookingId, setReviewBookingId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!order || order.customerStatus !== "completed") {
+    if (!order || !orderEligibleForDoctorReview(order)) {
       setReviewBookingId(null);
       return;
     }

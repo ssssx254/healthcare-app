@@ -29,12 +29,18 @@ export type DoctorReviewsResponse = {
 };
 
 export const doctorReviewApi = {
-  list(doctorId: string | number, params?: { page?: number; page_size?: number }): Promise<DoctorReviewsResponse> {
+  list(
+    doctorId: string | number,
+    params?: { page?: number; page_size?: number; skipCache?: boolean },
+  ): Promise<DoctorReviewsResponse> {
     const q = new URLSearchParams();
     if (params?.page) q.set("page", String(params.page));
     if (params?.page_size) q.set("page_size", String(params.page_size));
     const suffix = q.toString() ? `?${q.toString()}` : "";
-    return apiRequest<DoctorReviewsResponse>(`/doctors/${doctorId}/reviews${suffix}`, { method: "GET" });
+    return apiRequest<DoctorReviewsResponse>(`/doctors/${doctorId}/reviews${suffix}`, {
+      method: "GET",
+      skipCache: params?.skipCache,
+    });
   },
 
   create(

@@ -51,17 +51,25 @@ async function assertDoctorOwnedByProvider(doctorId, ownerUserId) {
   }
 }
 
-async function assertNoOverlappingSlot({ doctorId, slotDate, startTime, endTime, ignoreSlotId = null }) {
+async function assertNoOverlappingSlot({
+  doctorId,
+  slotDate,
+  startTime,
+  endTime,
+  consultationType = null,
+  ignoreSlotId = null,
+}) {
   const sql = `SELECT id FROM schedule_slots
     WHERE doctor_id = ?
       AND slot_date = ?
       AND start_time < ?
       AND end_time > ?
-      ${ignoreSlotId ? "AND id <> ?" : ""}
+      ${consultationType ? "AND consultation_type = ?" : ""}
+    ${ignoreSlotId ? "AND id <> ?" : ""}
     LIMIT 1`;
-  const params = ignoreSlotId
-    ? [doctorId, slotDate, endTime, startTime, ignoreSlotId]
-    : [doctorId, slotDate, endTime, startTime];
+  const base = [doctorId, slotDate, endTime, startTime];
+  if (consultationType) base.push(consultationType);
+  const params = ignoreSlotId ? [...base, ignoreSlotId] : base;
   const [rows] = await pool.execute(sql, params);
   if (rows[0]) {
     throw new AppError(409, "Давхардсан цагийн слот байна. Эхлэх/дуусах цагаа шалгана уу.");
@@ -100,6 +108,7 @@ async function createSlot(ownerUserId, body) {
     slotDate: slot_date,
     startTime: minutesToTime(startMinutes),
     endTime: minutesToTime(endMinutes),
+    consultationType: consultation_type,
   });
   try {
     const [result] = await pool.execute(

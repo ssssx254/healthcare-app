@@ -90,9 +90,21 @@ function validateProviderReviewBody(body) {
   return { decision, feedback };
 }
 
+function validateProviderLogoPatchBody(body) {
+  if (body.logo_url === undefined || body.logo_url === null || String(body.logo_url).trim() === "") {
+    return { logo_url: null };
+  }
+  const logo_url = trimmed(body.logo_url) || null;
+  if (logo_url && logo_url.length > LOGO_URL_MAX_LENGTH) {
+    throw new AppError(400, "Лого хэт том байна. Жижиг зураг сонгоно уу.");
+  }
+  return { logo_url };
+}
+
 module.exports = {
   validateProviderOnboardingRegisterBody,
   validateProviderOnboardingBody,
   validateProviderReviewBody,
+  validateProviderLogoPatchBody,
 };
 

@@ -161,6 +161,16 @@ async function listPendingProvidersForAdmin() {
   return rows;
 }
 
+async function updateLogoUrlByUserId(userId, logoUrl) {
+  const [result] = await pool.execute(
+    `UPDATE provider_onboarding_submissions
+     SET logo_url = ?, updated_at = CURRENT_TIMESTAMP
+     WHERE user_id = ?`,
+    [logoUrl, userId],
+  );
+  return result.affectedRows > 0;
+}
+
 async function reviewSubmission({ userId, reviewerId, status, feedback }) {
   await pool.execute(
     `UPDATE provider_onboarding_submissions
@@ -174,6 +184,7 @@ async function reviewSubmission({ userId, reviewerId, status, feedback }) {
 module.exports = {
   findSubmissionByUserId,
   upsertSubmissionByUserId,
+  updateLogoUrlByUserId,
   listPendingSubmissions,
   listPendingProvidersForAdmin,
   reviewSubmission,
