@@ -32,22 +32,24 @@ npm run deploy:web
 
 ### Алхам A — Production DB-ийн холболт
 
-`backend/.env` файлд **production** MySQL-ийн хаяг, нэр, нууц үгийг түр оруулна (локал биш!):
+Render → **Environment** → `DATABASE_URL` (Aiven MySQL) хуулна.
+
+`backend/.env` дээр **локал `DB_HOST=127.0.0.1` үлдээхгүй** — production URL тавина:
 
 ```env
-DB_HOST=...
-DB_PORT=3306
-DB_USER=...
-DB_PASSWORD=...
-DB_NAME=...
+DATABASE_URL=mysql://USER:PASSWORD@HOST:PORT/defaultdb?ssl=true
 ```
+
+(эсвэл `DB_HOST` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` — гэхдээ `DATABASE_URL` давуу эрхтэй)
 
 ### Алхам B — Migration ажиллуулах
 
 ```bash
 cd backend
-npm run db:migrate:deploy
+npm run db:migrate:production
 ```
+
+`db:migrate:production` нь локал MySQL руу буруу холбогдвол **зогсоно** (өмнө нь ийм алдаа гарсан).
 
 Эсвэл бүрэн catchup:
 

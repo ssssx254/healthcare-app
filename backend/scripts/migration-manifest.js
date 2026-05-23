@@ -20,4 +20,5 @@ module.exports.CATCHUP_MIGRATIONS = [
   "016_clinic_service_categories.sql",
   "017_clinic_logo_url.sql",
   "018_services_is_free_consultation.sql",
+  "019_services_consultation_type.sql",
 ];

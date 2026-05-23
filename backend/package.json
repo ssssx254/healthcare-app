@@ -9,6 +9,7 @@
     "dev": "node --watch src/server.js",
     "db:migrate": "node scripts/run-migration.js",
     "db:migrate:deploy": "node scripts/migrate-deploy.js",
+    "db:migrate:production": "node scripts/assert-production-db.js && node scripts/migrate-deploy.js",
     "db:migrate:lab-tests": "node scripts/run-migration.js sql/migrations/011_lab_tests.sql",
     "db:migrate:catchup": "node scripts/run-migrations-catchup.js",
     "db:migrate:catchup:safe": "node scripts/run-migrations-catchup.js",
